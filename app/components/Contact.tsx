@@ -38,8 +38,17 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
   const formOpen = isFormOpen !== undefined ? isFormOpen : internalOpen;
 
   return (
-    <section id="contact" ref={ref} style={{ background: "#14141A", padding: "clamp(48px, 12vh, 120px) 0", minHeight: "100vh", display: "flex", alignItems: "center" }}>
-      <div className="container" style={{ width: "100%" }}>
+    <section id="contact" ref={ref} style={{ background: "#14141A", padding: "clamp(48px, 6vw, 80px) 0" }}>
+      <div className="container">
+
+        <motion.h2
+          initial={{ opacity: 0, y: 20 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.55, ease: E }}
+          className="sec-label"
+        >
+          CONTACT
+        </motion.h2>
 
         <div className="contact-top">
           <div className="contact-heading">
@@ -48,20 +57,31 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.65, delay: 0.06, ease: E }}
               className="contact-outline"
-              data-text="READY TO START?"
+              data-text="GOT A VISION?"
               style={{ fontSize: "clamp(36px, 4.2vw, 56px)", lineHeight: 0.98, letterSpacing: "-0.015em", margin: 0 }}
             >
-              READY TO START?
+              GOT A VISION?
             </motion.h3>
 
             <motion.h3
               initial={{ opacity: 0, y: 28 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.65, delay: 0.1, ease: E }}
-              className="fd"
-              style={{ color: "#CEFF1A", fontSize: "clamp(36px, 4.2vw, 56px)", lineHeight: 0.98, letterSpacing: "-0.015em", margin: "0.1em 0 0.12em" }}
+              className="contact-outline"
+              data-text="I'D LOVE TO"
+              style={{ fontSize: "clamp(36px, 4.2vw, 56px)", lineHeight: 0.98, letterSpacing: "-0.015em", margin: "0.1em 0 0.12em" }}
             >
-              LET&apos;S TALK.
+              I&apos;D LOVE TO
+            </motion.h3>
+
+            <motion.h3
+              initial={{ opacity: 0, y: 28 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.65, delay: 0.18, ease: E }}
+              className="fd"
+              style={{ color: "#F5F6FC", fontSize: "clamp(36px, 4.2vw, 56px)", lineHeight: 0.98, letterSpacing: "-0.015em", marginBottom: "28px" }}
+            >
+                HEAR ALL<br />ABOUT <span style={{ color: "#CEFF1A" }}>IT.</span>
             </motion.h3>
 
             <motion.a
@@ -116,8 +136,8 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
             justifyContent: "flex-start",
             gap:            "clamp(24px, 4vw, 48px)",
             width:          "100%",
-            marginTop:      "clamp(32px, 5vh, 48px)",
-            flexWrap: "nowrap",
+            marginTop:      "16px",
+            flexWrap: "wrap",
           }}
         >
           <div>
@@ -152,6 +172,19 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
           font-family: var(--font-zalando-expanded), "Arial Black", Impact, system-ui, sans-serif;
           font-weight: 900;
           text-transform: uppercase;
+        }
+
+        .sec-label {
+          font-family: var(--font-zalando-expanded), "Arial Black", Impact, system-ui, sans-serif;
+          font-weight: 700;
+          text-transform: uppercase;
+          font-size: clamp(18px, 1.8vw, 22px);
+          letter-spacing: 0.08em;
+          color: #CEFF1A;
+          display: inline-block;
+          padding-bottom: 6px;
+          border-bottom: 2px solid #CEFF1A;
+          margin-bottom: clamp(24px, 3vw, 32px);
         }
 
         .contact-outline {
@@ -207,8 +240,9 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
         }
 
         .btn-start {
-          width: clamp(80px, 9vw, 100px);
-          height: clamp(80px, 9vw, 100px);
+          /* Wider on desktop to match official CTA style */
+          width: clamp(110px, 12vw, 130px);
+          height: clamp(110px, 12vw, 130px);
           border-radius: 50%;
           background: #CEFF1A;
           color: #14141A;
@@ -222,8 +256,8 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
           transition: all 0.25s ease;
           flex-shrink: 0;
           box-shadow: 0 0 15px rgba(206, 255, 26, 0.2);
-          min-width: 72px;
-          min-height: 72px;
+          min-width: 80px; /* Minimum touch target size */
+          min-height: 80px;
         }
         .btn-start:hover {
           background: #D8FF48;
@@ -256,18 +290,39 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
           grid-template-columns: minmax(0, 1.05fr) minmax(360px, 0.95fr);
           gap: clamp(40px, 5vw, 64px);
           align-items: start;
+          margin-bottom: clamp(24px, 3vw, 32px);
         }
         @media (max-width: 900px) {
           .contact-top {
             grid-template-columns: 1fr;
             gap: 36px;
+            margin-bottom: 24px;
+          }
+          #contact {
+            padding: 48px 0 !important;
           }
         }
         @media (max-width: 768px) {
           .btn-start {
-            width: 72px;
-            height: 72px;
+            width: 90px;
+            height: 90px;
             font-size: 11px;
+          }
+        }
+        @media (max-width: 480px) {
+          .sec-label {
+            font-size: 16px;
+            letter-spacing: 0.07em;
+            border-bottom-width: 1.5px;
+            padding-bottom: 5px;
+          }
+          .btn-start {
+            width: 80px;
+            height: 80px;
+            font-size: 11px;
+          }
+          .contact-row {
+            gap: 10px !important;
           }
         }
       `}</style>
