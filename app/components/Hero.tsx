@@ -73,14 +73,17 @@ export default function Hero({ openContactForm }: HeroProps) {
             font-size: clamp(13px, 3.2vw, 15px) !important;
             line-height: 1.7 !important;
             text-align: center !important;
-            max-width: 100% !important;
+            max-width: 320px !important;
             margin-left: auto !important;
             margin-right: auto !important;
             padding: 0 8px !important;
             white-space: normal !important;
+            text-wrap: pretty;
           }
+        }
 
-          /* Button sizing */
+        /* Button sizing */
+        @media (max-width: 480px) {
           .hero-btn {
             width: auto !important;
             max-width: 90% !important;
@@ -204,7 +207,7 @@ export default function Hero({ openContactForm }: HeroProps) {
                   letterSpacing: "0.02em",
                   color: "rgba(245,246,252,0.9)",
                   margin: "0 auto 48px",
-                  maxWidth: "920px",
+                  maxWidth: "620px",
                   textAlign: "center",
                 }}
               >
@@ -221,11 +224,7 @@ export default function Hero({ openContactForm }: HeroProps) {
                 >
                   UX/UI Designer
                 </span>{" "}
-                passionate about creating intuitive, accessible, and user-centered digital experiences.
-                <br />
-                Combining creative design with practical technical knowledge
-                <br />
-                to build solutions that work for both users and businesses.
+                passionate about creating intuitive, accessible, and user-centered digital experiences. Combining creative design with practical technical knowledge to build solutions that work for both users and businesses.
               </motion.p>
 
               <motion.div
