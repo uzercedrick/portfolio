@@ -132,3 +132,11 @@
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 }
+
+@media (max-width: 480px) {
+  #hero {
+    min-height: auto !important;
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+}
