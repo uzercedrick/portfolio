@@ -24,7 +24,7 @@ const CASES: Project[] = [
     highlightWord: "System",
     subtitle: "A real-time IoT dashboard tracking classroom temperature, humidity, and availability — built from scratch for City of Malabon University and recognized as a Research Congress finalist.",
     subtitleHighlight: "A real-time IoT dashboard",
-    summary: "Led UX/UI design, front-end, and backend setup for a 5-person capstone team — designing a live monitoring dashboard for classroom conditions and availability, and building the Node.js backend and account system behind it. Selected as a Research Congress finalist.",
+    summary: "Led UX/UI design, front-end, and backend setup by a 5-person capstone team — designing a live monitoring dashboard for classroom conditions and availability, and building the Node.js backend and account system behind it. Selected as a Research Congress finalist.",
     meta: [
       { label: "Role", value: "UX/UI + Front-end Developer" },
       { label: "Team", value: "5-person capstone team" },
