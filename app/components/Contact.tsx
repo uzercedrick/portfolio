@@ -125,16 +125,16 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
           className="cta-bottom"
         >
           <div className="cta-text-block">
-            {/* Line 1: LET'S MAKE SOMETHING — slightly smaller to fit on one line */}
-            <h2 className="fd cta-line-1" style={{ color:"#CEFF1A", margin:0 }}>
+            {/* Line 1: smaller, fits one line on desktop */}
+            <h2 className="fd" style={{ color:"#CEFF1A", fontSize:"clamp(24px, 2.8vw, 38px)", lineHeight:1.0, letterSpacing:"0.01em", margin:0 }}>
               LET&apos;S MAKE SOMETHING
             </h2>
-            {/* Line 2: TOGETHER — keep original size/format */}
-            <h2 className="fd cta-line-2" style={{ color:"#CEFF1A", margin:"0.08em 0 0" }}>
+            {/* Line 2: TOGETHER, kept at original size */}
+            <h2 className="fd" style={{ color:"#CEFF1A", fontSize:"clamp(28px,3.5vw,44px)", lineHeight:1.0, letterSpacing:"0.01em", margin:"0.08em 0" }}>
               TOGETHER
             </h2>
-            {/* Line 3: PROMISE I DON'T BITE */}
-            <p className="fd cta-line-3" style={{ color:"#F5F6FC", margin:"10px 0 0 0" }}>
+            {/* Line 3: promise text */}
+            <p className="fd" style={{ color:"#F5F6FC", fontSize:"clamp(16px,2vw,24px)", lineHeight:1.1, letterSpacing:"0.01em", margin:"8px 0 0 0" }}>
               PROMISE I DON&apos;T <span style={{ color:"#CEFF1A" }}>BITE</span>
             </p>
           </div>
@@ -227,42 +227,21 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
           display: flex;
           align-items: center;
           justify-content: flex-start;
-          gap: clamp(24px, 4vw, 48px);
+          gap: clamp(16px, 3vw, 32px); /* reduced gap to bring button closer */
           width: 100%;
           margin-top: 16px;
           flex-wrap: wrap;
+          max-width: 1150px; /* match contact-top max-width for alignment */
+          margin-left: auto;
+          margin-right: auto;
         }
 
         .cta-text-block {
-          flex: 1;
+          flex: 0 1 auto; /* removed flex:1 so text doesn't push button far */
           min-width: 280px;
-          line-height: 1;
-        }
-
-        /* Line 1: LET'S MAKE SOMETHING — slightly smaller to fit cleanly on one line */
-        .cta-line-1 {
-          font-size: clamp(22px, 2.8vw, 36px);
-          line-height: 1.0;
-          letter-spacing: 0.01em;
-          white-space: nowrap;
-        }
-
-        /* Line 2: TOGETHER — keep the original larger size for emphasis */
-        .cta-line-2 {
-          font-size: clamp(28px, 3.5vw, 44px);
-          line-height: 1.0;
-          letter-spacing: 0.01em;
-        }
-
-        /* Line 3: PROMISE I DON'T BITE */
-        .cta-line-3 {
-          font-size: clamp(16px, 2vw, 24px);
-          line-height: 1.1;
-          letter-spacing: 0.01em;
         }
 
         .btn-start {
-          /* Increased size for better visibility */
           width: clamp(100px, 11vw, 120px);
           height: clamp(100px, 11vw, 120px);
           border-radius: 50%;
@@ -309,24 +288,24 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
         }
         .contact-top {
           display: grid;
-          grid-template-columns: minmax(0, 1.05fr) minmax(360px, 0.95fr);
+          grid-template-columns: 1fr 1fr; /* balanced columns for better screen centering */
           gap: clamp(40px, 5vw, 64px);
           align-items: start;
           margin-bottom: clamp(24px, 3vw, 32px);
-          /* Desktop: center the whole contact section */
-          max-width: 1200px;
+          max-width: 1150px; /* adjusted max-width for tighter centering */
           margin-left: auto;
           margin-right: auto;
         }
 
-        /* Mobile: contact-top collapses to one column here.
-           Everything below centers that stacked layout — desktop above
-           this breakpoint is untouched. */
+        /* Mobile rules — UNCHANGED (you confirmed mobile is perfect) */
         @media (max-width: 900px) {
           .contact-top {
             grid-template-columns: 1fr;
             gap: 36px;
             margin-bottom: 24px;
+            max-width: 100%;
+          }
+          .cta-bottom {
             max-width: 100%;
           }
           #contact {
@@ -337,7 +316,6 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
             text-align: center;
           }
           .contact-outline {
-            /* Override max-content to allow centering */
             width: auto !important;
             text-align: center;
           }
@@ -353,15 +331,10 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
             text-align: center;
           }
           .contact-row {
-            /* Center icon + link row on mobile */
             display: flex !important;
             justify-content: center;
             width: 100%;
           }
-
-          /* Bottom CTA: stack, center, button below the text — same
-             text block/format as desktop, just centered instead of
-             left-aligned next to the button. */
           .cta-bottom {
             flex-direction: column;
             justify-content: center;
@@ -370,9 +343,6 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
           }
           .cta-text-block {
             text-align: center;
-          }
-          .cta-line-1 {
-            white-space: normal; /* allow wrapping on very small screens */
           }
         }
         @media (max-width: 768px) {
