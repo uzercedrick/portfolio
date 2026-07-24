@@ -106,7 +106,7 @@ function SkillCurve({ inView }: { inView: boolean }) {
       <svg
         viewBox="0 0 1200 120"
         preserveAspectRatio="none"
-        className="pointer-events-none absolute inset-x-0 top-[30px] hidden h-[120px] w-full md:block"
+        className="pointer-events-none absolute inset-x-0 top-[30px] block h-[120px] w-full"
       >
         <path
           d="M 0 100 Q 600 20 1200 100"
@@ -476,7 +476,7 @@ export default function About() {
           .about-grid { grid-template-columns: 1fr; row-gap: 40px; }
           .about-grid .cell-text    { grid-column: 1; grid-row: 1; }
           .about-grid .cell-image   { grid-column: 1; grid-row: 2; justify-self: center; }
-          .about-grid .cell-card    { grid-column: 1; grid-row: 3; justify-self: center; width: 290px !important; max-width: 90% !important; }
+          .about-grid .cell-card    { grid-column: 1; grid-row: 3; justify-self: center; width: 230px !important; max-width: 70% !important; }
           .about-grid .cell-details { grid-column: 1; grid-row: 4; align-self: auto; }
 
           .about-title {
@@ -497,8 +497,8 @@ export default function About() {
           }
 
           .cell-card {
-            max-width: 290px !important;
-            min-height: clamp(230px, 48vw, 300px) !important;
+            max-width: 230px !important;
+            min-height: clamp(200px, 40vw, 250px) !important;
           }
           .cell-card > div {
             padding: clamp(12px, 4vw, 18px) !important;
