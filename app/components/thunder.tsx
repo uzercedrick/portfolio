@@ -44,6 +44,7 @@ type StyleWithVars = CSSProperties & Record<string, string | number>;
 
 export default function ThunderScrollButton() {
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const [isLowPower, setIsLowPower] = useState(false);
   const [thunderAnim, setThunderAnim] = useState<{ dir: "down" | "up"; id: number }>({ dir: "down", id: 0 });
   const [impactId, setImpactId] = useState(0);
   const [explosionId, setExplosionId] = useState(0);
@@ -51,6 +52,16 @@ export default function ThunderScrollButton() {
 
   const triggerImpact = () => setImpactId(p => p + 1);
   const triggerExplosion = () => setExplosionId(p => p + 1);
+
+  // Detect touch/low-power devices once, so we can trim decorative density
+  // and filter complexity without dropping any effect category entirely.
+  useEffect(() => {
+    const mq = window.matchMedia("(pointer: coarse), (max-width: 768px)");
+    const update = () => setIsLowPower(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -78,28 +89,68 @@ export default function ThunderScrollButton() {
   const FORK_FILL = dir === "down" ? FORK_FILL_DOWN : FORK_FILL_UP;
   const ARROW_CHEVRON = dir === "down" ? ARROW_CHEVRON_DOWN : ARROW_CHEVRON_UP;
   const leader1 = dir === "down" ? LEADER_DOWN_1 : LEADER_UP_1;
-  const sparks = dir === "down" ? SPARKS_DOWN : SPARKS_UP;
-  const arcs = dir === "down" ? ARCS_DOWN : ARCS_UP;
-  const impactLeaders = dir === "down" ? IMPACT_LEADERS_DOWN : IMPACT_LEADERS_UP;
   const extraFork1 = dir === "down" ? EXTRA_FORK_DOWN_1 : EXTRA_FORK_UP_1;
   const extraFork2 = dir === "down" ? EXTRA_FORK_DOWN_2 : EXTRA_FORK_UP_2;
   const extraFork3 = dir === "down" ? EXTRA_FORK_DOWN_3 : EXTRA_FORK_UP_3;
   const boltClass = dir === "down" ? "bolt-fill bolt-strike-down" : "bolt-fill bolt-strike-up";
   const forkClass = dir === "down" ? "fork-fill fork-strike-down" : "fork-fill fork-strike-up";
 
-  const particleStyles = useMemo(() => 
-    STATIC_PARTICLES.map((_, i) => {
+  // Trimmed element sets for touch / low-power devices — every effect
+  // category (particles, sparks, arcs, explosion) still renders, just
+  // fewer instances of each, which cuts filter/paint cost substantially.
+  const sparks = useMemo(() => {
+    const full = dir === "down" ? SPARKS_DOWN : SPARKS_UP;
+    return isLowPower ? full.slice(0, 4) : full;
+  }, [dir, isLowPower]);
+
+  const arcs = useMemo(() => {
+    const full = dir === "down" ? ARCS_DOWN : ARCS_UP;
+    return isLowPower ? full.slice(0, 2) : full;
+  }, [dir, isLowPower]);
+
+  const impactLeaders = useMemo(() => {
+    const full = dir === "down" ? IMPACT_LEADERS_DOWN : IMPACT_LEADERS_UP;
+    return isLowPower ? full.slice(0, 2) : full;
+  }, [dir, isLowPower]);
+
+  const staticParticles = useMemo(
+    () => (isLowPower ? STATIC_PARTICLES.slice(0, 3) : STATIC_PARTICLES),
+    [isLowPower]
+  );
+  const burstParticles = useMemo(
+    () => (isLowPower ? STATIC_PARTICLES.slice(0, 2) : STATIC_PARTICLES.slice(0, 4)),
+    [isLowPower]
+  );
+  const idleZaps = useMemo(
+    () => (isLowPower ? IDLE_MINI_ZAPS.slice(0, 2) : IDLE_MINI_ZAPS),
+    [isLowPower]
+  );
+  const explosionOffsets = useMemo(
+    () => (isLowPower ? EXPLOSION_OFFSETS.slice(0, 4) : EXPLOSION_OFFSETS),
+    [isLowPower]
+  );
+  const explosionStreaks = useMemo(
+    () => (isLowPower ? EXPLOSION_STREAKS.slice(0, 4) : EXPLOSION_STREAKS),
+    [isLowPower]
+  );
+
+  const particleStyles = useMemo(() =>
+    staticParticles.map((_, i) => {
       const o = PARTICLE_OFFSETS[i % PARTICLE_OFFSETS.length];
       return { "--tx": `${o.tx}px`, "--ty": `${o.ty}px`, "--bx": `${o.bx}px`, "--by": `${o.by}px`, animationDelay: `${i * 0.32}s` } as StyleWithVars;
-    }), []
+    }), [staticParticles]
   );
 
-  const burstStyles = useMemo(() => 
-    BURST_OFFSETS.map((o, i) => ({ "--bx": `${o.bx}px`, "--by": `${o.by}px`, animationDelay: `${0.08 + i * 0.03}s` } as StyleWithVars)), []
+  const burstStyles = useMemo(() =>
+    burstParticles.map((_, i) => {
+      const o = BURST_OFFSETS[i % BURST_OFFSETS.length];
+      return { "--bx": `${o.bx}px`, "--by": `${o.by}px`, animationDelay: `${0.08 + i * 0.03}s` } as StyleWithVars;
+    }), [burstParticles]
   );
 
-  const explosionStyles = useMemo(() => 
-    EXPLOSION_OFFSETS.map((o, i) => ({ "--ex": `${o.ex}px`, "--ey": `${o.ey}px`, "--er": `${o.er}px`, animationDelay: `${i * 0.02}s` } as StyleWithVars)), []
+  const explosionStyles = useMemo(() =>
+    explosionOffsets.map((o, i) => ({ "--ex": `${o.ex}px`, "--ey": `${o.ey}px`, "--er": `${o.er}px`, animationDelay: `${i * 0.02}s` } as StyleWithVars)),
+    [explosionOffsets]
   );
 
   return (
@@ -318,6 +369,50 @@ export default function ThunderScrollButton() {
           will-change: opacity, transform;
           filter: drop-shadow(0 0 6px rgba(255,100,50,0.3));
         }
+
+        /* Freeze every animation inside the button while it's off-screen —
+           the idle loops (static-float, idle-mini-zap, idle-bolt-flicker,
+           arrow-idle-pulse) would otherwise run forever from page load
+           even before the user has scrolled far enough to see the button. */
+        .thunder-button[data-visible="false"] svg * {
+          animation-play-state: paused !important;
+        }
+
+        /* Lower-power / touch devices: cut the costliest part — stacked
+           multi-stop drop-shadow filters — down to a single stop each.
+           Motion/timing/color choreography is untouched. */
+        @media (pointer: coarse), (max-width: 768px) {
+          .thunder-button { filter: none; will-change: opacity, transform; }
+          .bolt-fill, .fork-fill, .arrow-fill { will-change: transform, opacity; }
+
+          .bolt-fill { filter: drop-shadow(0 0 5px rgba(255,130,50,0.55)); }
+          .fork-fill { filter: drop-shadow(0 0 4px rgba(255,150,80,0.5)); }
+          .arrow-fill { filter: drop-shadow(0 0 6px rgba(150,190,255,0.65)); }
+
+          @keyframes strike-down {
+            0%   { opacity: 0; transform-origin: center bottom; transform: scaleX(1.3) scaleY(3.5) translateY(-120px); filter: drop-shadow(0 0 10px #ff3300); }
+            22%  { opacity: 1; transform-origin: center bottom; transform: scaleX(1.1) scaleY(1.3) translateY(-6px); filter: drop-shadow(0 0 16px #ff5500); }
+            50%  { opacity: 1; transform-origin: center bottom; transform: scaleX(1) scaleY(1.01) translateY(0); filter: drop-shadow(0 0 10px #ff8844); }
+            100% { opacity: 1; transform-origin: center bottom; transform: scale(1); filter: drop-shadow(0 0 5px rgba(255,130,50,0.55)); }
+          }
+          @keyframes strike-up {
+            0%   { opacity: 0; transform-origin: center top; transform: scaleX(1.3) scaleY(3.5) translateY(120px); filter: drop-shadow(0 0 10px #ff3300); }
+            22%  { opacity: 1; transform-origin: center top; transform: scaleX(1.1) scaleY(1.3) translateY(6px); filter: drop-shadow(0 0 16px #ff5500); }
+            50%  { opacity: 1; transform-origin: center top; transform: scaleX(1) scaleY(1.01) translateY(0); filter: drop-shadow(0 0 10px #ff8844); }
+            100% { opacity: 1; transform-origin: center top; transform: scale(1); filter: drop-shadow(0 0 5px rgba(255,130,50,0.55)); }
+          }
+          @keyframes idle-bolt-flicker {
+            0%, 88%, 100% { opacity: 1; filter: drop-shadow(0 0 5px rgba(255,130,50,0.55)); }
+            91% { opacity: 0.85; }
+            94% { opacity: 1; filter: drop-shadow(0 0 8px rgba(255,170,90,0.65)); }
+            97% { opacity: 0.9; }
+          }
+          @keyframes explosion-flash {
+            0%   { opacity: 0; transform: scale(0.25); filter: drop-shadow(0 0 12px #ff5500); }
+            18%  { opacity: 1; transform: scale(1.6); filter: drop-shadow(0 0 18px #ff6600); }
+            100% { opacity: 0; transform: scale(3); filter: drop-shadow(0 0 0 transparent); }
+          }
+        }
       `}</style>
 
       <motion.button
@@ -326,6 +421,7 @@ export default function ThunderScrollButton() {
         animate={{ opacity: showBackToTop ? 1 : 0, scale: showBackToTop ? 1 : 0.8 }}
         transition={{ duration: 0.4, ease: E }}
         className="thunder-button"
+        data-visible={showBackToTop}
         onMouseEnter={(e) => { e.currentTarget.style.transform = "scale(1.05)"; }}
         onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
         aria-label="Back to top"
@@ -338,11 +434,11 @@ export default function ThunderScrollButton() {
           xmlns="http://www.w3.org/2000/svg"
           style={{ position: "relative", overflow: "visible" }}
         >
-          {STATIC_PARTICLES.map((p, i) => (
+          {staticParticles.map((p, i) => (
             <circle key={`static-${i}`} cx={p.x} cy={p.y} r="0.9" className="static-particle static-float" style={particleStyles[i]} />
           ))}
 
-          {STATIC_PARTICLES.slice(0, 4).map((p, i) => (
+          {burstParticles.map((p, i) => (
             <circle key={`burst-${impactId}-${i}`} cx={p.x} cy={p.y} r="1.1" fill="#ffccaa" className="static-burst" style={burstStyles[i]} />
           ))}
 
@@ -350,13 +446,15 @@ export default function ThunderScrollButton() {
             <path key={`arc-${i}`} className="arc-path arc-flicker" pathLength={1} d={d} style={{ animationDelay: `${0.04 + i * 0.025}s` } as StyleWithVars} />
           ))}
 
-          {IDLE_MINI_ZAPS.map((d, i) => (
+          {idleZaps.map((d, i) => (
             <path key={`idle-zap-${i}`} className="idle-zap-path idle-mini-zap" pathLength={1} d={d} style={{ animationDelay: `${i * 1.3}s` } as StyleWithVars} />
           ))}
 
           <path className={`extra-fork ${dir === "down" ? "fork-strike-down" : "fork-strike-up"} extra-delay`} pathLength={1} d={extraFork1} />
           <path className={`extra-fork ${dir === "down" ? "fork-strike-down" : "fork-strike-up"} extra-delay`} pathLength={1} d={extraFork2} />
-          <path className={`extra-fork ${dir === "down" ? "fork-strike-down" : "fork-strike-up"}`} pathLength={1} d={extraFork3} style={{ animationDelay: "0.12s" } as StyleWithVars} />
+          {!isLowPower && (
+            <path className={`extra-fork ${dir === "down" ? "fork-strike-down" : "fork-strike-up"}`} pathLength={1} d={extraFork3} style={{ animationDelay: "0.12s" } as StyleWithVars} />
+          )}
 
           {impactLeaders.map((d, i) => (
             <path key={`leader-${impactId}-${i}`} className="impact-leader leader-burst" pathLength={1} d={d} style={{ animationDelay: `${0.04 + i * 0.02}s` } as StyleWithVars} />
@@ -374,10 +472,10 @@ export default function ThunderScrollButton() {
           <g key={`explosion-${explosionId}`} style={{ opacity: dir === "up" ? 1 : 0 }}>
             <circle cx={BOLT_CENTER_X} cy={BOLT_CENTER_Y} r="14" fill="#ffaa55" className="explosion-flash" />
             <circle cx={BOLT_CENTER_X} cy={BOLT_CENTER_Y} r="2" className="explosion-ring" style={{ animationDelay: "0.06s" } as StyleWithVars} />
-            {EXPLOSION_STREAKS.map((d, i) => (
+            {explosionStreaks.map((d, i) => (
               <path key={`ex-streak-${i}`} className="explosion-streak" pathLength={1} d={d} style={{ animationDelay: `${0.03 + i * 0.01}s` } as StyleWithVars} />
             ))}
-            {EXPLOSION_OFFSETS.map((o, i) => (
+            {explosionOffsets.map((o, i) => (
               <circle key={`ex-particle-${i}`} cx={BOLT_CENTER_X} cy={BOLT_CENTER_Y} r={o.er} className="explosion-particle" style={explosionStyles[i]} />
             ))}
           </g>
