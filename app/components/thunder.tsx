@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { motion } from "framer-motion";
 import type { CSSProperties } from "react";
 
@@ -41,48 +41,112 @@ const EXPLOSION_OFFSETS = [{ ex: 0, ey: -22, er: 2.2 }, { ex: 16, ey: -16, er: 2
 const EXPLOSION_STREAKS = ["M9,42 L9,18", "M9,42 L25,26", "M9,42 L31,42", "M9,42 L25,58", "M9,42 L9,66", "M9,42 L-7,58", "M9,42 L-13,42", "M9,42 L-7,26"];
 
 type StyleWithVars = CSSProperties & Record<string, string | number>;
+type Tier = "high" | "mid" | "low" | "off";
+
+// ---------------------------------------------------------------------------
+// Device-capability tiering.
+//
+// pointer:coarse / max-width alone conflate "touch device" with "weak device"
+// — plenty of 2026 flagships are touch-only. We instead weight real capacity
+// signals (deviceMemory, core count, Save-Data) and treat coarse-pointer /
+// small-viewport as a secondary nudge, not the sole decision. Falls back to
+// "mid" when a signal is unavailable (Safari doesn't expose deviceMemory)
+// rather than assuming the device is powerful.
+// ---------------------------------------------------------------------------
+function detectTier(): Tier {
+  if (typeof window === "undefined") return "high";
+
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reducedMotion) return "off";
+
+  const nav = navigator as Navigator & {
+    deviceMemory?: number;
+    connection?: { saveData?: boolean; effectiveType?: string };
+  };
+
+  const mem = nav.deviceMemory; // undefined on iOS/Safari
+  const cores = nav.hardwareConcurrency;
+  const saveData = nav.connection?.saveData;
+  const slowNet = nav.connection?.effectiveType === "2g" || nav.connection?.effectiveType === "slow-2g";
+  const coarse = window.matchMedia("(pointer: coarse)").matches;
+  const smallViewport = window.matchMedia("(max-width: 480px)").matches;
+
+  if (saveData || slowNet || (mem !== undefined && mem <= 2) || (cores !== undefined && cores <= 4)) {
+    return "low";
+  }
+  if ((mem !== undefined && mem <= 4) || coarse || smallViewport) {
+    return "mid";
+  }
+  return "high";
+}
+
+/** Join several path "d" strings into one multi-subpath d — one element,
+ *  one filter pass, one animation, instead of N of each. */
+const mergeD = (paths: string[]) => paths.join(" ");
 
 export default function ThunderScrollButton() {
   const [showBackToTop, setShowBackToTop] = useState(false);
-  const [isLowPower, setIsLowPower] = useState(false);
+  const [tier, setTier] = useState<Tier>("high");
   const [thunderAnim, setThunderAnim] = useState<{ dir: "down" | "up"; id: number }>({ dir: "down", id: 0 });
   const [impactId, setImpactId] = useState(0);
   const [explosionId, setExplosionId] = useState(0);
   const wasVisible = useRef(false);
+  const ticking = useRef(false);
+  const animating = useRef(false);
 
   const triggerImpact = () => setImpactId(p => p + 1);
   const triggerExplosion = () => setExplosionId(p => p + 1);
 
-  // Detect touch/low-power devices once, so we can trim decorative density
-  // and filter complexity without dropping any effect category entirely.
   useEffect(() => {
-    const mq = window.matchMedia("(pointer: coarse), (max-width: 768px)");
-    const update = () => setIsLowPower(mq.matches);
+    const update = () => setTier(detectTier());
     update();
-    mq.addEventListener("change", update);
-    return () => mq.removeEventListener("change", update);
+    // Re-check on the signals that can change live (viewport, reduced-motion,
+    // save-data toggles) rather than only once at mount.
+    const mqs = [
+      window.matchMedia("(pointer: coarse)"),
+      window.matchMedia("(max-width: 480px)"),
+      window.matchMedia("(prefers-reduced-motion: reduce)"),
+    ];
+    mqs.forEach(mq => mq.addEventListener("change", update));
+    return () => mqs.forEach(mq => mq.removeEventListener("change", update));
   }, []);
 
   useEffect(() => {
+    // rAF-throttled scroll: the previous version re-ran full logic on every
+    // native scroll event, which on a low-end CPU can fire far faster than
+    // the display can paint. Coalescing to one check per animation frame
+    // keeps this cheap regardless of scroll event frequency.
     const handleScroll = () => {
-      const isVisible = window.scrollY > 300;
-      if (isVisible && !wasVisible.current) {
-        setThunderAnim(p => ({ dir: "down", id: p.id + 1 }));
-        triggerImpact();
-      }
-      wasVisible.current = isVisible;
-      setShowBackToTop(isVisible);
+      if (ticking.current) return;
+      ticking.current = true;
+      requestAnimationFrame(() => {
+        const isVisible = window.scrollY > 300;
+        if (isVisible && !wasVisible.current) {
+          setThunderAnim(p => ({ dir: "down", id: p.id + 1 }));
+          triggerImpact();
+        }
+        wasVisible.current = isVisible;
+        setShowBackToTop(isVisible);
+        ticking.current = false;
+      });
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const scrollToTop = () => {
+  const scrollToTop = useCallback(() => {
+    // Guard against re-trigger spam on low tier: overlapping full effect
+    // stacks (each remounting an SVG subtree) is the single most expensive
+    // thing a fast double-tap can cause on a weak device.
+    if (tier === "low" && animating.current) return;
+    animating.current = true;
+    setTimeout(() => { animating.current = false; }, 900);
+
     setThunderAnim(p => ({ dir: "up", id: p.id + 1 }));
     triggerImpact();
     triggerExplosion();
     window.scrollTo({ top: 0, behavior: "smooth" });
-  };
+  }, [tier]);
 
   const dir = thunderAnim.dir;
   const BOLT_FILL = dir === "down" ? BOLT_FILL_DOWN : BOLT_FILL_UP;
@@ -95,44 +159,28 @@ export default function ThunderScrollButton() {
   const boltClass = dir === "down" ? "bolt-fill bolt-strike-down" : "bolt-fill bolt-strike-up";
   const forkClass = dir === "down" ? "fork-fill fork-strike-down" : "fork-fill fork-strike-up";
 
-  // Trimmed element sets for touch / low-power devices — every effect
-  // category (particles, sparks, arcs, explosion) still renders, just
-  // fewer instances of each, which cuts filter/paint cost substantially.
-  const sparks = useMemo(() => {
-    const full = dir === "down" ? SPARKS_DOWN : SPARKS_UP;
-    return isLowPower ? full.slice(0, 4) : full;
-  }, [dir, isLowPower]);
+  const isMerged = tier !== "high"; // mid/low/off collapse decorative groups into single paths
+  const isOff = tier === "off"; // reduced-motion: keep the tap/arrival feedback, drop the fireworks
 
-  const arcs = useMemo(() => {
-    const full = dir === "down" ? ARCS_DOWN : ARCS_UP;
-    return isLowPower ? full.slice(0, 2) : full;
-  }, [dir, isLowPower]);
+  // Per-tier counts. "off" still shows a couple of accents so the button
+  // doesn't feel dead — prefers-reduced-motion means "calm", not "static".
+  const counts = useMemo(() => {
+    switch (tier) {
+      case "low": return { sparks: 3, arcs: 0, leaders: 2, zaps: 0, particles: 2, burst: 0, explosion: 3 };
+      case "mid": return { sparks: 5, arcs: 2, leaders: 3, zaps: 2, particles: 4, burst: 2, explosion: 5 };
+      case "off": return { sparks: 2, arcs: 0, leaders: 0, zaps: 0, particles: 2, burst: 0, explosion: 0 };
+      default: return { sparks: 7, arcs: 3, leaders: 4, zaps: 4, particles: 6, burst: 4, explosion: 8 };
+    }
+  }, [tier]);
 
-  const impactLeaders = useMemo(() => {
-    const full = dir === "down" ? IMPACT_LEADERS_DOWN : IMPACT_LEADERS_UP;
-    return isLowPower ? full.slice(0, 2) : full;
-  }, [dir, isLowPower]);
-
-  const staticParticles = useMemo(
-    () => (isLowPower ? STATIC_PARTICLES.slice(0, 3) : STATIC_PARTICLES),
-    [isLowPower]
-  );
-  const burstParticles = useMemo(
-    () => (isLowPower ? STATIC_PARTICLES.slice(0, 2) : STATIC_PARTICLES.slice(0, 4)),
-    [isLowPower]
-  );
-  const idleZaps = useMemo(
-    () => (isLowPower ? IDLE_MINI_ZAPS.slice(0, 2) : IDLE_MINI_ZAPS),
-    [isLowPower]
-  );
-  const explosionOffsets = useMemo(
-    () => (isLowPower ? EXPLOSION_OFFSETS.slice(0, 4) : EXPLOSION_OFFSETS),
-    [isLowPower]
-  );
-  const explosionStreaks = useMemo(
-    () => (isLowPower ? EXPLOSION_STREAKS.slice(0, 4) : EXPLOSION_STREAKS),
-    [isLowPower]
-  );
+  const sparksArr = (dir === "down" ? SPARKS_DOWN : SPARKS_UP).slice(0, counts.sparks);
+  const arcsArr = (dir === "down" ? ARCS_DOWN : ARCS_UP).slice(0, counts.arcs);
+  const impactLeadersArr = (dir === "down" ? IMPACT_LEADERS_DOWN : IMPACT_LEADERS_UP).slice(0, counts.leaders);
+  const idleZapsArr = IDLE_MINI_ZAPS.slice(0, counts.zaps);
+  const staticParticles = STATIC_PARTICLES.slice(0, counts.particles);
+  const burstParticles = STATIC_PARTICLES.slice(0, counts.burst);
+  const explosionOffsets = EXPLOSION_OFFSETS.slice(0, counts.explosion);
+  const explosionStreaks = EXPLOSION_STREAKS.slice(0, counts.explosion);
 
   const particleStyles = useMemo(() =>
     staticParticles.map((_, i) => {
@@ -156,31 +204,37 @@ export default function ThunderScrollButton() {
   return (
     <>
       <style>{`
-        /* Base: GPU-accelerated with restored glow */
-        .bolt-fill { 
-          fill: #f5faff; 
-          transform-box: fill-box; 
-          will-change: transform, opacity, filter;
+        /* Base: GPU-friendly. Filter is applied but NOT animated frame-to-frame
+           on mid/low/off tiers — see .tier-mid / .tier-low overrides below.
+           Animating transform/opacity lets the compositor reuse one rasterized
+           blur layer; animating filter forces re-rasterization every frame. */
+        .bolt-fill {
+          fill: #f5faff;
+          transform-box: fill-box;
           filter: drop-shadow(0 0 4px #ff7733) drop-shadow(0 0 8px rgba(255,120,50,0.4));
         }
-        .fork-fill { 
-          fill: #eef7ff; 
-          transform-box: fill-box; 
-          will-change: transform, opacity, filter;
+        .fork-fill {
+          fill: #eef7ff;
+          transform-box: fill-box;
           filter: drop-shadow(0 0 3px #ff9955) drop-shadow(0 0 6px rgba(255,140,70,0.35));
         }
-        .arrow-fill { 
-          fill: #ffffff; 
-          transform-box: fill-box; 
-          transform-origin: ${BOLT_CENTER_X}px ${BOLT_CENTER_Y}px; 
-          will-change: transform, opacity, filter;
+        .arrow-fill {
+          fill: #ffffff;
+          transform-box: fill-box;
+          transform-origin: ${BOLT_CENTER_X}px ${BOLT_CENTER_Y}px;
           filter: drop-shadow(0 0 5px #ffffff) drop-shadow(0 0 12px rgba(100,160,255,0.6));
         }
-        .leader-path, .extra-fork, .impact-leader, .arc-path, .spark-path, .idle-zap-path { 
-          fill: none; 
-          stroke-linecap: round; 
-          stroke-linejoin: round; 
-          stroke-dasharray: 1; 
+        /* will-change only on the three elements that animate continuously
+           for as long as the button is visible (idle flicker/pulse). Every
+           other decorative element below animates once per click and does
+           not need a permanently promoted layer. */
+        .bolt-fill, .fork-fill, .arrow-fill { will-change: transform, opacity; }
+
+        .leader-path, .extra-fork, .impact-leader, .arc-path, .spark-path, .idle-zap-path {
+          fill: none;
+          stroke-linecap: round;
+          stroke-linejoin: round;
+          stroke-dasharray: 1;
         }
         .leader-path { stroke: #ffbb88; stroke-width: 0.7; opacity: 0; filter: drop-shadow(0 0 2px #ff7744); }
         .extra-fork { stroke: #ffaa66; stroke-width: 1.2; filter: drop-shadow(0 0 2px #ff8833); }
@@ -190,7 +244,6 @@ export default function ThunderScrollButton() {
         .idle-zap-path { stroke: #ffddaa; stroke-width: 0.7; opacity: 0; filter: drop-shadow(0 0 2px #ffaa55); }
         .static-particle { fill: #ffddbb; opacity: 0; filter: drop-shadow(0 0 2px #ff9944); }
 
-        /* --- Smoother Slower Animations --- */
         @keyframes idle-mini-zap {
           0%, 85%, 100% { stroke-dashoffset: 1; opacity: 0; }
           92% { stroke-dashoffset: 0; opacity: 0.8; }
@@ -205,12 +258,13 @@ export default function ThunderScrollButton() {
         .static-float { animation: static-float 4.5s infinite ease-in-out; }
 
         @keyframes idle-bolt-flicker {
-          0%, 88%, 100% { opacity: 1; filter: drop-shadow(0 0 4px #ff7733) drop-shadow(0 0 8px rgba(255,120,50,0.4)); }
+          0%, 88%, 100% { opacity: 1; }
           91% { opacity: 0.85; }
-          94% { opacity: 1; filter: drop-shadow(0 0 7px #ffaa55) drop-shadow(0 0 16px rgba(255,150,80,0.6)); }
+          94% { opacity: 1; }
           97% { opacity: 0.9; }
         }
 
+        /* --- High tier: full choreography, filter animates for extra punch --- */
         @keyframes strike-down {
           0%   { opacity: 0; transform-origin: center bottom; transform: scaleX(1.3) scaleY(3.5) translateY(-120px); filter: drop-shadow(0 0 6px #ff2200) drop-shadow(0 0 14px #ff4400) drop-shadow(0 0 24px #ff7700); }
           10%  { opacity: 1; transform-origin: center bottom; transform: scaleX(1.2) scaleY(2.2) translateY(-40px); filter: drop-shadow(0 0 10px #ff1100) drop-shadow(0 0 22px #ff3300) drop-shadow(0 0 36px #ff6600); }
@@ -219,7 +273,6 @@ export default function ThunderScrollButton() {
           50%  { opacity: 1; transform-origin: center bottom; transform: scaleX(1) scaleY(1.01) translateY(0); filter: drop-shadow(0 0 6px #ff6644) drop-shadow(0 0 16px #ff9977) drop-shadow(0 0 24px #ffccaa); }
           100% { opacity: 1; transform-origin: center bottom; transform: scale(1); filter: drop-shadow(0 0 4px #ff7733) drop-shadow(0 0 8px rgba(255,120,50,0.4)); }
         }
-
         @keyframes strike-up {
           0%   { opacity: 0; transform-origin: center top; transform: scaleX(1.3) scaleY(3.5) translateY(120px); filter: drop-shadow(0 0 6px #ff2200) drop-shadow(0 0 14px #ff4400) drop-shadow(0 0 24px #ff7700); }
           10%  { opacity: 1; transform-origin: center top; transform: scaleX(1.2) scaleY(2.2) translateY(40px); filter: drop-shadow(0 0 10px #ff1100) drop-shadow(0 0 22px #ff3300) drop-shadow(0 0 36px #ff6600); }
@@ -230,20 +283,12 @@ export default function ThunderScrollButton() {
         }
 
         @keyframes bolt-fill-heat {
-          0%   { fill: #ff5522; }
-          10%  { fill: #ff4400; }
-          22%  { fill: #ff6611; }
-          35%  { fill: #ff8833; }
-          50%  { fill: #ffaa66; }
-          100% { fill: #f5faff; }
+          0%   { fill: #ff5522; } 10%  { fill: #ff4400; } 22%  { fill: #ff6611; }
+          35%  { fill: #ff8833; } 50%  { fill: #ffaa66; } 100% { fill: #f5faff; }
         }
         @keyframes fork-fill-heat {
-          0%   { fill: #ff6633; }
-          10%  { fill: #ff5511; }
-          22%  { fill: #ff7722; }
-          35%  { fill: #ff9944; }
-          50%  { fill: #ffbb77; }
-          100% { fill: #eef7ff; }
+          0%   { fill: #ff6633; } 10%  { fill: #ff5511; } 22%  { fill: #ff7722; }
+          35%  { fill: #ff9944; } 50%  { fill: #ffbb77; } 100% { fill: #eef7ff; }
         }
 
         .bolt-strike-down { animation: strike-down 0.85s ease-out both, bolt-fill-heat 0.85s ease-out both, idle-bolt-flicker 4.8s 0.85s infinite ease-in-out; }
@@ -297,7 +342,7 @@ export default function ThunderScrollButton() {
           30%  { transform: scale(1.02) translate(-0.5px, 0.5px); }
           100% { transform: scale(1) translate(0,0); }
         }
-        .button-impact { animation: button-impact-jolt 0.75s cubic-bezier(.32,.08,.22,.98) both; will-change: transform; }
+        .button-impact { animation: button-impact-jolt 0.75s cubic-bezier(.32,.08,.22,.98) both; }
 
         @keyframes static-burst {
           0%, 28% { opacity: 0; transform: translate(0,0) scale(0.5); }
@@ -312,8 +357,8 @@ export default function ThunderScrollButton() {
           100%     { opacity: 1; transform: scale(1); }
         }
         @keyframes arrow-idle-pulse {
-          0%, 100% { opacity: 0.85; filter: drop-shadow(0 0 4px #ffffff) drop-shadow(0 0 8px rgba(100,160,255,0.5)); }
-          50%      { opacity: 1; filter: drop-shadow(0 0 6px #ffffff) drop-shadow(0 0 14px rgba(120,180,255,0.7)); }
+          0%, 100% { opacity: 0.85; }
+          50%      { opacity: 1; }
         }
         .arrow-anim { animation: arrow-pop 0.75s cubic-bezier(.32,1.5,.6,1) both, arrow-idle-pulse 3.2s 0.75s infinite ease-in-out; }
 
@@ -345,12 +390,10 @@ export default function ThunderScrollButton() {
         }
         .explosion-ring { fill: none; animation: explosion-ring 0.8s ease-out both; transform-origin: ${BOLT_CENTER_X}px ${BOLT_CENTER_Y}px; }
 
-        /* Respect reduced motion */
         @media (prefers-reduced-motion: reduce) {
-          * { animation: none !important; }
+          .static-float, .idle-mini-zap, .arrow-idle-pulse, .idle-bolt-flicker { animation: none !important; }
         }
 
-        /* Button base */
         .thunder-button {
           pointer-events: auto;
           position: fixed;
@@ -368,51 +411,69 @@ export default function ThunderScrollButton() {
           overflow: visible;
           will-change: opacity, transform;
           filter: drop-shadow(0 0 6px rgba(255,100,50,0.3));
+          /* Isolates this fixed element's paint/layout work from the rest of
+             the page — the browser doesn't need to consider it when deciding
+             what else on the page might need repainting. */
+          contain: layout style paint;
         }
 
-        /* Freeze every animation inside the button while it's off-screen —
-           the idle loops (static-float, idle-mini-zap, idle-bolt-flicker,
-           arrow-idle-pulse) would otherwise run forever from page load
-           even before the user has scrolled far enough to see the button. */
         .thunder-button[data-visible="false"] svg * {
           animation-play-state: paused !important;
         }
 
-        /* Lower-power / touch devices: cut the costliest part — stacked
-           multi-stop drop-shadow filters — down to a single stop each.
-           Motion/timing/color choreography is untouched. */
-        @media (pointer: coarse), (max-width: 768px) {
-          .thunder-button { filter: none; will-change: opacity, transform; }
-          .bolt-fill, .fork-fill, .arrow-fill { will-change: transform, opacity; }
-
-          .bolt-fill { filter: drop-shadow(0 0 5px rgba(255,130,50,0.55)); }
-          .fork-fill { filter: drop-shadow(0 0 4px rgba(255,150,80,0.5)); }
-          .arrow-fill { filter: drop-shadow(0 0 6px rgba(150,190,255,0.65)); }
-
-          @keyframes strike-down {
-            0%   { opacity: 0; transform-origin: center bottom; transform: scaleX(1.3) scaleY(3.5) translateY(-120px); filter: drop-shadow(0 0 10px #ff3300); }
-            22%  { opacity: 1; transform-origin: center bottom; transform: scaleX(1.1) scaleY(1.3) translateY(-6px); filter: drop-shadow(0 0 16px #ff5500); }
-            50%  { opacity: 1; transform-origin: center bottom; transform: scaleX(1) scaleY(1.01) translateY(0); filter: drop-shadow(0 0 10px #ff8844); }
-            100% { opacity: 1; transform-origin: center bottom; transform: scale(1); filter: drop-shadow(0 0 5px rgba(255,130,50,0.55)); }
-          }
-          @keyframes strike-up {
-            0%   { opacity: 0; transform-origin: center top; transform: scaleX(1.3) scaleY(3.5) translateY(120px); filter: drop-shadow(0 0 10px #ff3300); }
-            22%  { opacity: 1; transform-origin: center top; transform: scaleX(1.1) scaleY(1.3) translateY(6px); filter: drop-shadow(0 0 16px #ff5500); }
-            50%  { opacity: 1; transform-origin: center top; transform: scaleX(1) scaleY(1.01) translateY(0); filter: drop-shadow(0 0 10px #ff8844); }
-            100% { opacity: 1; transform-origin: center top; transform: scale(1); filter: drop-shadow(0 0 5px rgba(255,130,50,0.55)); }
-          }
-          @keyframes idle-bolt-flicker {
-            0%, 88%, 100% { opacity: 1; filter: drop-shadow(0 0 5px rgba(255,130,50,0.55)); }
-            91% { opacity: 0.85; }
-            94% { opacity: 1; filter: drop-shadow(0 0 8px rgba(255,170,90,0.65)); }
-            97% { opacity: 0.9; }
-          }
-          @keyframes explosion-flash {
-            0%   { opacity: 0; transform: scale(0.25); filter: drop-shadow(0 0 12px #ff5500); }
-            18%  { opacity: 1; transform: scale(1.6); filter: drop-shadow(0 0 18px #ff6600); }
-            100% { opacity: 0; transform: scale(3); filter: drop-shadow(0 0 0 transparent); }
-          }
+        /* --- Mid tier: same choreography, filter blur is now STATIC during
+           the strike (only opacity/transform/color animate). This is the
+           single biggest cost cut: the browser rasterizes the blurred glow
+           once instead of recomputing it at every keyframe stop. --- */
+        .thunder-button[data-tier="mid"] .bolt-strike-down,
+        .thunder-button[data-tier="mid"] .bolt-strike-up,
+        .thunder-button[data-tier="low"] .bolt-strike-down,
+        .thunder-button[data-tier="low"] .bolt-strike-up {
+          filter: drop-shadow(0 0 8px #ff5500);
         }
+        .thunder-button[data-tier="mid"] .fork-strike-down,
+        .thunder-button[data-tier="mid"] .fork-strike-up,
+        .thunder-button[data-tier="low"] .fork-strike-down,
+        .thunder-button[data-tier="low"] .fork-strike-up {
+          filter: drop-shadow(0 0 6px #ff7733);
+        }
+        .thunder-button[data-tier="mid"] .explosion-flash,
+        .thunder-button[data-tier="low"] .explosion-flash {
+          filter: drop-shadow(0 0 10px #ff6600);
+        }
+        @keyframes strike-down-flat {
+          0%   { opacity: 0; transform-origin: center bottom; transform: scaleX(1.3) scaleY(3.5) translateY(-120px); }
+          10%  { opacity: 1; transform-origin: center bottom; transform: scaleX(1.2) scaleY(2.2) translateY(-40px); }
+          22%  { opacity: 1; transform-origin: center bottom; transform: scaleX(1.1) scaleY(1.3) translateY(-6px); }
+          35%  { opacity: 1; transform-origin: center bottom; transform: scaleX(1.03) scaleY(0.98) translateY(1px); }
+          50%  { opacity: 1; transform-origin: center bottom; transform: scaleX(1) scaleY(1.01) translateY(0); }
+          100% { opacity: 1; transform-origin: center bottom; transform: scale(1); }
+        }
+        @keyframes strike-up-flat {
+          0%   { opacity: 0; transform-origin: center top; transform: scaleX(1.3) scaleY(3.5) translateY(120px); }
+          10%  { opacity: 1; transform-origin: center top; transform: scaleX(1.2) scaleY(2.2) translateY(40px); }
+          22%  { opacity: 1; transform-origin: center top; transform: scaleX(1.1) scaleY(1.3) translateY(6px); }
+          35%  { opacity: 1; transform-origin: center top; transform: scaleX(1.03) scaleY(0.98) translateY(-1px); }
+          50%  { opacity: 1; transform-origin: center top; transform: scaleX(1) scaleY(1.01) translateY(0); }
+          100% { opacity: 1; transform-origin: center top; transform: scale(1); }
+        }
+        .thunder-button[data-tier="mid"] .bolt-strike-down, .thunder-button[data-tier="low"] .bolt-strike-down { animation-name: strike-down-flat, bolt-fill-heat, idle-bolt-flicker; }
+        .thunder-button[data-tier="mid"] .bolt-strike-up,   .thunder-button[data-tier="low"] .bolt-strike-up   { animation-name: strike-up-flat, bolt-fill-heat, idle-bolt-flicker; }
+        .thunder-button[data-tier="mid"] .fork-strike-down, .thunder-button[data-tier="low"] .fork-strike-down { animation-name: strike-down-flat, fork-fill-heat; }
+        .thunder-button[data-tier="mid"] .fork-strike-up,   .thunder-button[data-tier="low"] .fork-strike-up   { animation-name: strike-up-flat, fork-fill-heat; }
+
+        /* --- Low tier: also drop the stacked glow on the small decorative
+           strokes down to one soft shadow, and disable the continuous idle
+           loops entirely once the initial reveal settles (biggest ongoing
+           battery/CPU drain for a button that mostly just sits there). --- */
+        .thunder-button[data-tier="low"] .spark-path,
+        .thunder-button[data-tier="low"] .impact-leader,
+        .thunder-button[data-tier="low"] .leader-path {
+          filter: drop-shadow(0 0 2px #ff8833);
+        }
+        .thunder-button[data-tier="low"] .arrow-fill { filter: drop-shadow(0 0 6px rgba(140,180,255,0.7)); }
+        .thunder-button[data-tier="low"] .arrow-idle-pulse,
+        .thunder-button[data-tier="low"] .idle-bolt-flicker { animation: none; }
       `}</style>
 
       <motion.button
@@ -422,6 +483,7 @@ export default function ThunderScrollButton() {
         transition={{ duration: 0.4, ease: E }}
         className="thunder-button"
         data-visible={showBackToTop}
+        data-tier={tier}
         onMouseEnter={(e) => { e.currentTarget.style.transform = "scale(1.05)"; }}
         onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
         aria-label="Back to top"
@@ -442,43 +504,79 @@ export default function ThunderScrollButton() {
             <circle key={`burst-${impactId}-${i}`} cx={p.x} cy={p.y} r="1.1" fill="#ffccaa" className="static-burst" style={burstStyles[i]} />
           ))}
 
-          {arcs.map((d, i) => (
-            <path key={`arc-${i}`} className="arc-path arc-flicker" pathLength={1} d={d} style={{ animationDelay: `${0.04 + i * 0.025}s` } as StyleWithVars} />
-          ))}
+          {/* Merged (mid/low/off): one path, one filter pass, one animation
+              for the whole arc group instead of one per arc. */}
+          {arcsArr.length > 0 && (
+            isMerged ? (
+              <path className="arc-path arc-flicker" pathLength={1} d={mergeD(arcsArr)} />
+            ) : (
+              arcsArr.map((d, i) => (
+                <path key={`arc-${i}`} className="arc-path arc-flicker" pathLength={1} d={d} style={{ animationDelay: `${0.04 + i * 0.025}s` } as StyleWithVars} />
+              ))
+            )
+          )}
 
-          {idleZaps.map((d, i) => (
-            <path key={`idle-zap-${i}`} className="idle-zap-path idle-mini-zap" pathLength={1} d={d} style={{ animationDelay: `${i * 1.3}s` } as StyleWithVars} />
-          ))}
+          {idleZapsArr.length > 0 && (
+            isMerged ? (
+              <path className="idle-zap-path idle-mini-zap" pathLength={1} d={mergeD(idleZapsArr)} />
+            ) : (
+              idleZapsArr.map((d, i) => (
+                <path key={`idle-zap-${i}`} className="idle-zap-path idle-mini-zap" pathLength={1} d={d} style={{ animationDelay: `${i * 1.3}s` } as StyleWithVars} />
+              ))
+            )
+          )}
 
           <path className={`extra-fork ${dir === "down" ? "fork-strike-down" : "fork-strike-up"} extra-delay`} pathLength={1} d={extraFork1} />
-          <path className={`extra-fork ${dir === "down" ? "fork-strike-down" : "fork-strike-up"} extra-delay`} pathLength={1} d={extraFork2} />
-          {!isLowPower && (
+          {tier !== "low" && (
+            <path className={`extra-fork ${dir === "down" ? "fork-strike-down" : "fork-strike-up"} extra-delay`} pathLength={1} d={extraFork2} />
+          )}
+          {tier === "high" && (
             <path className={`extra-fork ${dir === "down" ? "fork-strike-down" : "fork-strike-up"}`} pathLength={1} d={extraFork3} style={{ animationDelay: "0.12s" } as StyleWithVars} />
           )}
 
-          {impactLeaders.map((d, i) => (
-            <path key={`leader-${impactId}-${i}`} className="impact-leader leader-burst" pathLength={1} d={d} style={{ animationDelay: `${0.04 + i * 0.02}s` } as StyleWithVars} />
-          ))}
+          {impactLeadersArr.length > 0 && (
+            isMerged ? (
+              <path key={`leader-${impactId}`} className="impact-leader leader-burst" pathLength={1} d={mergeD(impactLeadersArr)} />
+            ) : (
+              impactLeadersArr.map((d, i) => (
+                <path key={`leader-${impactId}-${i}`} className="impact-leader leader-burst" pathLength={1} d={d} style={{ animationDelay: `${0.04 + i * 0.02}s` } as StyleWithVars} />
+              ))
+            )
+          )}
 
           <path key={`stepped-leader-${thunderAnim.id}`} className="leader-path leader-draw" pathLength={1} d={leader1} />
           <path key={`fork-${thunderAnim.id}`} className={forkClass} d={FORK_FILL} />
           <path key={`bolt-${thunderAnim.id}`} className={boltClass} d={BOLT_FILL} />
           <path key={`arrow-${thunderAnim.id}`} className="arrow-fill arrow-anim" d={ARROW_CHEVRON} />
 
-          {sparks.map((d, i) => (
-            <path key={`spark-${i}`} className="spark-path spark-burst" pathLength={1} d={d} style={{ animationDelay: `${0.04 + i * 0.015}s` } as StyleWithVars} />
-          ))}
+          {sparksArr.length > 0 && (
+            isMerged ? (
+              <path className="spark-path spark-burst" pathLength={1} d={mergeD(sparksArr)} />
+            ) : (
+              sparksArr.map((d, i) => (
+                <path key={`spark-${i}`} className="spark-path spark-burst" pathLength={1} d={d} style={{ animationDelay: `${0.04 + i * 0.015}s` } as StyleWithVars} />
+              ))
+            )
+          )}
 
-          <g key={`explosion-${explosionId}`} style={{ opacity: dir === "up" ? 1 : 0 }}>
-            <circle cx={BOLT_CENTER_X} cy={BOLT_CENTER_Y} r="14" fill="#ffaa55" className="explosion-flash" />
-            <circle cx={BOLT_CENTER_X} cy={BOLT_CENTER_Y} r="2" className="explosion-ring" style={{ animationDelay: "0.06s" } as StyleWithVars} />
-            {explosionStreaks.map((d, i) => (
-              <path key={`ex-streak-${i}`} className="explosion-streak" pathLength={1} d={d} style={{ animationDelay: `${0.03 + i * 0.01}s` } as StyleWithVars} />
-            ))}
-            {explosionOffsets.map((o, i) => (
-              <circle key={`ex-particle-${i}`} cx={BOLT_CENTER_X} cy={BOLT_CENTER_Y} r={o.er} className="explosion-particle" style={explosionStyles[i]} />
-            ))}
-          </g>
+          {!isOff && (
+            <g key={`explosion-${explosionId}`} style={{ opacity: dir === "up" ? 1 : 0 }}>
+              <circle cx={BOLT_CENTER_X} cy={BOLT_CENTER_Y} r="14" fill="#ffaa55" className="explosion-flash" />
+              <circle cx={BOLT_CENTER_X} cy={BOLT_CENTER_Y} r="2" className="explosion-ring" style={{ animationDelay: "0.06s" } as StyleWithVars} />
+              {explosionStreaks.length > 0 && (
+                isMerged ? (
+                  <path className="explosion-streak" pathLength={1} d={mergeD(explosionStreaks)} />
+                ) : (
+                  explosionStreaks.map((d, i) => (
+                    <path key={`ex-streak-${i}`} className="explosion-streak" pathLength={1} d={d} style={{ animationDelay: `${0.03 + i * 0.01}s` } as StyleWithVars} />
+                  ))
+                )
+              )}
+              {explosionOffsets.map((o, i) => (
+                <circle key={`ex-particle-${i}`} cx={BOLT_CENTER_X} cy={BOLT_CENTER_Y} r={o.er} className="explosion-particle" style={explosionStyles[i]} />
+              ))}
+            </g>
+          )}
         </svg>
       </motion.button>
     </>
