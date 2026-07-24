@@ -43,7 +43,7 @@ const CASES: Project[] = [
         n: "02", h: "Approach",
         p: "I led UX/UI and front-end design, building color-coded status cards (ClassGuard Blue and Gold) for at-a-glance room availability, plus the Node.js backend with real-time socket updates and an account system verified through Google SMTP. Room readings came from Arduino Uno boards with DHT11 sensors, transmitted live via ESP32 microcontrollers.",
         highlight: [
-          "color-coded status cards (ClassGuard Violet) for at-a-glance room availability",
+          "color-coded status cards (ClassGuard BLue and Gold) for at-a-glance room availability",
         ],
       },
       {
