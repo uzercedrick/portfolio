@@ -411,10 +411,13 @@ export default function ThunderScrollButton() {
           overflow: visible;
           will-change: opacity, transform;
           filter: drop-shadow(0 0 6px rgba(255,100,50,0.3));
-          /* Isolates this fixed element's paint/layout work from the rest of
-             the page — the browser doesn't need to consider it when deciding
-             what else on the page might need repainting. */
-          contain: layout style paint;
+          /* layout+style containment only — NOT paint. This component
+             intentionally paints outside its own box (the strike enters
+             from ~120px above it, the explosion scales out past its edges),
+             and contain: paint hard-clips child rendering to the element's
+             box, which cuts off the incoming strike and turns the
+             explosion's soft glow falloff into a rectangular hard edge. */
+          contain: layout style;
         }
 
         .thunder-button[data-visible="false"] svg * {
