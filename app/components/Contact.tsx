@@ -96,6 +96,7 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
                 initial={{ opacity: 0, x: 28 }}
                 animate={inView ? { opacity: 1, x: 0 } : {}}
                 transition={{ duration: 0.55, delay: 0.14 + i * 0.13, ease: E }}
+                className="contact-item-block"
               >
                 <p className="fd contact-eyebrow" style={{ color: "#CEFF1A", fontSize: "clamp(14px, 1.3vw, 18px)", letterSpacing: "-0.02em", marginBottom: "8px", textTransform: "uppercase", lineHeight: 1 }}>
                   {eyebrow}
@@ -123,14 +124,17 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
           transition={{ duration: 0.7, delay: 0.55, ease: E }}
           className="cta-bottom"
         >
-          <div>
-            <h2 className="fd" style={{ color:"#CEFF1A", fontSize:"clamp(28px,3.5vw,44px)", lineHeight:1.0, letterSpacing:"0.01em", margin:0 }}>
-              LET&apos;S MAKE
+          <div className="cta-text-block">
+            {/* Line 1: LET'S MAKE SOMETHING — slightly smaller to fit on one line */}
+            <h2 className="fd cta-line-1" style={{ color:"#CEFF1A", margin:0 }}>
+              LET&apos;S MAKE SOMETHING
             </h2>
-            <h2 className="fd" style={{ color:"#CEFF1A", fontSize:"clamp(28px,3.5vw,44px)", lineHeight:1.0, letterSpacing:"0.01em", margin:0 }}>
-              SOMETHING TOGETHER
+            {/* Line 2: TOGETHER — keep original size/format */}
+            <h2 className="fd cta-line-2" style={{ color:"#CEFF1A", margin:"0.08em 0 0" }}>
+              TOGETHER
             </h2>
-            <p className="fd" style={{ color:"#F5F6FC", fontSize:"clamp(16px,2vw,24px)", lineHeight:1.1, letterSpacing:"0.01em", margin:"8px 0 0 0" }}>
+            {/* Line 3: PROMISE I DON'T BITE */}
+            <p className="fd cta-line-3" style={{ color:"#F5F6FC", margin:"10px 0 0 0" }}>
               PROMISE I DON&apos;T <span style={{ color:"#CEFF1A" }}>BITE</span>
             </p>
           </div>
@@ -140,7 +144,7 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
             className="btn-start"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            style={{ textTransform:"uppercase", flexShrink:0, fontSize:12 }}
+            style={{ textTransform:"uppercase", flexShrink:0, fontSize:13 }}
           >
             START
           </motion.button>
@@ -215,6 +219,10 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
           gap: clamp(28px, 3vw, 40px);
         }
 
+        .contact-item-block {
+          width: 100%;
+        }
+
         .cta-bottom {
           display: flex;
           align-items: center;
@@ -225,10 +233,38 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
           flex-wrap: wrap;
         }
 
+        .cta-text-block {
+          flex: 1;
+          min-width: 280px;
+          line-height: 1;
+        }
+
+        /* Line 1: LET'S MAKE SOMETHING — slightly smaller to fit cleanly on one line */
+        .cta-line-1 {
+          font-size: clamp(22px, 2.8vw, 36px);
+          line-height: 1.0;
+          letter-spacing: 0.01em;
+          white-space: nowrap;
+        }
+
+        /* Line 2: TOGETHER — keep the original larger size for emphasis */
+        .cta-line-2 {
+          font-size: clamp(28px, 3.5vw, 44px);
+          line-height: 1.0;
+          letter-spacing: 0.01em;
+        }
+
+        /* Line 3: PROMISE I DON'T BITE */
+        .cta-line-3 {
+          font-size: clamp(16px, 2vw, 24px);
+          line-height: 1.1;
+          letter-spacing: 0.01em;
+        }
+
         .btn-start {
-          /* sized down from the original 110–130px range */
-          width: clamp(90px, 10vw, 108px);
-          height: clamp(90px, 10vw, 108px);
+          /* Increased size for better visibility */
+          width: clamp(100px, 11vw, 120px);
+          height: clamp(100px, 11vw, 120px);
           border-radius: 50%;
           background: #CEFF1A;
           color: #14141A;
@@ -277,9 +313,13 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
           gap: clamp(40px, 5vw, 64px);
           align-items: start;
           margin-bottom: clamp(24px, 3vw, 32px);
+          /* Desktop: center the whole contact section */
+          max-width: 1200px;
+          margin-left: auto;
+          margin-right: auto;
         }
 
-        /* Mobile: contact-top already collapses to one column here.
+        /* Mobile: contact-top collapses to one column here.
            Everything below centers that stacked layout — desktop above
            this breakpoint is untouched. */
         @media (max-width: 900px) {
@@ -287,6 +327,7 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
             grid-template-columns: 1fr;
             gap: 36px;
             margin-bottom: 24px;
+            max-width: 100%;
           }
           #contact {
             padding: 48px 0 !important;
@@ -296,16 +337,26 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
             text-align: center;
           }
           .contact-outline {
-            margin: 0 auto;
+            /* Override max-content to allow centering */
+            width: auto !important;
+            text-align: center;
           }
           .btn-resume {
             margin: 0 auto 20px;
+            display: flex;
+            width: fit-content;
           }
           .contact-items {
             align-items: center;
           }
           .contact-eyebrow {
             text-align: center;
+          }
+          .contact-row {
+            /* Center icon + link row on mobile */
+            display: flex !important;
+            justify-content: center;
+            width: 100%;
           }
 
           /* Bottom CTA: stack, center, button below the text — same
@@ -317,18 +368,24 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
             text-align: center;
             gap: 28px;
           }
+          .cta-text-block {
+            text-align: center;
+          }
+          .cta-line-1 {
+            white-space: normal; /* allow wrapping on very small screens */
+          }
         }
         @media (max-width: 768px) {
           .btn-start {
-            width: 72px;
-            height: 72px;
-            font-size: 10px;
+            width: 80px;
+            height: 80px;
+            font-size: 11px;
           }
         }
         @media (max-width: 480px) {
           .btn-start {
-            width: 64px;
-            height: 64px;
+            width: 72px;
+            height: 72px;
             font-size: 10px;
           }
           .contact-row {
