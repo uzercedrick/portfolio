@@ -7,7 +7,7 @@ import { zalando } from "../fonts";
 const SOCIAL = [
   { Icon: MdEmail,      href: "mailto:jhoncedrick.fuentes@gmail.com", label: "Email"    },
   { Icon: FaLinkedinIn, href: "https://linkedin.com/in/jcnungay",     label: "LinkedIn" },
-  { Icon: FaGithub,     href: "https://github.com/uzercedrick/",            label: "GitHub"   },
+  { Icon: FaGithub,     href: "https://github.com/uzercedrick/",      label: "GitHub"   },
 ];
 
 export default function Footer() {
@@ -23,7 +23,7 @@ export default function Footer() {
         padding: "clamp(24px, 4vw, 32px) 0",
       }}
     >
-      <div className="container" style={{
+      <div className="footer-container" style={{
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -31,9 +31,10 @@ export default function Footer() {
         gap: "clamp(14px, 2.5vw, 20px)",
         minHeight: "60px",
         padding: "0 20px",
+        position: "relative",
       }}>
 
-        {/* ✅ CENTERED COPYRIGHT & CREDITS */}
+        {/* ✅ CENTERED COPYRIGHT & CREDITS — stays centered on all screens */}
         <div style={{
           display: "flex",
           flexDirection: "column",
@@ -64,8 +65,12 @@ export default function Footer() {
           </p>
         </div>
 
-        {/* ✅ ICONS DIRECTLY BELOW, CENTERED */}
-        <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+        {/* ✅ ICONS — centered on mobile, pushed to right on desktop */}
+        <div className="footer-icons" style={{
+          display: "flex",
+          gap: "12px",
+          alignItems: "center",
+        }}>
           {SOCIAL.map(({ Icon, href, label }) => (
             <a
               key={label}
@@ -103,9 +108,22 @@ export default function Footer() {
       </div>
 
       <style>{`
-        /* Consistent centered layout for ALL screen sizes */
+        /* Desktop: icons to the right, text stays centered */
+        @media (min-width: 641px) {
+          .footer-container {
+            flex-direction: row !important;
+            justify-content: center !important;
+            position: relative !important;
+          }
+          .footer-icons {
+            position: absolute !important;
+            right: 20px !important;
+          }
+        }
+
+        /* Mobile: keep everything centered in a column */
         @media (max-width: 640px) {
-          footer > div {
+          .footer-container {
             padding: 20px 24px !important;
           }
         }
