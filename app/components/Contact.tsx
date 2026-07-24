@@ -41,15 +41,6 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
     <section id="contact" ref={ref} style={{ background: "#14141A", padding: "clamp(48px, 6vw, 80px) 0" }}>
       <div className="container">
 
-        <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.55, ease: E }}
-          className="sec-label"
-        >
-          CONTACT
-        </motion.h2>
-
         <div className="contact-top">
           <div className="contact-heading">
             <motion.h3
@@ -98,7 +89,7 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
 
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "clamp(28px, 3vw, 40px)" }}>
+          <div className="contact-items">
             {CONTACT_ITEMS.map(({ eyebrow, Icon, text, href }, i) => (
               <motion.div
                 key={eyebrow}
@@ -106,7 +97,7 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
                 animate={inView ? { opacity: 1, x: 0 } : {}}
                 transition={{ duration: 0.55, delay: 0.14 + i * 0.13, ease: E }}
               >
-                <p className="fd" style={{ color: "#CEFF1A", fontSize: "clamp(14px, 1.3vw, 18px)", letterSpacing: "-0.02em", marginBottom: "8px", textTransform: "uppercase", lineHeight: 1 }}>
+                <p className="fd contact-eyebrow" style={{ color: "#CEFF1A", fontSize: "clamp(14px, 1.3vw, 18px)", letterSpacing: "-0.02em", marginBottom: "8px", textTransform: "uppercase", lineHeight: 1 }}>
                   {eyebrow}
                 </p>
                 <a
@@ -130,15 +121,7 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
           initial={{ opacity: 0, y: 44 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.7, delay: 0.55, ease: E }}
-          style={{
-            display:        "flex",
-            alignItems:     "center",
-            justifyContent: "flex-start",
-            gap:            "clamp(24px, 4vw, 48px)",
-            width:          "100%",
-            marginTop:      "16px",
-            flexWrap: "wrap",
-          }}
+          className="cta-bottom"
         >
           <div>
             <h2 className="fd" style={{ color:"#CEFF1A", fontSize:"clamp(28px,3.5vw,44px)", lineHeight:1.0, letterSpacing:"0.01em", margin:0 }}>
@@ -172,19 +155,6 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
           font-family: var(--font-zalando-expanded), "Arial Black", Impact, system-ui, sans-serif;
           font-weight: 900;
           text-transform: uppercase;
-        }
-
-        .sec-label {
-          font-family: var(--font-zalando-expanded), "Arial Black", Impact, system-ui, sans-serif;
-          font-weight: 700;
-          text-transform: uppercase;
-          font-size: clamp(18px, 1.8vw, 22px);
-          letter-spacing: 0.08em;
-          color: #CEFF1A;
-          display: inline-block;
-          padding-bottom: 6px;
-          border-bottom: 2px solid #CEFF1A;
-          margin-bottom: clamp(24px, 3vw, 32px);
         }
 
         .contact-outline {
@@ -239,10 +209,26 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
           transform: translateY(-2px);
         }
 
+        .contact-items {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(28px, 3vw, 40px);
+        }
+
+        .cta-bottom {
+          display: flex;
+          align-items: center;
+          justify-content: flex-start;
+          gap: clamp(24px, 4vw, 48px);
+          width: 100%;
+          margin-top: 16px;
+          flex-wrap: wrap;
+        }
+
         .btn-start {
-          /* Wider on desktop to match official CTA style */
-          width: clamp(110px, 12vw, 130px);
-          height: clamp(110px, 12vw, 130px);
+          /* sized down from the original 110–130px range */
+          width: clamp(90px, 10vw, 108px);
+          height: clamp(90px, 10vw, 108px);
           border-radius: 50%;
           background: #CEFF1A;
           color: #14141A;
@@ -256,8 +242,8 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
           transition: all 0.25s ease;
           flex-shrink: 0;
           box-shadow: 0 0 15px rgba(206, 255, 26, 0.2);
-          min-width: 80px; /* Minimum touch target size */
-          min-height: 80px;
+          min-width: 64px;
+          min-height: 64px;
         }
         .btn-start:hover {
           background: #D8FF48;
@@ -292,6 +278,10 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
           align-items: start;
           margin-bottom: clamp(24px, 3vw, 32px);
         }
+
+        /* Mobile: contact-top already collapses to one column here.
+           Everything below centers that stacked layout — desktop above
+           this breakpoint is untouched. */
         @media (max-width: 900px) {
           .contact-top {
             grid-template-columns: 1fr;
@@ -301,25 +291,45 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
           #contact {
             padding: 48px 0 !important;
           }
+          .contact-heading {
+            max-width: 100%;
+            text-align: center;
+          }
+          .contact-outline {
+            margin: 0 auto;
+          }
+          .btn-resume {
+            margin: 0 auto 20px;
+          }
+          .contact-items {
+            align-items: center;
+          }
+          .contact-eyebrow {
+            text-align: center;
+          }
+
+          /* Bottom CTA: stack, center, button below the text — same
+             text block/format as desktop, just centered instead of
+             left-aligned next to the button. */
+          .cta-bottom {
+            flex-direction: column;
+            justify-content: center;
+            text-align: center;
+            gap: 28px;
+          }
         }
         @media (max-width: 768px) {
           .btn-start {
-            width: 90px;
-            height: 90px;
-            font-size: 11px;
+            width: 72px;
+            height: 72px;
+            font-size: 10px;
           }
         }
         @media (max-width: 480px) {
-          .sec-label {
-            font-size: 16px;
-            letter-spacing: 0.07em;
-            border-bottom-width: 1.5px;
-            padding-bottom: 5px;
-          }
           .btn-start {
-            width: 80px;
-            height: 80px;
-            font-size: 11px;
+            width: 64px;
+            height: 64px;
+            font-size: 10px;
           }
           .contact-row {
             gap: 10px !important;
