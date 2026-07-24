@@ -103,10 +103,11 @@ function SkillCurve({ inView }: { inView: boolean }) {
 
   return (
     <div className="relative w-full">
+      {/* Fixed curve SVG: removed hidden md:block, added responsive sizing */}
       <svg
         viewBox="0 0 1200 120"
         preserveAspectRatio="none"
-        className="pointer-events-none absolute inset-x-0 top-[30px] hidden h-[120px] w-full md:block"
+        className="pointer-events-none absolute inset-x-0 top-[20px] h-[80px] w-full md:top-[30px] md:h-[120px]"
       >
         <path
           d="M 0 100 Q 600 20 1200 100"
