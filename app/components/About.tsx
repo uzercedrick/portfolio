@@ -106,7 +106,7 @@ function SkillCurve({ inView }: { inView: boolean }) {
       <svg
         viewBox="0 0 1200 120"
         preserveAspectRatio="none"
-        className="pointer-events-none absolute inset-x-0 top-[30px] block h-[120px] w-full"
+        className="pointer-events-none absolute inset-x-0 top-[46px] block h-[44px] w-full md:top-[30px] md:h-[120px]"
       >
         <path
           d="M 0 100 Q 600 20 1200 100"
@@ -498,7 +498,7 @@ export default function About() {
 
           .cell-card {
             max-width: 230px !important;
-            min-height: clamp(200px, 40vw, 250px) !important;
+            min-height: clamp(230px, 48vw, 280px) !important;
           }
           .cell-card > div {
             padding: clamp(12px, 4vw, 18px) !important;
