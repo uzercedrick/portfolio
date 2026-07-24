@@ -103,14 +103,15 @@ function SkillCurve({ inView }: { inView: boolean }) {
 
   return (
     <div className="relative w-full">
-      {/* Fixed curve SVG: removed hidden md:block, added responsive sizing */}
+      {/* Fixed curve: lower position + flatter arc */}
       <svg
         viewBox="0 0 1200 120"
         preserveAspectRatio="none"
-        className="pointer-events-none absolute inset-x-0 top-[20px] h-[80px] w-full md:top-[30px] md:h-[120px]"
+        className="pointer-events-none absolute inset-x-0 top-[40px] h-[100px] w-full md:top-[50px] md:h-[120px]"
       >
+        {/* New path: control point raised to y=60 → much flatter curve; start/end at y=110 → sits lower */}
         <path
-          d="M 0 100 Q 600 20 1200 100"
+          d="M 0 110 Q 600 60 1200 110"
           fill="none"
           stroke={ACCENT}
           strokeWidth="1.5"
@@ -125,7 +126,7 @@ function SkillCurve({ inView }: { inView: boolean }) {
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
         onWheel={handleWheel}
-        className="no-scrollbar relative flex w-full snap-x snap-mandatory overflow-x-auto overscroll-y-none scroll-smooth pt-10 pb-6"
+        className="no-scrollbar relative flex w-full snap-x snap-mandatory overflow-x-auto overscroll-y-none scroll-smooth pt-14 md:pt-16 pb-6"
       >
         {CATEGORIES.map((cat, i) => (
           <motion.div
