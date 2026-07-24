@@ -282,7 +282,9 @@ export default function ContactFormPopup({ isOpen, onClose }: ContactFormPopupPr
               overflowY: "auto",
               padding: "40px 32px",
               position: "relative",
-              border: "2px solid rgba(206, 255, 26, 0.1)"
+              /* ✅ Matches your About modal exactly */
+              borderRadius: "16px",
+              border: "1px solid rgba(245,246,252,0.12)"
             }}
             onKeyDown={handleKeyDown}
             tabIndex={-1}

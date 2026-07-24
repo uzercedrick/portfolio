@@ -43,7 +43,7 @@ const CASES: Project[] = [
         n: "02", h: "Approach",
         p: "I led UX/UI and front-end design, building color-coded status cards (ClassGuard Blue and Gold) for at-a-glance room availability, plus the Node.js backend with real-time socket updates and an account system verified through Google SMTP. Room readings came from Arduino Uno boards with DHT11 sensors, transmitted live via ESP32 microcontrollers.",
         highlight: [
-          "color-coded status cards (ClassGuard BLue and Gold) for at-a-glance room availability",
+          "color-coded status cards (ClassGuard Blue and Gold) for at-a-glance room availability",
         ],
       },
       {
@@ -137,7 +137,7 @@ function renderHighlighted(text: string, highlight?: string | string[]) {
 }
 
 function useReveal(): [React.RefObject<HTMLDivElement | null>, boolean] {
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement | null>(null);
   const [visible, setVisible] = useState(false);
   useEffect(() => {
     const el = ref.current; if (!el) return;
@@ -213,8 +213,8 @@ function BrowserFrame({
         {showLive && (
           <span className="ml-auto flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.14em] shrink-0" style={{ color: brand.a }}>
             <span className="relative flex w-1.5 h-1.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60" style={{ background: brand.a }} />
-              <span className="relative inline-flex rounded-full w-1.5 h-1.5" style={{ background: brand.a }} />
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60" style={{ background: brand.b }} />
+              <span className="relative inline-flex rounded-full w-1.5 h-1.5" style={{ background: brand.b }} />
             </span>
             LIVE
           </span>
@@ -293,7 +293,7 @@ function MockPanel({ project }: { project: Project }) {
       showLive={hasLiveUrl}
       height="auto"
     >
-      <div className="p-6 sm:p-10 min-h-70 flex flex-col justify-center gap-6">
+      <div className="p-6 sm:p-10 min-h-[280px] flex flex-col justify-center gap-6">
         <div>
           <div className="font-mono text-[11px] tracking-[0.2em] uppercase mb-3" style={{ color: brand.a, opacity: 0.7 }}>{project.accentName}</div>
           <div className="font-display font-bold text-2xl sm:text-3xl uppercase leading-[1.05]" style={{ color: brand.a }}>{project.title}</div>
@@ -314,7 +314,9 @@ function CaseStudyDetail({ project, onSwitch, nextId }: { project: Project; onSw
           <ArrowLeft size={14} /> Back to home
         </Link>
         <button type="button" onClick={() => onSwitch(nextId)} aria-label="Next case study" className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.18em] text-muted hover:text-volt transition-colors mr-3 sm:mr-0 p-2 -my-2">
-          <span className="hidden sm:inline">Next case study</span> <ArrowUpRight size={20} className="sm:hidden" /> <ArrowUpRight size={14} className="hidden sm:block" />
+          <span className="hidden sm:inline">Next case study</span>
+          <ArrowUpRight size={20} className="sm:hidden" />
+          <ArrowUpRight size={14} className="hidden sm:block" />
         </button>
       </div>
       <Reveal><div className="font-mono text-volt text-[11px] tracking-[0.22em] uppercase mb-4">Case study — {project.index} / 02</div></Reveal>
@@ -348,7 +350,7 @@ export default function CaseStudyLanding() {
   return (
     <div className="bg-ink text-bone w-full flex-1 flex flex-col">
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Zalando+Sans+Expanded:wght@400;500;600;700;800;900&family=Ubuntu+Sans+Mono:wght@400;500;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Zalando+Sans+Expanded:wght@400;500;600;700;800;900&family=Ubuntu+Sans+Mono:wght@400;500;600;700&display=swap');
         :root { --ink: #14141A; --volt: #CEFF1A; --bone: #F5F6FC; }
         .bg-ink { background-color: var(--ink); }
         .text-bone { color: var(--bone); }
@@ -362,7 +364,7 @@ export default function CaseStudyLanding() {
         .text-marker { background: var(--volt); color: var(--ink); padding: 0 4px; border-radius: 2px; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
         .reveal { opacity: 0; transform: translateY(14px); transition: opacity 0.6s ease, transform 0.6s ease; }
         .reveal-in { opacity: 1; transform: translateY(0); }
-        @keyframes fadeSlide { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+        @keyframes fadeSlide { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .view-enter { animation: fadeSlide 0.35s ease both; }
         @media (prefers-reduced-motion: reduce) {
           .reveal, .view-enter { transition: none; animation: none; opacity: 1; transform: none; }
