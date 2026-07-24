@@ -7,7 +7,7 @@ import { zalando } from "../fonts";
 const SOCIAL = [
   { Icon: MdEmail,      href: "mailto:jhoncedrick.fuentes@gmail.com", label: "Email"    },
   { Icon: FaLinkedinIn, href: "https://linkedin.com/in/jcnungay",     label: "LinkedIn" },
-  { Icon: FaGithub,     href: "https://github.com/uzerce",            label: "GitHub"   },
+  { Icon: FaGithub,     href: "https://github.com/uzercedrick/",            label: "GitHub"   },
 ];
 
 export default function Footer() {

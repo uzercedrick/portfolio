@@ -41,7 +41,7 @@ const CASES: Project[] = [
       },
       {
         n: "02", h: "Approach",
-        p: "I led UX/UI and front-end design, building color-coded status cards (ClassGuard Violet) for at-a-glance room availability, plus the Node.js backend with real-time socket updates and an account system verified through Google SMTP. Room readings came from Arduino Uno boards with DHT11 sensors, transmitted live via ESP32 microcontrollers.",
+        p: "I led UX/UI and front-end design, building color-coded status cards (ClassGuard Blue and Gold) for at-a-glance room availability, plus the Node.js backend with real-time socket updates and an account system verified through Google SMTP. Room readings came from Arduino Uno boards with DHT11 sensors, transmitted live via ESP32 microcontrollers.",
         highlight: [
           "color-coded status cards (ClassGuard Violet) for at-a-glance room availability",
         ],
@@ -55,7 +55,7 @@ const CASES: Project[] = [
       },
     ],
     brand: { a: "#E7DEFF", b: "#7C5CFF", c: "#2B1F4D" },
-    accentName: "ClassGuard violet", live: "#",
+    accentName: "ClassGuard Blue & Gold", live: "#",
     images: [
       { src: "/login.png", alt: "ClassGuard login and account verification screen", caption: "Login" },
       { src: "/dashboard.png", alt: "ClassGuard dashboard — room status overview", caption: "Dashboard" },
