@@ -34,28 +34,23 @@ const CASES: Project[] = [
     narrative: [
       {
         n: "01", h: "Problem",
-        p: "City of Malabon University had no way to check a classroom's temperature, humidity, or availability without physically walking over. Teachers were left guessing whether a room was too hot, already occupied, or ready to use — a problem that only got worse once monitoring needed to cover more than one room. No existing system solved this; ClassGuard was built from scratch by a 5-person capstone team.",
+        p: "Teachers at City of Malabon University had no way to check a classroom's temperature, humidity, or availability without walking over — a problem no existing system solved. Our 5-person capstone team built ClassGuard from scratch to fix it.",
         highlight: [
-          "no way to check a classroom's temperature, humidity, or availability",
-          "Teachers were left guessing whether a room was too hot, already occupied, or ready to use",
-          "No existing system solved this",
+          "no way to check a classroom's temperature, humidity, or availability without walking over",
         ],
       },
       {
         n: "02", h: "Approach",
-        p: "Early wireframes were sketched in Miro from a smartphone before moving into high-fidelity Figma. The result was a set of color-coded status cards (ClassGuard Violet) that make available and occupied rooms readable at a glance, plus a full backend — a Node.js server, real-time socket updates, and an account system with Google SMTP email verification.",
+        p: "I led UX/UI and front-end design, building color-coded status cards (ClassGuard Violet) for at-a-glance room availability, plus the Node.js backend with real-time socket updates and an account system verified through Google SMTP. Room readings came from Arduino Uno boards with DHT11 sensors, transmitted live via ESP32 microcontrollers.",
         highlight: [
-          "color-coded status cards (ClassGuard Violet) that make available and occupied rooms readable at a glance",
-          "a Node.js server, real-time socket updates, and an account system with Google SMTP email verification",
+          "color-coded status cards (ClassGuard Violet) for at-a-glance room availability",
         ],
       },
       {
         n: "03", h: "Result",
-        p: "ClassGuard was selected as a Research Congress finalist and presented directly to judges and panelists, earning positive feedback from the academic panel and from the teachers and staff who tried it. The demo proved the core idea worked: live, at-a-glance visibility into classroom conditions and availability across multiple rooms. It stands today as a fully working demo built for the defense — with real deployment as the clear next step.",
+        p: "ClassGuard was live-demoed across 2 classrooms for our thesis defense and selected as a Research Congress finalist. The working prototype proved the concept — real-time room conditions readable at a glance — with full multi-room deployment as the clear next step.",
         highlight: [
           "selected as a Research Congress finalist",
-          "earning positive feedback from the academic panel and from the teachers and staff who tried it",
-          "live, at-a-glance visibility into classroom conditions and availability across multiple rooms",
         ],
       },
     ],
@@ -73,7 +68,7 @@ const CASES: Project[] = [
     highlightWord: "Inc.",
     subtitle: "A B2B website for Ultrafood Distributors Inc. — prototyped in React and shipped in Laravel as their new, live production site.",
     subtitleHighlight: "A B2B website for Ultrafood Distributors Inc.",
-    summary: "Converted the marketing team's brand guidelines into a validated Figma-to-React/Next.js prototype, then rebuilt the front-end in Laravel, PHP, and Tailwind CSS to match the client's production stack. The result: Ultrafood Distributors Inc.'s new B2B website, now live and fully replacing their previous site.",
+    summary: "Converted the marketing team's brand guidelines into a validated Figma-to-React/Next.js prototype, then rebuilt the front-end in Laravel, PHP, and Tailwind CSS to match the client's production stack. The result: Ultrafood Distributors Inc.'s first dedicated B2B website, now live in production.",
     meta: [
       { label: "Role", value: "UX/UI + Landing Page Dev" },
       { label: "Team", value: "4-person team" },
@@ -84,27 +79,23 @@ const CASES: Project[] = [
     narrative: [
       {
         n: "01", h: "Problem",
-        p: "Ultrafood's previous website was outdated and difficult for the team to maintain — not the kind of B2B presence that could confidently represent the company's brands, Menu Food Solutions and Nordic Foods Philippines, to distributors and buyers. Company leadership and the marketing team brought in a small internship team to design and build a full replacement from the ground up.",
+        p: "Ultrafood Distributors needed its own dedicated B2B website to represent its brands, Menu Food Solutions and Nordic Foods Philippines — while a sister company's site was already up and running, Ultrafood had no web presence of its own. Leadership brought in a 4-person intern team to design and build one from scratch.",
         highlight: [
-          "outdated and difficult for the team to maintain",
-          "confidently represent the company's brands, Menu Food Solutions and Nordic Foods Philippines, to distributors and buyers",
+          "Ultrafood had no web presence of its own",
         ],
       },
       {
         n: "02", h: "Approach",
-        p: "After establishing the Ultrafood Green brand direction, the entire site was wireframed in Figma and ownership split by page — the landing/home page front-end and a Google SMTP-powered 'Connect With Us' contact form were built solo, while two interns covered the brand tabs and a separate developer handled the backend. The design was validated in a React, Next.js, and Tailwind CSS prototype, then rebuilt in Laravel and PHP to match the client's production stack, all onsite over a 400-hour internship.",
+        p: "I owned the landing page front-end and a Google SMTP-powered contact form solo, validating the design in a React, Next.js, and Tailwind CSS prototype before rebuilding it in Laravel and PHP to match the client's production stack — all during a 400-hour onsite internship.",
         highlight: [
-          "the landing/home page front-end and a Google SMTP-powered 'Connect With Us' contact form were built solo",
-          "validated in a React, Next.js, and Tailwind CSS prototype, then rebuilt in Laravel and PHP to match the client's production stack",
+          "validating the design in a React, Next.js, and Tailwind CSS prototype before rebuilding it in Laravel and PHP to match the client's production stack",
         ],
       },
       {
         n: "03", h: "Result",
-        p: "Ultrafood Distributors Inc. shipped and is live in production today at ultrafoodinc.com, fully replacing the company's previous site. Early feedback from the team was positive, including from the internship supervisor overseeing the project.",
+        p: "The site shipped and is live today at ultrafoodinc.com, giving Ultrafood its first dedicated brand presence. The internship supervisor overseeing the project gave positive feedback on the final result.",
         highlight: [
-          "live in production today at ultrafoodinc.com",
-          "fully replacing the company's previous site",
-          "including from the internship supervisor overseeing the project",
+          "live today at ultrafoodinc.com",
         ],
       },
     ],
