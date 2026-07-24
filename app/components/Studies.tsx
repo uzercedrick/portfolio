@@ -29,7 +29,7 @@ const CASES: Project[] = [
       { label: "Role", value: "UX/UI + Front-end Developer" },
       { label: "Team", value: "5-person capstone team" },
       { label: "Recognition", value: "Research Congress Finalist" },
-      { label: "Stack", value: "HTML · Tailwind CSS · Node.js" },
+      { label: "Stack", value: "HTML · CSS · JAVASCRIPT · Node.js" },
     ],
     narrative: [
       {

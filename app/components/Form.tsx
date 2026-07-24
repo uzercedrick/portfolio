@@ -798,7 +798,7 @@ export default function ContactFormPopup({ isOpen, onClose }: ContactFormPopupPr
 
                   <div style={{ display: "flex", gap: "20px", justifyContent: "center", marginBottom: "32px" }}>
                     <a href="mailto:jhoncedrick.fuentes@gmail.com" style={{ color: "#F5F6FC", textDecoration: "none", fontFamily: '"Ubuntu Sans", monospace', textTransform: "uppercase", fontSize: "14px" }}>EMAIL</a>
-                    <a href="https://github.com/uzerce" target="_blank" rel="noopener noreferrer" style={{ color: "#F5F6FC", textDecoration: "none", fontFamily: '"Ubuntu Sans", monospace', textTransform: "uppercase", fontSize: "14px" }}>GITHUB</a>
+                    <a href="https://github.com/uzercedrick/" target="_blank" rel="noopener noreferrer" style={{ color: "#F5F6FC", textDecoration: "none", fontFamily: '"Ubuntu Sans", monospace', textTransform: "uppercase", fontSize: "14px" }}>GITHUB</a>
                     <a href="https://linkedin.com/in/jcnungay" target="_blank" rel="noopener noreferrer" style={{ color: "#F5F6FC", textDecoration: "none", fontFamily: '"Ubuntu Sans", monospace', textTransform: "uppercase", fontSize: "14px" }}>LINKEDIN</a>
                   </div>
 

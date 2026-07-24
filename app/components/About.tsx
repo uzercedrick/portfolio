@@ -44,7 +44,7 @@ const CATEGORIES: Category[] = [
     number: "03",
     label: "TOOLS",
     description:
-      "Figma, Miro, VS Code, GitHub — design, prototyping, flow mapping, and version-controlled development.",
+      "Figma, Miro, VS Code, Git & GitHub, and version-controlled development.",
   },
 ];
 

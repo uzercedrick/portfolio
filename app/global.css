@@ -136,16 +136,6 @@
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 }
 
-/*
-  Section spacing fix — mobile only.
-  Hero currently forces `min-height: 100vh` inline, so on shorter mobile
-  content it centers with a lot of empty space above/below, then the next
-  section starts right after that, doubling the visible gap.
-  This tightens Hero down to its actual content height on small screens
-  (its own container padding already gives balanced top/bottom breathing
-  room) without touching the full-screen desktop hero.
-  `!important` is required here to win over the inline `minHeight` style.
-*/
 @media (max-width: 480px) {
   #hero {
     min-height: auto !important;
