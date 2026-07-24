@@ -73,7 +73,7 @@ export default function Hero({ openContactForm }: HeroProps) {
             font-size: clamp(13px, 3.2vw, 15px) !important;
             line-height: 1.7 !important;
             text-align: center !important;
-            max-width: 320px !important;
+            max-width: 380px !important;
             margin-left: auto !important;
             margin-right: auto !important;
             padding: 0 8px !important;
@@ -207,7 +207,7 @@ export default function Hero({ openContactForm }: HeroProps) {
                   letterSpacing: "0.02em",
                   color: "rgba(245,246,252,0.9)",
                   margin: "0 auto 48px",
-                  maxWidth: "620px",
+                  maxWidth: "760px",
                   textAlign: "center",
                 }}
               >
