@@ -23,20 +23,17 @@ export default function Footer() {
         padding: "clamp(24px, 4vw, 32px) 0",
       }}
     >
-      <div 
-        className="footer-container container" 
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: "clamp(14px, 2.5vw, 20px)",
-          minHeight: "60px",
-          padding: "0 20px",
-        }}
-      >
+      <div className="container" style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: "clamp(14px, 2.5vw, 20px)",
+        minHeight: "60px",
+        padding: "0 20px",
+      }}>
 
-        {/* ✅ COPYRIGHT & CREDITS */}
+        {/* ✅ CENTERED COPYRIGHT & CREDITS */}
         <div style={{
           display: "flex",
           flexDirection: "column",
@@ -67,8 +64,8 @@ export default function Footer() {
           </p>
         </div>
 
-        {/* ✅ SOCIAL ICONS */}
-        <div className="social-icons" style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+        {/* ✅ ICONS DIRECTLY BELOW, CENTERED */}
+        <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
           {SOCIAL.map(({ Icon, href, label }) => (
             <a
               key={label}
@@ -106,27 +103,10 @@ export default function Footer() {
       </div>
 
       <style>{`
-        /* Mobile: keep centered layout (default) */
+        /* Consistent centered layout for ALL screen sizes */
         @media (max-width: 640px) {
           footer > div {
             padding: 20px 24px !important;
-          }
-        }
-
-        /* Desktop/Laptop: icons right, larger size */
-        @media (min-width: 768px) {
-          .footer-container {
-            flex-direction: row !important;
-            justify-content: space-between !important;
-            align-items: center !important;
-          }
-          .social-icons a {
-            width: 40px !important;
-            height: 40px !important;
-          }
-          .social-icons svg {
-            width: 18px !important;
-            height: 18px !important;
           }
         }
       `}</style>
