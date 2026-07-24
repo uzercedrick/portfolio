@@ -75,6 +75,7 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
                 HEAR ALL<br />ABOUT <span style={{ color: "#CEFF1A" }}>IT.</span>
             </motion.h3>
 
+            {/* Desktop resume button — hidden on mobile */}
             <motion.a
               initial={{ opacity: 0, y: 20 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
@@ -82,39 +83,54 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
               href="/resume.pdf"
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-resume"
+              className="btn-resume btn-resume-desktop"
             >
               VIEW RESUME <span style={{ fontSize: "14px" }}>↓</span>
             </motion.a>
 
           </div>
 
-          <div className="contact-items">
-            {CONTACT_ITEMS.map(({ eyebrow, Icon, text, href }, i) => (
-              <motion.div
-                key={eyebrow}
-                initial={{ opacity: 0, x: 28 }}
-                animate={inView ? { opacity: 1, x: 0 } : {}}
-                transition={{ duration: 0.55, delay: 0.14 + i * 0.13, ease: E }}
-                className="contact-item-block"
-              >
-                <p className="fd contact-eyebrow" style={{ color: "#CEFF1A", fontSize: "clamp(14px, 1.3vw, 18px)", letterSpacing: "-0.02em", marginBottom: "8px", textTransform: "uppercase", lineHeight: 1 }}>
-                  {eyebrow}
-                </p>
-                <a
-                  href={href}
-                  target={href.startsWith("http") ? "_blank" : undefined}
-                  rel="noopener noreferrer"
-                  style={{ display: "inline-flex", alignItems: "center", gap: "12px", textDecoration: "none" }}
-                  className="contact-row"
+          <div className="contact-right-col">
+            <div className="contact-items">
+              {CONTACT_ITEMS.map(({ eyebrow, Icon, text, href }, i) => (
+                <motion.div
+                  key={eyebrow}
+                  initial={{ opacity: 0, x: 28 }}
+                  animate={inView ? { opacity: 1, x: 0 } : {}}
+                  transition={{ duration: 0.55, delay: 0.14 + i * 0.13, ease: E }}
+                  className="contact-item-block"
                 >
-                  <span className="c-icon"><Icon size={20} /></span>
-                  <span className={`${mono.className} contact-text`} style={{ color: "#F5F6FC", fontSize: "clamp(14px, 1.5vw, 18px)", letterSpacing: "0.01em", lineHeight: 1.2, whiteSpace: "nowrap" }}>
-                    {text}
-                  </span>
-                </a>
-              </motion.div>
-            ))}
+                  <p className="fd contact-eyebrow" style={{ color: "#CEFF1A", fontSize: "clamp(14px, 1.3vw, 18px)", letterSpacing: "-0.02em", marginBottom: "8px", textTransform: "uppercase", lineHeight: 1 }}>
+                    {eyebrow}
+                  </p>
+                  <a
+                    href={href}
+                    target={href.startsWith("http") ? "_blank" : undefined}
+                    rel="noopener noreferrer"
+                    style={{ display: "inline-flex", alignItems: "center", gap: "12px", textDecoration: "none" }}
+                    className="contact-row"
+                  >
+                    <span className="c-icon"><Icon size={20} /></span>
+                    <span className={`${mono.className} contact-text`} style={{ color: "#F5F6FC", fontSize: "clamp(14px, 1.5vw, 18px)", letterSpacing: "0.01em", lineHeight: 1.2, whiteSpace: "nowrap" }}>
+                      {text}
+                    </span>
+                  </a>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Mobile resume button — appears under contact info, hidden on desktop */}
+            <motion.a
+              initial={{ opacity: 0, y: 20 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.55, delay: 0.55, ease: E }}
+              href="/resume.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-resume btn-resume-mobile"
+            >
+              VIEW RESUME <span style={{ fontSize: "14px" }}>↓</span>
+            </motion.a>
           </div>
         </div>
 
@@ -125,11 +141,11 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
           className="cta-bottom"
         >
           <div className="cta-text-block">
-            {/* Line 1: smaller, fits one line on desktop */}
+            {/* Line 1: fits one line on desktop, also one line on mobile */}
             <h2 className="fd" style={{ color:"#CEFF1A", fontSize:"clamp(24px, 2.8vw, 38px)", lineHeight:1.0, letterSpacing:"0.01em", margin:0 }}>
               LET&apos;S MAKE SOMETHING
             </h2>
-            {/* Line 2: TOGETHER, kept at original size */}
+            {/* Line 2: TOGETHER */}
             <h2 className="fd" style={{ color:"#CEFF1A", fontSize:"clamp(28px,3.5vw,44px)", lineHeight:1.0, letterSpacing:"0.01em", margin:"0.08em 0" }}>
               TOGETHER
             </h2>
@@ -206,11 +222,17 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
           border: none;
           cursor: pointer;
           transition: background 0.25s ease, transform 0.2s ease;
-          margin-bottom: 20px;
         }
         .btn-resume:hover {
           background: #D8FF48;
           transform: translateY(-2px);
+        }
+        .btn-resume-desktop {
+          margin-bottom: 20px;
+        }
+        .btn-resume-mobile {
+          display: none; /* hidden on desktop */
+          margin-top: 8px;
         }
 
         .contact-items {
@@ -227,17 +249,17 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
           display: flex;
           align-items: center;
           justify-content: flex-start;
-          gap: clamp(16px, 3vw, 32px); /* reduced gap to bring button closer */
+          gap: clamp(16px, 3vw, 32px);
           width: 100%;
           margin-top: 16px;
           flex-wrap: wrap;
-          max-width: 1150px; /* match contact-top max-width for alignment */
+          max-width: 1100px;
           margin-left: auto;
           margin-right: auto;
         }
 
         .cta-text-block {
-          flex: 0 1 auto; /* removed flex:1 so text doesn't push button far */
+          flex: 0 1 auto;
           min-width: 280px;
         }
 
@@ -286,22 +308,24 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
         .contact-row:hover .contact-text {
           color: #CEFF1A;
         }
+
+        /* DESKTOP: tighter max-width + auto margins = true center on screen */
         .contact-top {
           display: grid;
-          grid-template-columns: 1fr 1fr; /* balanced columns for better screen centering */
+          grid-template-columns: 1fr 1fr;
           gap: clamp(40px, 5vw, 64px);
           align-items: start;
           margin-bottom: clamp(24px, 3vw, 32px);
-          max-width: 1150px; /* adjusted max-width for tighter centering */
+          max-width: 1100px;
           margin-left: auto;
           margin-right: auto;
         }
 
-        /* Mobile rules — UNCHANGED (you confirmed mobile is perfect) */
+        /* MOBILE */
         @media (max-width: 900px) {
           .contact-top {
             grid-template-columns: 1fr;
-            gap: 36px;
+            gap: 28px;
             margin-bottom: 24px;
             max-width: 100%;
           }
@@ -319,10 +343,20 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
             width: auto !important;
             text-align: center;
           }
-          .btn-resume {
-            margin: 0 auto 20px;
+          /* Hide desktop resume button under heading on mobile */
+          .btn-resume-desktop {
+            display: none;
+          }
+          /* Show mobile resume button under contact info */
+          .btn-resume-mobile {
             display: flex;
+            margin: 0 auto;
             width: fit-content;
+          }
+          .contact-right-col {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
           }
           .contact-items {
             align-items: center;
