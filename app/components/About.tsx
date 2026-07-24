@@ -103,15 +103,15 @@ function SkillCurve({ inView }: { inView: boolean }) {
 
   return (
     <div className="relative w-full">
-      {/* Fixed curve: lower position + flatter arc */}
+      {/* Fixed curve: higher position + flatter arc to sit in middle of the number */}
       <svg
         viewBox="0 0 1200 120"
         preserveAspectRatio="none"
-        className="pointer-events-none absolute inset-x-0 top-[40px] h-[100px] w-full md:top-[50px] md:h-[120px]"
+        className="pointer-events-none absolute inset-x-0 top-[30px] h-[100px] w-full md:top-[35px] md:h-[120px]"
       >
-        {/* New path: control point raised to y=60 → much flatter curve; start/end at y=110 → sits lower */}
+        {/* New path: flatter arc (control point closer to end points) + positioned to cross middle of the number */}
         <path
-          d="M 0 110 Q 600 60 1200 110"
+          d="M 0 95 Q 600 75 1200 95"
           fill="none"
           stroke={ACCENT}
           strokeWidth="1.5"
@@ -126,7 +126,7 @@ function SkillCurve({ inView }: { inView: boolean }) {
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
         onWheel={handleWheel}
-        className="no-scrollbar relative flex w-full snap-x snap-mandatory overflow-x-auto overscroll-y-none scroll-smooth pt-14 md:pt-16 pb-6"
+        className="no-scrollbar relative flex w-full snap-x snap-mandatory overflow-x-auto overscroll-y-none scroll-smooth pt-12 md:pt-14 pb-6"
       >
         {CATEGORIES.map((cat, i) => (
           <motion.div

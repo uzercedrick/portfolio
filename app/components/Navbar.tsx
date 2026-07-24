@@ -126,19 +126,20 @@ export default function Navbar() {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", justifyContent: isMobile ? "space-between" : "flex-start" }}>
-          {/* ✅ Logo links cleanly back to homepage */}
+          {/* ✅ Logo — no background on mobile, stays fixed on left */}
           <div
             style={{
               flexShrink: 0,
-              padding: "12px 24px",
-              borderTopLeftRadius: "10px",
-              borderBottomLeftRadius: "10px",
-              borderTopRightRadius: isMobile ? "10px" : "0",
-              borderBottomRightRadius: isMobile ? "10px" : "0",
-              background: "#14141A",
-              boxShadow: "0 4px 16px rgba(0, 0, 0, 0.15)",
-              marginRight: isMobile ? "0" : "-1px",
-              zIndex: 2,
+              // Desktop styles
+              ...(!isMobile && {
+                padding: "12px 24px",
+                borderTopLeftRadius: "10px",
+                borderBottomLeftRadius: "10px",
+                background: "#14141A",
+                boxShadow: "0 4px 16px rgba(0, 0, 0, 0.15)",
+                marginRight: "-1px",
+                zIndex: 2,
+              }),
             }}
           >
             <Link href="/" style={{ textDecoration: "none" }}>
@@ -313,7 +314,7 @@ export default function Navbar() {
             </motion.div>
           )}
 
-          {/* 🔹 MOBILE: Hamburger button + right-side dropdown — unchanged */}
+          {/* 🔹 MOBILE: Hamburger button — right side, logo stays left */}
           {isMobile && (
             <>
               {/* Hamburger button — right side */}
