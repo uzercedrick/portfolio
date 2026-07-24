@@ -34,7 +34,7 @@ const CASES: Project[] = [
     narrative: [
       {
         n: "01", h: "Problem",
-        p: "City of Malabon University had no way to check a classroom's temperature, humidity, or availability without physically walking over. Teachers were left guessing whether a room was too hot, already occupied, or ready to use — a problem that only got worse once monitoring needed to cover more than one room. No existing system solved this; ClassGuard was built from scratch for a 5-person capstone team.",
+        p: "City of Malabon University had no way to check a classroom's temperature, humidity, or availability without physically walking over. Teachers were left guessing whether a room was too hot, already occupied, or ready to use — a problem that only got worse once monitoring needed to cover more than one room. No existing system solved this; ClassGuard was built from scratch by a 5-person capstone team.",
         highlight: [
           "no way to check a classroom's temperature, humidity, or availability",
           "Teachers were left guessing whether a room was too hot, already occupied, or ready to use",
