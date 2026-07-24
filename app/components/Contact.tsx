@@ -141,8 +141,8 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
           className="cta-bottom"
         >
           <div className="cta-text-block">
-            {/* Line 1: fits one line on desktop, also one line on mobile */}
-            <h2 className="fd" style={{ color:"#CEFF1A", fontSize:"clamp(24px, 2.8vw, 38px)", lineHeight:1.0, letterSpacing:"0.01em", margin:0 }}>
+            {/* Line 1: smaller on mobile to fit one line */}
+            <h2 className="fd cta-line-1" style={{ color:"#CEFF1A", fontSize:"clamp(24px, 2.8vw, 38px)", lineHeight:1.0, letterSpacing:"0.01em", margin:0 }}>
               LET&apos;S MAKE SOMETHING
             </h2>
             {/* Line 2: TOGETHER */}
@@ -253,7 +253,7 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
           width: 100%;
           margin-top: 16px;
           flex-wrap: wrap;
-          max-width: 1100px;
+          max-width: 1050px; /* tighter max-width for better centering */
           margin-left: auto;
           margin-right: auto;
         }
@@ -309,14 +309,14 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
           color: #CEFF1A;
         }
 
-        /* DESKTOP: tighter max-width + auto margins = true center on screen */
+        /* DESKTOP: tighter max-width to match upper sections' centering */
         .contact-top {
           display: grid;
           grid-template-columns: 1fr 1fr;
           gap: clamp(40px, 5vw, 64px);
           align-items: start;
           margin-bottom: clamp(24px, 3vw, 32px);
-          max-width: 1100px;
+          max-width: 1050px; /* reduced from 1100px to pull content right/center */
           margin-left: auto;
           margin-right: auto;
         }
@@ -377,6 +377,11 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
           }
           .cta-text-block {
             text-align: center;
+          }
+          /* Shrink first CTA line to fit in ONE line on mobile */
+          .cta-line-1 {
+            font-size: clamp(18px, 5.2vw, 26px) !important;
+            white-space: nowrap;
           }
         }
         @media (max-width: 768px) {
