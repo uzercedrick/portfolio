@@ -3,15 +3,19 @@ import { useState, useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { MdEmail } from "react-icons/md";
 import { FaLinkedinIn, FaGithub } from "react-icons/fa";
-import { mono } from "../fonts";
+import { mono, zalando } from "../fonts";
 import FormPopup from "./Form";
 
 const E = [0.22, 1, 0.36, 1] as [number, number, number, number];
+const DARK_GRAY = "rgba(245,246,252,0.75)";
+const ICE_WHITE = "#F5F6FC";
+const MUTED_GRAY = "rgba(245,246,252,0.65)";
+const BG = "#14141A";
 
 const CONTACT_ITEMS = [
-  { eyebrow: "MY INBOX IS ALWAYS OPEN",        Icon: MdEmail,      text: "jhoncedrick.fuentes@gmail.com", href: "mailto:jhoncedrick.fuentes@gmail.com" },
-  { eyebrow: "DON'T JUDGE MY COMMIT MESSAGE",  Icon: FaGithub,     text: "github.com/uzerce",              href: "https://github.com/uzercedrick/"            },
-  { eyebrow: "LET'S BE FRIENDS TOO",           Icon: FaLinkedinIn, text: "linkedin.com/in/jcnungay",       href: "https://linkedin.com/in/jcnungay"     },
+  { eyebrow: "EMAIL",    Icon: MdEmail,    text: "jhoncedrick.fuentes@gmail.com", href: "mailto:jhoncedrick.fuentes@gmail.com" },
+  { eyebrow: "GITHUB",   Icon: FaGithub,   text: "github.com/uzercedrick",          href: "https://github.com/uzercedrick/" },
+  { eyebrow: "LINKEDIN", Icon: FaLinkedinIn,text: "linkedin.com/in/jcnungay",         href: "https://linkedin.com/in/jcnungay" },
 ];
 
 type ContactProps = {
@@ -20,24 +24,14 @@ type ContactProps = {
   onCloseForm?: () => void;
 };
 
-/**
- * Reveals the ORIGINAL outlined heading style (single continuous text run,
- * exactly like the untouched .contact-outline/::before CSS) with a smooth
- * left-to-right clip-path wipe, instead of animating individual letters.
- * Per-letter spans don't kern identically to a normal text run, which is
- * what caused the double-outline/misalignment glitch — revealing the real,
- * single text node avoids that entirely and keeps it fully readable.
- */
-function TypedOutlineLine({
+function RevealLine({
   text,
-  className,
   style,
   inView,
   delay = 0,
-  duration = 0.7,
+  duration = 0.65,
 }: {
   text: string;
-  className?: string;
   style?: React.CSSProperties;
   inView: boolean;
   delay?: number;
@@ -45,15 +39,17 @@ function TypedOutlineLine({
 }) {
   return (
     <motion.h3
-      className={className}
-      data-text={text}
-      style={style}
-      initial={{ clipPath: "inset(0 100% 0 -10px)" }}
-      animate={
-        inView
-          ? { clipPath: "inset(0 -10px 0 -10px)" }
-          : { clipPath: "inset(0 100% 0 -10px)" }
-      }
+      style={{
+        fontFamily: zalando.style.fontFamily,
+        fontWeight: 800,
+        textTransform: "uppercase",
+        color: ICE_WHITE,
+        lineHeight: 1.15,
+        margin: 0,
+        ...style,
+      }}
+      initial={{ clipPath: "inset(0 100% 0 0)", opacity: 0.3 }}
+      animate={inView ? { clipPath: "inset(0 0% 0 0)", opacity: 1 } : {}}
       transition={{ duration, ease: E, delay }}
     >
       {text}
@@ -61,56 +57,44 @@ function TypedOutlineLine({
   );
 }
 
-/**
- * Renders a line of text as individually-animated <span> characters.
- * `segments` lets you mix colors and insert line breaks while keeping
- * a single continuous stagger sequence across the whole line. Used for
- * plain filled text (no outline/stroke), where per-letter kerning drift
- * isn't visually noticeable.
- */
-type TypedSegment = { text: string; color?: string } | { break: true };
+type CharSegment = { text: string; color?: string } | { break: true };
 
-function TypedLine({
+function CharReveal({
   segments,
-  className,
   style,
   inView,
-  charDelay = 0.045,
+  charDelay = 0.04,
   startDelay = 0,
 }: {
-  segments: TypedSegment[];
-  className?: string;
+  segments: CharSegment[];
   style?: React.CSSProperties;
   inView: boolean;
   charDelay?: number;
   startDelay?: number;
 }) {
-  let counter = 0;
+  let count = 0;
   return (
-    <motion.h3 className={className} style={style}>
+    <motion.h3
+      style={{
+        fontFamily: zalando.style.fontFamily,
+        fontWeight: 800,
+        textTransform: "uppercase",
+        lineHeight: 1.15,
+        margin: 0,
+        ...style,
+      }}
+    >
       {segments.map((seg, si) => {
         if ("break" in seg) return <br key={`br-${si}`} />;
         return seg.text.split("").map((char, ci) => {
-          const idx = counter++;
+          const idx = count++;
           return (
             <motion.span
               key={`${si}-${ci}`}
               initial={{ opacity: 0, y: 8, filter: "blur(2px)" }}
-              animate={
-                inView
-                  ? { opacity: 1, y: 0, filter: "blur(0px)" }
-                  : { opacity: 0, y: 8, filter: "blur(2px)" }
-              }
-              transition={{
-                duration: 0.4,
-                ease: E,
-                delay: startDelay + idx * charDelay,
-              }}
-              style={{
-                display: "inline-block",
-                whiteSpace: char === " " ? "pre" : "normal",
-                color: seg.color,
-              }}
+              animate={inView ? { opacity: 1, y: 0, filter: "blur(0)" } : {}}
+              transition={{ duration: 0.35, ease: E, delay: startDelay + idx * charDelay }}
+              style={{ display: "inline-block", color: seg.color }}
             >
               {char}
             </motion.span>
@@ -123,394 +107,201 @@ function TypedLine({
 
 export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: ContactProps) {
   const ref = useRef<HTMLElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-60px 0px" });
+  const inView = useInView(ref, { once: true, margin: "-80px 0px -80px 0px" });
   const [internalOpen, setInternalOpen] = useState(false);
 
-  const openForm = () => {
-    if (onOpenForm) onOpenForm();
-    else setInternalOpen(true);
-  };
+  const openForm = () => onOpenForm ? onOpenForm() : setInternalOpen(true);
+  const closeForm = () => onCloseForm ? onCloseForm() : setInternalOpen(false);
 
-  const closeForm = () => {
-    if (onCloseForm) onCloseForm();
-    else setInternalOpen(false);
-  };
-
-  // Forces an actual file download instead of opening the PDF in a new tab
   const downloadResume = async () => {
     try {
-      const response = await fetch("/resume.pdf");
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-
+      const res = await fetch("/resume.pdf");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
       link.download = "Jhon-Cedrick-Nungay-Resume.pdf";
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-
-      window.URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error("Resume download failed:", err);
-    }
+      URL.revokeObjectURL(url);
+    } catch (err) { console.error("Download failed", err); }
   };
 
   const formOpen = isFormOpen !== undefined ? isFormOpen : internalOpen;
 
   return (
-    <section id="contact" ref={ref} style={{ background: "#14141A", padding: "clamp(48px, 6vw, 80px) 0" }}>
-      {/*
-        Project section renders at max-w-7xl (1280px) with px-5 (20px) side padding.
-        This is set wider (1440px) than that, with matching 20px side padding, and
-        centered the same way (margin/mx auto) so both sections align visually.
-      */}
-      <div
-        style={{
-          width: "100%",
-          maxWidth: "1440px",
-          margin: "0 auto",
-          padding: "0 20px",
-          boxSizing: "border-box",
-        }}
-      >
+    <section id="contact" ref={ref} style={{ background: BG, padding: "clamp(70px, 9vw, 110px) 0" }}>
+      <div style={{ maxWidth: "1080px", margin: "0 auto", padding: "0 28px" }}>
 
-        {/*
-          Shared 2-column grid: row 1 = heading + contact info, row 2 = closing CTA + Start.
-          Because both rows sit in the SAME grid (same two columns), column 1 always shares
-          one left edge across both rows, and column 2 shares another — so the closing CTA
-          text lines up with the heading/download button, and Start sits right next to it.
-        */}
+        {/* Section Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.5, ease: E }}
+          style={{ marginBottom: "clamp(50px, 7vw, 70px)" }}
+        >
+          <p style={{ fontFamily: mono.style.fontFamily, fontSize: "11px", letterSpacing: "0.3em", textTransform: "uppercase", color: MUTED_GRAY, margin: 0 }}>
+            CONTACT
+          </p>
+        </motion.div>
+
+        {/* Modern Editorial Grid */}
         <div className="contact-grid">
-
-          <div className="contact-heading">
-            <TypedOutlineLine
-              inView={inView}
-              className="contact-outline"
-              style={{
-                fontSize: "clamp(36px, 4.2vw, 56px)",
-                lineHeight: 0.98,
-                letterSpacing: "-0.015em",
-                margin: 0,
-                width: "max-content",
-                maxWidth: "100%",
-              }}
-              delay={0.15}
-              duration={0.7}
-              text="GOT A VISION?"
-            />
-
-            <TypedOutlineLine
-              inView={inView}
-              className="contact-outline"
-              style={{
-                fontSize: "clamp(36px, 4.2vw, 56px)",
-                lineHeight: 0.98,
-                letterSpacing: "-0.015em",
-                margin: "0.1em 0 0.12em",
-                width: "max-content",
-                maxWidth: "100%",
-              }}
-              delay={0.15 + 0.7 + 0.15}
-              duration={0.7}
-              text="I'D LOVE TO"
-            />
-
-            <TypedLine
-              inView={inView}
-              className="fd"
-              style={{
-                color: "#F5F6FC",
-                fontSize: "clamp(36px, 4.2vw, 56px)",
-                lineHeight: 0.98,
-                letterSpacing: "-0.015em",
-                marginBottom: "28px",
-              }}
-              startDelay={0.15 + 0.7 + 0.15 + 0.7 + 0.15}
+          {/* Left Column — Heading & CTA */}
+          <div className="col-main">
+            <RevealLine inView={inView} delay={0.1} text="GOT A VISION?"
+              style={{ fontSize: "clamp(34px, 4.2vw, 52px)" }} />
+            <RevealLine inView={inView} delay={0.85} text="I'D LOVE TO"
+              style={{ fontSize: "clamp(34px, 4.2vw, 52px)", margin: "0.12em 0" }} />
+            <CharReveal inView={inView} startDelay={1.6}
+              style={{ fontSize: "clamp(34px, 4.2vw, 52px)", marginBottom: "36px" }}
               segments={[
-                { text: "HEAR ALL", color: "#F5F6FC" },
+                { text: "HEAR ALL", color: ICE_WHITE },
                 { break: true },
-                { text: "ABOUT ", color: "#F5F6FC" },
-                { text: "IT.", color: "#CEFF1A" },
-              ]}
-            />
+                { text: "ABOUT ", color: ICE_WHITE },
+                { text: "IT.", color: DARK_GRAY },
+              ]} />
 
             <motion.button
-              type="button"
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 18 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.55, delay: 0.28, ease: E }}
+              transition={{ duration: 0.5, delay: 2.3, ease: E }}
               onClick={downloadResume}
               className={mono.className}
               style={{
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "10px",
-                background: "transparent",
-                color: "#F5F6FC",
-                border: "2px solid #F5F6FC",
-                fontWeight: 700,
-                fontSize: "clamp(14px, 1.6vw, 16px)",
-                letterSpacing: "0.14em",
-                textTransform: "uppercase",
-                padding: "18px 40px",
-                borderRadius: "6px",
-                cursor: "pointer",
-                transition: "all .2s ease",
+                display: "inline-flex", alignItems: "center", gap: "12px",
+                background: "transparent", color: ICE_WHITE,
+                border: `1px solid ${DARK_GRAY}`,
+                fontWeight: 500, fontSize: "clamp(13px, 1.5vw, 15px)",
+                letterSpacing: "0.16em", textTransform: "uppercase",
+                padding: "14px 28px", borderRadius: "2px",
+                cursor: "pointer", transition: "all 0.25s ease",
               }}
-              onMouseEnter={(e) => {
-                const el = e.currentTarget as HTMLButtonElement;
-                el.style.background = "#F5F6FC";
-                el.style.color = "#14141A";
-                el.style.borderColor = "#F5F6FC";
+              onMouseEnter={e => {
+                e.currentTarget.style.background = ICE_WHITE;
+                e.currentTarget.style.color = BG;
+                e.currentTarget.style.borderColor = ICE_WHITE;
               }}
-              onMouseLeave={(e) => {
-                const el = e.currentTarget as HTMLButtonElement;
-                el.style.background = "transparent";
-                el.style.color = "#F5F6FC";
-                el.style.borderColor = "#F5F6FC";
+              onMouseLeave={e => {
+                e.currentTarget.style.background = "transparent";
+                e.currentTarget.style.color = ICE_WHITE;
+                e.currentTarget.style.borderColor = DARK_GRAY;
               }}
             >
-              DOWNLOAD RESUME <span style={{ fontSize: "14px" }}>↓</span>
+              DOWNLOAD RESUME ↓
             </motion.button>
+
+            {/* Bottom CTA + New Text Button Side-by-Side */}
+            <motion.div
+              initial={{ opacity: 0, y: 24 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.6, delay: 0.8, ease: E }}
+              style={{ marginTop: "clamp(40px, 5vw, 60px)", display: "flex", alignItems: "flex-end", gap: "clamp(24px, 3vw, 36px)", flexWrap: "wrap" }}
+            >
+              <div>
+                <h2 style={{ fontFamily: zalando.style.fontFamily, fontWeight: 800, fontSize: "clamp(22px, 3vw, 32px)", color: ICE_WHITE, textTransform: "uppercase", lineHeight: 1.2, margin: 0 }}>
+                  LET&apos;S BUILD
+                </h2>
+                <h2 style={{ fontFamily: zalando.style.fontFamily, fontWeight: 800, fontSize: "clamp(22px, 3vw, 32px)", color: DARK_GRAY, textTransform: "uppercase", lineHeight: 1.2, margin: "0 0 8px" }}>
+                  SOMETHING GREAT
+                </h2>
+                <p style={{ fontFamily: mono.style.fontFamily, fontSize: "13px", color: MUTED_GRAY, margin: 0 }}>
+                  OPEN TO PROJECTS, COLLABORATIONS & OPPORTUNITIES
+                </p>
+              </div>
+
+              {/* ✅ Modern Text Button — replaces circle button */}
+              <motion.button
+                onClick={openForm}
+                initial={{ opacity: 0, x: 12 }}
+                animate={inView ? { opacity: 1, x: 0 } : {}}
+                transition={{ duration: 0.5, delay: 1.0, ease: E }}
+                whileHover={{ x: 4 }}
+                style={{
+                  fontFamily: zalando.style.fontFamily,
+                  fontWeight: 800,
+                  fontSize: "clamp(15px, 2vw, 20px)",
+                  letterSpacing: "0.12em",
+                  textTransform: "uppercase",
+                  color: ICE_WHITE,
+                  background: "transparent",
+                  border: "none",
+                  borderBottom: `1px solid ${DARK_GRAY}`,
+                  padding: "8px 0",
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                  flexShrink: 0,
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.color = DARK_GRAY;
+                  e.currentTarget.style.borderBottomColor = ICE_WHITE;
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.color = ICE_WHITE;
+                  e.currentTarget.style.borderBottomColor = DARK_GRAY;
+                }}
+              >
+                START →
+              </motion.button>
+            </motion.div>
           </div>
 
-          <div className="contact-info-col">
+          {/* Right Column — Contact List Only */}
+          <div className="col-details">
+            <p style={{ fontFamily: mono.style.fontFamily, fontSize: "10px", letterSpacing: "0.25em", textTransform: "uppercase", color: MUTED_GRAY, marginBottom: "18px" }}>
+              WHERE TO FIND ME
+            </p>
+
             {CONTACT_ITEMS.map(({ eyebrow, Icon, text, href }, i) => (
-              <motion.div
+              <motion.a
                 key={eyebrow}
-                initial={{ opacity: 0, x: 28 }}
+                href={href}
+                target={href.startsWith("http") ? "_blank" : undefined}
+                rel="noopener noreferrer"
+                initial={{ opacity: 0, x: 20 }}
                 animate={inView ? { opacity: 1, x: 0 } : {}}
-                transition={{ duration: 0.55, delay: 0.14 + i * 0.13, ease: E }}
+                transition={{ duration: 0.5, delay: 0.2 + i * 0.12, ease: E }}
+                style={{ display: "block", padding: "10px 0", borderBottom: `1px solid ${MUTED_GRAY}`, textDecoration: "none" }}
+                className="contact-link"
               >
-                <p className="fd" style={{ color: "#CEFF1A", fontSize: "clamp(14px, 1.3vw, 18px)", letterSpacing: "-0.02em", marginBottom: "8px", textTransform: "uppercase", lineHeight: 1 }}>
-                  {eyebrow}
-                </p>
-                <a
-                  href={href}
-                  target={href.startsWith("http") ? "_blank" : undefined}
-                  rel="noopener noreferrer"
-                  style={{ display: "inline-flex", alignItems: "center", gap: "12px", textDecoration: "none" }}
-                  className="contact-row"
-                >
-                  <span className="c-icon"><Icon size={20} /></span>
-                  <span className={`${mono.className} contact-text`} style={{ color: "#F5F6FC", fontSize: "clamp(14px, 1.5vw, 18px)", letterSpacing: "0.01em", lineHeight: 1.2, whiteSpace: "nowrap" }}>
-                    {text}
-                  </span>
-                </a>
-              </motion.div>
+                <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+                  <Icon size={18} style={{ color: DARK_GRAY, flexShrink: 0 }} />
+                  <div>
+                    <p style={{ fontFamily: mono.style.fontFamily, fontSize: "10px", letterSpacing: "0.2em", textTransform: "uppercase", color: MUTED_GRAY, margin: 0 }}>
+                      {eyebrow}
+                    </p>
+                    <p style={{ fontFamily: mono.style.fontFamily, fontSize: "13px", color: ICE_WHITE, margin: "2px 0 0" }}>
+                      {text}
+                    </p>
+                  </div>
+                </div>
+              </motion.a>
             ))}
           </div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 44 }}
-            animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.7, delay: 0.55, ease: E }}
-            className="contact-cta-text"
-          >
-            {/* Desktop wording: fits "SOMETHING TOGETHER" on one line */}
-            <h2 className="fd cta-desktop" style={{ color:"#CEFF1A", fontSize:"clamp(28px,3.5vw,44px)", lineHeight:1.0, letterSpacing:"0.01em", margin:0 }}>
-              LET&apos;S MAKE
-            </h2>
-            <h2 className="fd cta-desktop" style={{ color:"#CEFF1A", fontSize:"clamp(28px,3.5vw,44px)", lineHeight:1.0, letterSpacing:"0.01em", margin:0 }}>
-              SOMETHING TOGETHER
-            </h2>
-
-            {/* Mobile wording: regrouped + smaller so it doesn't wrap into 3 lines */}
-            <h2 className="fd cta-mobile" style={{ color:"#CEFF1A", fontSize:"clamp(15px,5vw,21px)", lineHeight:1.1, letterSpacing:"0.01em", margin:0, whiteSpace:"nowrap" }}>
-              LET&apos;S MAKE SOMETHING
-            </h2>
-            <h2 className="fd cta-mobile" style={{ color:"#CEFF1A", fontSize:"clamp(15px,5vw,21px)", lineHeight:1.1, letterSpacing:"0.01em", margin:0, whiteSpace:"nowrap" }}>
-              TOGETHER
-            </h2>
-
-            <p className="fd" style={{ color:"#F5F6FC", fontSize:"clamp(16px,2vw,24px)", lineHeight:1.1, letterSpacing:"0.01em", margin:"8px 0 0 0" }}>
-              PROMISE I DON&apos;T <span style={{ color:"#CEFF1A" }}>BITE</span>
-            </p>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 44 }}
-            animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.7, delay: 0.6, ease: E }}
-            className="contact-start-wrap"
-          >
-            <motion.button
-              onClick={openForm}
-              className="btn-start"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              style={{ textTransform:"uppercase", flexShrink:0, fontSize:11 }}
-            >
-              START
-            </motion.button>
-          </motion.div>
-
         </div>
-
       </div>
 
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Ubuntu+Sans+Mono:wght@400;500;600;700&display=swap');
-
-        .fd {
-          font-family: var(--font-zalando-expanded), "Arial Black", Impact, system-ui, sans-serif;
-          font-weight: 900;
-          text-transform: uppercase;
-        }
-
-        .contact-outline {
-          position: relative;
-          display: block;
-          width: max-content;
-          max-width: 100%;
-          color: #14141A;
-          -webkit-text-fill-color: #14141A;
-          font-family: var(--font-zalando-expanded), "Arial Black", Impact, system-ui, sans-serif;
-          font-weight: 900;
-          text-transform: uppercase;
-          text-rendering: geometricPrecision;
-          z-index: 0;
-        }
-        .contact-outline::before {
-          content: attr(data-text);
-          position: absolute;
-          inset: 0;
-          z-index: -1;
-          color: transparent;
-          -webkit-text-stroke: clamp(3px, 0.3vw, 5px) #CEFF1A;
-          text-stroke: clamp(3px, 0.3vw, 5px) #CEFF1A;
-          pointer-events: none;
-        }
-
-        .contact-heading {
-          max-width: 720px;
-          display: flex;
-          flex-direction: column;
-          align-items: flex-start;
-          gap: 20px;
-        }
-
-        .contact-info-col {
-          display: flex;
-          flex-direction: column;
-          gap: clamp(28px, 3vw, 40px);
-        }
-
-        .contact-cta-text {
-          display: flex;
-          flex-direction: column;
-        }
-
-        .contact-start-wrap {
-          display: flex;
-          align-items: center;
-          justify-content: flex-start;
-        }
-
-        .btn-start {
-          width: clamp(90px, 9vw, 108px);
-          height: clamp(90px, 9vw, 108px);
-          border-radius: 50%;
-          background: #CEFF1A;
-          color: #14141A;
-          font-family: var(--font-zalando-expanded), "Arial Black", Impact, system-ui, sans-serif;
-          font-weight: 800;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border: none;
-          cursor: pointer;
-          transition: all 0.25s ease;
-          flex-shrink: 0;
-          box-shadow: 0 0 15px rgba(206, 255, 26, 0.2);
-          min-width: 70px;
-          min-height: 70px;
-        }
-        .btn-start:hover {
-          background: #D8FF48;
-          box-shadow: 0 0 25px rgba(206, 255, 26, 0.4);
-        }
-        .c-icon {
-          width: clamp(28px, 2.5vw, 36px);
-          height: clamp(28px, 2.5vw, 36px);
-          border-radius: 4px;
-          background: #F5F6FC;
-          color: #14141A;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-shrink: 0;
-          transition: background 0.2s ease, color 0.2s ease;
-        }
-        a:hover .c-icon {
-          background: #CEFF1A;
-          color: #14141A;
-        }
-        .contact-text {
-          transition: color 0.2s ease;
-        }
-        .contact-row:hover .contact-text {
-          color: #CEFF1A;
-        }
-
         .contact-grid {
           display: grid;
-          grid-template-columns: max-content max-content;
-          justify-content: center;
-          column-gap: clamp(16px, 2.5vw, 28px);
-          row-gap: clamp(32px, 4vw, 48px);
+          grid-template-columns: 1.4fr 1fr;
+          column-gap: clamp(50px, 7vw, 90px);
+          align-items: start;
         }
 
-        .cta-desktop { display: block; }
-        .cta-mobile { display: none; }
+        .col-main { grid-column: 1 / 2; }
+        .col-details { grid-column: 2 / 3; }
+
+        .contact-link:hover { border-bottom-color: ${ICE_WHITE}; }
+        .contact-link:hover p:last-child { color: ${DARK_GRAY}; }
 
         @media (max-width: 900px) {
           .contact-grid {
             grid-template-columns: 1fr;
-            justify-items: center;
-            row-gap: 32px;
+            row-gap: 48px;
           }
-          .contact-heading {
-            align-items: center;
-            text-align: center;
-            max-width: 100%;
-          }
-          .contact-cta-text {
-            align-items: center;
-            text-align: center;
-          }
-          .contact-start-wrap {
-            justify-content: center;
-          }
-          .contact-info-col {
-            align-items: center;
-            text-align: center;
-          }
-          #contact {
-            padding: 48px 0 !important;
-          }
-          .cta-desktop { display: none; }
-          .cta-mobile { display: block; }
-        }
-        @media (max-width: 768px) {
-          .btn-start {
-            width: 80px;
-            height: 80px;
-            font-size: 10px;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .btn-start {
-            width: 82px;
-            height: 82px;
-            font-size: 11px;
-          }
-          .contact-row {
-            gap: 10px !important;
-          }
+          .col-main, .col-details { grid-column: 1; }
         }
       `}</style>
 

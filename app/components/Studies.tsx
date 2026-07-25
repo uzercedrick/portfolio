@@ -5,6 +5,12 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import ThunderScrollButton from "./thunder";
 import { ArrowUpRight, ArrowLeft, ArrowRight } from "lucide-react";
+import { zalando, mono } from "../fonts";
+
+const DARK_GRAY = "rgba(245,246,252,0.75)";
+const ICE_WHITE = "#F5F6FC";
+const MUTED_GRAY = "rgba(245,246,252,0.65)";
+const BG = "#14141A";
 
 interface MetaItem { label: string; value: string; }
 interface NarrativeItem { n: string; h: string; p: string; highlight?: string[]; }
@@ -19,42 +25,42 @@ interface Project {
 
 const CASES: Project[] = [
   {
-    index: "01", id: "classguard", tag: "IoT dashboard · Real-time monitoring",
+    index: "01", id: "classguard", tag: "IoT Dashboard · Real-Time Monitoring",
     title: "ClassGuard Monitoring System",
     highlightWord: "System",
     subtitle: "A real-time IoT dashboard tracking classroom temperature, humidity, and availability — built from scratch for City of Malabon University and recognized as a Research Congress finalist.",
     subtitleHighlight: "A real-time IoT dashboard",
     summary: "Led UX/UI design, front-end, and backend setup by a 5-person capstone team — designing a live monitoring dashboard for classroom conditions and availability, and building the Node.js backend and account system behind it. Selected as a Research Congress finalist.",
     meta: [
-      { label: "Role", value: "UX/UI + Front-end Developer" },
-      { label: "Team", value: "5-person capstone team" },
-      { label: "Recognition", value: "Research Congress Finalist" },
-      { label: "Stack", value: "HTML · CSS · JAVASCRIPT · Node.js" },
+      { label: "ROLE", value: "UX/UI + Front-end Developer" },
+      { label: "TEAM", value: "5-Person Capstone Team" },
+      { label: "RECOGNITION", value: "Research Congress Finalist" },
+      { label: "STACK", value: "HTML · CSS · JAVASCRIPT · Node.js" },
     ],
     narrative: [
       {
-        n: "01", h: "Problem",
+        n: "01", h: "PROBLEM",
         p: "Teachers at City of Malabon University had no way to check a classroom's temperature, humidity, or availability without walking over — a problem no existing system solved. Our 5-person capstone team built ClassGuard from scratch to fix it.",
         highlight: [
           "no way to check a classroom's temperature, humidity, or availability without walking over",
         ],
       },
       {
-        n: "02", h: "Approach",
+        n: "02", h: "APPROACH",
         p: "I led UX/UI and front-end design, building color-coded status cards (ClassGuard Blue and Gold) for at-a-glance room availability, plus the Node.js backend with real-time socket updates and an account system verified through Google SMTP. Room readings came from Arduino Uno boards with DHT11 sensors, transmitted live via ESP32 microcontrollers.",
         highlight: [
           "color-coded status cards (ClassGuard Blue and Gold) for at-a-glance room availability",
         ],
       },
       {
-        n: "03", h: "Result",
+        n: "03", h: "RESULT",
         p: "ClassGuard was live-demoed across 2 classrooms for our thesis defense and selected as a Research Congress finalist. The working prototype proved the concept — real-time room conditions readable at a glance — with full multi-room deployment as the clear next step.",
         highlight: [
           "selected as a Research Congress finalist",
         ],
       },
     ],
-    brand: { a: "#E7DEFF", b: "#7C5CFF", c: "#2B1F4D" },
+    brand: { a: ICE_WHITE, b: DARK_GRAY, c: "#2B1F4D" },
     accentName: "ClassGuard Blue & Gold", live: "#",
     images: [
       { src: "/login.png", alt: "ClassGuard login and account verification screen", caption: "Login" },
@@ -63,44 +69,44 @@ const CASES: Project[] = [
     ],
   },
   {
-    index: "02", id: "ultrafood", tag: "FMCG client · B2B website",
+    index: "02", id: "ultrafood", tag: "FMCG Client · B2B Website",
     title: "Ultrafood Distributors Inc.",
     highlightWord: "Inc.",
     subtitle: "A B2B website for Ultrafood Distributors Inc. — prototyped in React and shipped in Laravel as their new, live production site.",
     subtitleHighlight: "A B2B website for Ultrafood Distributors Inc.",
     summary: "Converted the marketing team's brand guidelines into a validated Figma-to-React/Next.js prototype, then rebuilt the front-end in Laravel, PHP, and Tailwind CSS to match the client's production stack. The result: Ultrafood Distributors Inc.'s first dedicated B2B website, now live in production.",
     meta: [
-      { label: "Role", value: "UX/UI + Landing Page Dev" },
-      { label: "Team", value: "4-person team" },
-      { label: "Timeline", value: "6 wks · 400-hr onsite OJT" },
-      { label: "Stack", value: "Figma · Laravel · Tailwind CSS · PHP" },
-      { label: "Status", value: "Deployed Live Website" },
+      { label: "ROLE", value: "UX/UI + Landing Page Dev" },
+      { label: "TEAM", value: "4-Person Team" },
+      { label: "TIMELINE", value: "6 WKS · 400-HR ONSITE OJT" },
+      { label: "STACK", value: "Figma · Laravel · Tailwind CSS · PHP" },
+      { label: "STATUS", value: "Deployed Live Website" },
     ],
     narrative: [
       {
-        n: "01", h: "Problem",
+        n: "01", h: "PROBLEM",
         p: "Ultrafood Distributors needed its own dedicated B2B website to represent its brands, Menu Food Solutions and Nordic Foods Philippines — while a sister company's site was already up and running, Ultrafood had no web presence of its own. Leadership brought in a 4-person intern team to design and build one from scratch.",
         highlight: [
           "Ultrafood had no web presence of its own",
         ],
       },
       {
-        n: "02", h: "Approach",
+        n: "02", h: "APPROACH",
         p: "I owned the landing page front-end and a Google SMTP-powered contact form solo, validating the design in a React, Next.js, and Tailwind CSS prototype before rebuilding it in Laravel and PHP to match the client's production stack — all during a 400-hour onsite internship.",
         highlight: [
           "validating the design in a React, Next.js, and Tailwind CSS prototype before rebuilding it in Laravel and PHP to match the client's production stack",
         ],
       },
       {
-        n: "03", h: "Result",
+        n: "03", h: "RESULT",
         p: "The site shipped and is live today at ultrafoodinc.com, giving Ultrafood its first dedicated brand presence. The internship supervisor overseeing the project gave positive feedback on the final result.",
         highlight: [
           "live today at ultrafoodinc.com",
         ],
       },
     ],
-    brand: { a: "#EAF7C9", b: "#4C7A2E", c: "#1F3A16" },
-    accentName: "Ultrafood green", live: "https://ultrafoodinc.com/",
+    brand: { a: ICE_WHITE, b: DARK_GRAY, c: "#1F3A16" },
+    accentName: "Ultrafood Green", live: "https://ultrafoodinc.com/",
     images: [
       { src: "/ultrafood.png", alt: "Ultrafood Distributors Inc. live website" },
     ],
@@ -114,7 +120,7 @@ function renderTitle(title: string, highlight?: string) {
   return (
     <>
       {title.slice(0, idx)}
-      <span className="text-volt">{title.slice(idx, idx + highlight.length)}</span>
+      <span style={{ color: DARK_GRAY }}>{title.slice(idx, idx + highlight.length)}</span>
       {title.slice(idx + highlight.length)}
     </>
   );
@@ -129,7 +135,7 @@ function renderHighlighted(text: string, highlight?: string | string[]) {
     const idx = text.indexOf(h, cursor);
     if (idx === -1) return;
     if (idx > cursor) parts.push(text.slice(cursor, idx));
-    parts.push(<span key={i} className="text-marker">{h}</span>);
+    parts.push(<span key={i} style={{ color: ICE_WHITE, fontWeight: 600 }}>{h}</span>);
     cursor = idx + h.length;
   });
   parts.push(text.slice(cursor));
@@ -143,7 +149,7 @@ function useReveal(): [React.RefObject<HTMLDivElement | null>, boolean] {
     const el = ref.current; if (!el) return;
     const obs = new IntersectionObserver(
       (entries) => entries.forEach((e) => { if (e.isIntersecting) { setVisible(true); obs.unobserve(el); } }),
-      { threshold: 0.15 }
+      { threshold: 0.1 }
     );
     obs.observe(el);
     return () => obs.disconnect();
@@ -159,39 +165,33 @@ function Reveal({ children, className = "" }: { children: React.ReactNode; class
 function MetaChip({ label, value }: MetaItem) {
   return (
     <div>
-      <div className="font-mono text-volt text-[10px] tracking-[0.18em] uppercase mb-1.5">{label}</div>
-      <div className="font-display text-bone text-[15px] leading-snug">{value}</div>
+      <div className={`${mono.className} text-[10px] tracking-[0.2em] uppercase mb-1.5`} style={{ color: DARK_GRAY }}>{label}</div>
+      <div className={`${zalando.className} text-[14px] font-medium`} style={{ color: ICE_WHITE }}>{value}</div>
     </div>
   );
 }
 
-function MockImageFill({ src, alt, brand, fill = true }: { src: string; alt: string; brand: Brand; fill?: boolean }) {
+function MockImageFill({ src, alt, fill = true }: { src: string; alt: string; fill?: boolean }) {
   const [errored, setErrored] = useState(false);
 
   if (errored) {
     return (
-      <div
-        className={`w-full flex flex-col items-center justify-center gap-2 px-4 text-center border-2 border-dashed rounded-lg m-2 ${fill ? "h-full" : "min-h-[180px]"}`}
-        style={{ borderColor: "rgba(255,255,255,0.18)" }}
-      >
-        <span className="font-mono text-[10px] tracking-[0.16em] uppercase" style={{ color: brand.a, opacity: 0.6 }}>
-          Add image
+      <div className="w-full flex flex-col items-center justify-center gap-2 p-8 text-center border border-dashed rounded-lg" style={{ borderColor: MUTED_GRAY }}>
+        <span className={`${mono.className} text-[11px] tracking-[0.18em] uppercase`} style={{ color: DARK_GRAY, opacity: 0.6 }}>
+          Image Unavailable
         </span>
-        <span className="font-mono text-[10px] break-all" style={{ color: brand.a, opacity: 0.4 }}>
-          public{src}
+        <span className={`${mono.className} text-[10px] break-all`} style={{ color: MUTED_GRAY }}>
+          {src}
         </span>
       </div>
     );
   }
 
-  const fillClass = "w-full h-full object-contain object-top transition-transform duration-1500 ease-out group-hover:scale-[1.02]";
-  const looseClass = "w-full h-auto block transition-transform duration-1500 ease-out group-hover:scale-[1.02]";
-
   return (
     <img
       src={src}
       alt={alt}
-      className={fill ? fillClass : looseClass}
+      className={fill ? "w-full h-full object-contain object-center transition-transform duration-700 ease-out" : "w-full h-auto block transition-transform duration-700 ease-out"}
       loading="eager"
       onError={() => setErrored(true)}
     />
@@ -199,35 +199,35 @@ function MockImageFill({ src, alt, brand, fill = true }: { src: string; alt: str
 }
 
 function BrowserFrame({
-  brand, label, showLive, height, href, children,
+  label, showLive, height, href, children,
 }: {
-  brand: Brand; label: string; showLive?: boolean; height: string; href?: string; children: React.ReactNode;
+  label: string; showLive?: boolean; height: string; href?: string; children: React.ReactNode;
 }) {
   const inner = (
     <>
-      <div className="flex items-center gap-2 px-4 py-3 border-hair border-b" style={{ background: "rgba(0,0,0,0.18)" }}>
+      <div className="flex items-center gap-2 px-4 py-3 border-b" style={{ borderColor: MUTED_GRAY, background: "rgba(245,246,252,0.02)" }}>
         <span className="w-2.5 h-2.5 rounded-full" style={{ background: "#FF5F57" }} />
         <span className="w-2.5 h-2.5 rounded-full" style={{ background: "#FEBC2E" }} />
         <span className="w-2.5 h-2.5 rounded-full" style={{ background: "#28C840" }} />
-        <span className="font-mono text-[11px] ml-3 truncate" style={{ color: brand.a }}>{label}</span>
+        <span className={`${mono.className} text-[11px] ml-3 truncate`} style={{ color: DARK_GRAY }}>{label}</span>
         {showLive && (
-          <span className="ml-auto flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.14em] shrink-0" style={{ color: brand.a }}>
+          <span className="ml-auto flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: DARK_GRAY }}>
             <span className="relative flex w-1.5 h-1.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60" style={{ background: brand.b }} />
-              <span className="relative inline-flex rounded-full w-1.5 h-1.5" style={{ background: brand.b }} />
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-50" style={{ background: ICE_WHITE }} />
+              <span className="relative inline-flex rounded-full w-1.5 h-1.5" style={{ background: ICE_WHITE }} />
             </span>
             LIVE
           </span>
         )}
       </div>
-      <div className="relative w-full bg-black/10" style={{ height }}>
+      <div className="relative w-full" style={{ height }}>
         {children}
       </div>
     </>
   );
 
-  const frameClass = "rounded-2xl overflow-hidden border-hair border";
-  const frameStyle = { background: brand.c };
+  const frameClass = "rounded-xl overflow-hidden border";
+  const frameStyle = { borderColor: MUTED_GRAY, background: "rgba(245,246,252,0.02)" };
 
   if (href) {
     return (
@@ -240,27 +240,25 @@ function BrowserFrame({
 }
 
 function MockPanel({ project }: { project: Project }) {
-  const { brand } = project;
   const hasLiveUrl = Boolean(project.live) && project.live !== "#";
   const images = project.images ?? [];
 
   if (images.length > 1) {
     return (
-      <div className="flex flex-col sm:flex-row items-stretch gap-3 sm:gap-2">
+      <div className="flex flex-col sm:flex-row items-stretch gap-4">
         {images.map((img, i) => (
           <React.Fragment key={img.src}>
-            <div className="flex-1 min-w-0 flex flex-col justify-center">
+            <div className="flex-1 min-w-0">
               <BrowserFrame
-                brand={brand}
                 label={img.caption ?? `${project.id}-0${i + 1}`}
                 height="auto"
               >
-                <MockImageFill src={img.src} alt={img.alt} brand={brand} fill={false} />
+                <MockImageFill src={img.src} alt={img.alt} fill={false} />
               </BrowserFrame>
             </div>
             {i < images.length - 1 && (
               <div className="flex items-center justify-center shrink-0 h-6 sm:h-auto">
-                <ArrowRight size={20} className="rotate-90 sm:rotate-0" style={{ color: brand.b }} />
+                <ArrowRight size={18} style={{ color: MUTED_GRAY }} />
               </div>
             )}
           </React.Fragment>
@@ -272,15 +270,15 @@ function MockPanel({ project }: { project: Project }) {
   if (images.length === 1) {
     const img = images[0];
     return (
-      <div className="sm:max-w-xl md:max-w-3xl lg:max-w-4xl sm:mx-auto">
+      /* ✅ Adjusted: Wider cap, balanced — not too narrow, not too huge */
+      <div className="max-w-4xl mx-auto">
         <BrowserFrame
-          brand={brand}
           label={hasLiveUrl ? project.live.replace(/^https?:\/\//, "") : `${project.id}.app`}
           showLive={hasLiveUrl}
           height="auto"
           href={hasLiveUrl ? project.live : undefined}
         >
-          <MockImageFill src={img.src} alt={img.alt} brand={brand} fill={false} />
+          <MockImageFill src={img.src} alt={img.alt} fill={false} />
         </BrowserFrame>
       </div>
     );
@@ -288,18 +286,17 @@ function MockPanel({ project }: { project: Project }) {
 
   return (
     <BrowserFrame
-      brand={brand}
       label={hasLiveUrl ? project.live.replace(/^https?:\/\//, "") : `${project.id}.app`}
       showLive={hasLiveUrl}
-      height="auto"
+      height="320px"
     >
-      <div className="p-6 sm:p-10 min-h-[280px] flex flex-col justify-center gap-6">
+      <div className="p-8 flex flex-col justify-center gap-6">
         <div>
-          <div className="font-mono text-[11px] tracking-[0.2em] uppercase mb-3" style={{ color: brand.a, opacity: 0.7 }}>{project.accentName}</div>
-          <div className="font-display font-bold text-2xl sm:text-3xl uppercase leading-[1.05]" style={{ color: brand.a }}>{project.title}</div>
+          <div className={`${mono.className} text-[11px] tracking-[0.2em] uppercase mb-3`} style={{ color: DARK_GRAY, opacity: 0.7 }}>{project.accentName}</div>
+          <div className={`${zalando.className} font-bold text-2xl uppercase`} style={{ color: ICE_WHITE }}>{project.title}</div>
         </div>
         <div className="grid grid-cols-3 gap-3">
-          {[0, 1, 2].map((i) => <div key={i} className="h-16 rounded-lg" style={{ background: "rgba(255,255,255,0.08)" }} />)}
+          {[0, 1, 2].map((i) => <div key={i} className="h-16 rounded-lg" style={{ background: MUTED_GRAY }} />)}
         </div>
       </div>
     </BrowserFrame>
@@ -310,27 +307,29 @@ function CaseStudyDetail({ project, onSwitch, nextId }: { project: Project; onSw
   return (
     <div>
       <div className="flex items-center justify-between flex-wrap gap-4 mb-12">
-        <Link href="/" className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.18em] text-muted hover:text-volt transition-colors">
-          <ArrowLeft size={14} /> Back to home
+        <Link href="/projects" className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.18em] transition-colors" style={{ color: MUTED_GRAY }} onMouseEnter={e => e.currentTarget.style.color = ICE_WHITE} onMouseLeave={e => e.currentTarget.style.color = MUTED_GRAY}>
+          <ArrowLeft size={14} /> BACK TO PROJECTS
         </Link>
-        <button type="button" onClick={() => onSwitch(nextId)} aria-label="Next case study" className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.18em] text-muted hover:text-volt transition-colors mr-3 sm:mr-0 p-2 -my-2">
-          <span className="hidden sm:inline">Next case study</span>
-          <ArrowUpRight size={20} className="sm:hidden" />
+        <button type="button" onClick={() => onSwitch(nextId)} aria-label="Next case study" className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.18em] transition-colors" style={{ color: MUTED_GRAY }} onMouseEnter={e => e.currentTarget.style.color = ICE_WHITE} onMouseLeave={e => e.currentTarget.style.color = MUTED_GRAY}>
+          <span className="hidden sm:inline">NEXT CASE STUDY</span>
+          <ArrowUpRight size={18} className="sm:hidden" />
           <ArrowUpRight size={14} className="hidden sm:block" />
         </button>
       </div>
-      <Reveal><div className="font-mono text-volt text-[11px] tracking-[0.22em] uppercase mb-4">Case study — {project.index} / 02</div></Reveal>
-      <Reveal><h3 className="font-display font-black uppercase leading-[0.95] text-[clamp(2rem,6vw,4rem)] mb-4">{renderTitle(project.title, project.highlightWord)}</h3></Reveal>
-      <Reveal><p className="text-muted font-display text-base sm:text-lg max-w-xl mb-10">{renderHighlighted(project.subtitle, project.subtitleHighlight)}</p></Reveal>
-      <Reveal className="mb-10"><div className="grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-4">{project.meta.map((m) => <MetaChip key={m.label} {...m} />)}</div></Reveal>
-      <Reveal className="mb-14"><MockPanel project={project} /></Reveal>
-      <Reveal><p className="font-display text-bone/90 max-w-2xl mb-14 leading-relaxed">{project.summary}</p></Reveal>
-      <div className="grid sm:grid-cols-3 gap-8 mb-14">
+
+      <Reveal><p className={`${mono.className} text-[11px] tracking-[0.22em] uppercase mb-4`} style={{ color: DARK_GRAY }}>CASE STUDY — {project.index} / 02</p></Reveal>
+      <Reveal><h3 className={`${zalando.className} font-black uppercase leading-[0.95] text-[clamp(2.2rem,6vw,4.2rem)] mb-4`} style={{ color: ICE_WHITE }}>{renderTitle(project.title, project.highlightWord)}</h3></Reveal>
+      <Reveal><p className={`${mono.className} text-base sm:text-lg max-w-2xl mb-10 leading-relaxed`} style={{ color: MUTED_GRAY }}>{renderHighlighted(project.subtitle, project.subtitleHighlight)}</p></Reveal>
+      <Reveal className="mb-12"><div className="grid grid-cols-2 sm:grid-cols-4 gap-x-8 gap-y-4">{project.meta.map((m) => <MetaChip key={m.label} {...m} />)}</div></Reveal>
+      <Reveal className="mb-16"><MockPanel project={project} /></Reveal>
+      <Reveal><p className={`${mono.className} max-w-2xl mb-16 leading-relaxed`} style={{ color: MUTED_GRAY }}>{project.summary}</p></Reveal>
+
+      <div className="grid sm:grid-cols-3 gap-10">
         {project.narrative.map((n) => (
           <Reveal key={n.n}>
-            <div className="font-mono text-volt text-xs mb-3">{n.n}</div>
-            <div className="font-display font-bold uppercase tracking-wide mb-2 text-sm">{n.h}</div>
-            <p className="text-muted text-sm leading-relaxed">{renderHighlighted(n.p, n.highlight)}</p>
+            <div className={`${mono.className} text-[11px] tracking-[0.2em] uppercase mb-3`} style={{ color: DARK_GRAY }}>{n.n}</div>
+            <div className={`${zalando.className} font-bold uppercase mb-2 text-sm`} style={{ color: ICE_WHITE }}>{n.h}</div>
+            <p className={`${mono.className} text-sm leading-relaxed`} style={{ color: MUTED_GRAY }}>{renderHighlighted(n.p, n.highlight)}</p>
           </Reveal>
         ))}
       </div>
@@ -348,32 +347,18 @@ export default function CaseStudyLanding() {
   const nextProject = CASES.find((c) => c.id !== openId) ?? CASES[0];
 
   return (
-    <div className="bg-ink text-bone w-full flex-1 flex flex-col">
+    <div style={{ background: BG, color: ICE_WHITE, width: "100%", minHeight: "100vh" }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Zalando+Sans+Expanded:wght@400;500;600;700;800;900&family=Ubuntu+Sans+Mono:wght@400;500;600;700&display=swap');
-        :root { --ink: #14141A; --volt: #CEFF1A; --bone: #F5F6FC; }
-        .bg-ink { background-color: var(--ink); }
-        .text-bone { color: var(--bone); }
-        .text-volt { color: var(--volt); }
-        .text-muted { color: rgba(245,246,252,0.55); }
-        .text-bone\\/90 { color: rgba(245,246,252,0.9); }
-        .border-hair { border-color: rgba(245,246,252,0.12); }
-        .bg-panel { background-color: rgba(245,246,252,0.045); }
-        .font-display { font-family: 'Zalando Sans Expanded', sans-serif; letter-spacing: 0.01em; }
-        .font-mono { font-family: 'Ubuntu Sans Mono', monospace; }
-        .text-marker { background: var(--volt); color: var(--ink); padding: 0 4px; border-radius: 2px; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
-        .reveal { opacity: 0; transform: translateY(14px); transition: opacity 0.6s ease, transform 0.6s ease; }
+        .reveal { opacity: 0; transform: translateY(12px); transition: opacity 0.6s cubic-bezier(0.22,1,0.36,1), transform 0.6s cubic-bezier(0.22,1,0.36,1); }
         .reveal-in { opacity: 1; transform: translateY(0); }
-        @keyframes fadeSlide { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .view-enter { animation: fadeSlide 0.35s ease both; }
         @media (prefers-reduced-motion: reduce) {
-          .reveal, .view-enter { transition: none; animation: none; opacity: 1; transform: none; }
+          .reveal { transition: none; opacity: 1; transform: none; }
           .animate-ping { animation: none; }
         }
-        ::selection { background: var(--volt); color: var(--ink); }
-        a:focus-visible, button:focus-visible { outline: 2px solid var(--volt); outline-offset: 2px; }
+        ::selection { background: ${DARK_GRAY}; color: ${BG}; }
+        a:focus-visible, button:focus-visible { outline: 2px solid ${DARK_GRAY}; outline-offset: 2px; }
       `}</style>
-      <div className="max-w-6xl mx-auto px-6 sm:px-10 pt-28 sm:pt-36 pb-16 sm:pb-20 w-full flex-1 flex flex-col">
+      <div className="max-w-6xl mx-auto px-6 sm:px-10 pt-28 sm:pt-36 pb-16 sm:pb-20">
         <div key={openId} className="view-enter">
           <CaseStudyDetail project={openProject} onSwitch={setOpenId} nextId={nextProject.id} />
         </div>

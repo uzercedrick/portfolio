@@ -4,7 +4,15 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 
-// ✅ Clear separation: page path + anchor ID
+// ✅ Your exact font stack
+const DISPLAY_FONT = "'Zalando Sans Expanded', sans-serif";
+const MONO_FONT = "'Ubuntu Sans Mono', monospace";
+
+const DARK_GRAY = "rgba(245,246,252,0.75)";
+const ICE_WHITE = "#F5F6FC";
+const MUTED_GRAY = "rgba(245,246,252,0.55)";
+const BG = "#14141A";
+
 const LINKS = [
   { label: "ABOUT", href: "/", anchor: "about" },
   { label: "PROJECT", href: "/", anchor: "projects" },
@@ -17,14 +25,12 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("");
   const [isMobile, setIsMobile] = useState(false);
-  const [isToggling, setIsToggling] = useState(false); // Fix: disable hover during toggle
+  const [isToggling, setIsToggling] = useState(false);
 
-  // ✅ Detect mobile viewport + auto-close menu when switching to desktop
   useEffect(() => {
     const checkMobile = () => {
       const mobile = window.innerWidth < 768;
       setIsMobile(mobile);
-      // 🔧 FIX: Close menu when switching to desktop (inside event handler = no ESLint error)
       if (!mobile) setOpen(false);
     };
     checkMobile();
@@ -32,13 +38,11 @@ export default function Navbar() {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  // ✅ Perfect navigation logic: same-page scroll OR cross-page navigate
   const handleNavClick = useCallback((e: React.MouseEvent, href: string, anchor: string) => {
     e.preventDefault();
     const targetId = anchor;
     const targetElement = document.getElementById(targetId);
 
-    // 🔹 If we're ALREADY on the homepage → smooth scroll directly
     if (pathname === "/" && targetElement) {
       const navHeight = 80;
       window.scrollTo({
@@ -46,17 +50,14 @@ export default function Navbar() {
         behavior: "smooth",
       });
       setOpen(false);
-    }
-    // 🔹 If we're ON ANY OTHER PAGE (like /studies) → go to homepage + target section
-    else {
+    } else {
       router.push(`${href}#${targetId}`, { scroll: false });
       setOpen(false);
     }
   }, [pathname, router]);
 
-  // ✅ Active section highlight (fixed matching)
   const onScroll = useCallback(() => {
-    if (pathname !== "/") return; // Only run on homepage
+    if (pathname !== "/") return;
     const scrollPosition = window.scrollY + 100;
     LINKS.forEach(({ anchor }) => {
       const element = document.getElementById(anchor);
@@ -69,7 +70,6 @@ export default function Navbar() {
     });
   }, [pathname]);
 
-  // ✅ Auto-scroll to section when landing on homepage with #anchor
   useEffect(() => {
     if (pathname === "/") {
       const hash = window.location.hash.replace("#", "");
@@ -83,7 +83,7 @@ export default function Navbar() {
               behavior: "smooth",
             });
           }
-        }, 100); // Small delay to let Hero/sections load fully
+        }, 100);
       }
     }
   }, [pathname]);
@@ -93,7 +93,6 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, [onScroll]);
 
-  // ✅ Lock body scroll when mobile menu is open
   useEffect(() => {
     if (isMobile && open) {
       document.body.style.overflow = "hidden";
@@ -103,11 +102,9 @@ export default function Navbar() {
     return () => { document.body.style.overflow = ""; };
   }, [isMobile, open]);
 
-  // 🔧 Fix: handle menu toggle + disable hover during animation
   const handleToggle = () => {
     setIsToggling(true);
     setOpen(prev => !prev);
-    // Re-enable hover after all animations finish (0.8s parent rotation + 0.35s icon swap)
     setTimeout(() => setIsToggling(false), 1200);
   };
 
@@ -126,17 +123,17 @@ export default function Navbar() {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", justifyContent: isMobile ? "space-between" : "flex-start" }}>
-          {/* ✅ Logo — no background on mobile, stays fixed on left */}
+          {/* Logo — Zalando Sans Expanded */}
           <div
             style={{
               flexShrink: 0,
-              // Desktop styles
               ...(!isMobile && {
-                padding: "12px 24px",
-                borderTopLeftRadius: "10px",
-                borderBottomLeftRadius: "10px",
-                background: "#14141A",
-                boxShadow: "0 4px 16px rgba(0, 0, 0, 0.15)",
+                padding: "12px 22px",
+                borderTopLeftRadius: "8px",
+                borderBottomLeftRadius: "8px",
+                background: BG,
+                border: `1px solid rgba(245,246,252,0.08)`,
+                borderRight: "none",
                 marginRight: "-1px",
                 zIndex: 2,
               }),
@@ -145,41 +142,34 @@ export default function Navbar() {
             <Link href="/" style={{ textDecoration: "none" }}>
               <span
                 style={{
-                  fontFamily: "var(--font-display)",
+                  fontFamily: DISPLAY_FONT,
                   fontWeight: 900,
                   textTransform: "uppercase",
-                  color: "#CEFF1A",
+                  color: ICE_WHITE,
                   fontSize: "clamp(13px, 2.4vw, 16px)",
-                  letterSpacing: "0.09em",
+                  letterSpacing: "0.14em",
                   whiteSpace: "nowrap",
                 }}
               >
-                ...JCN
+                JCN
               </span>
             </Link>
           </div>
 
-          {/* 🔹 DESKTOP: Original inline layout — FIXED menu button */}
+          {/* Desktop Navigation — Ubuntu Sans Mono */}
           {!isMobile && (
             <motion.div
               layout
-              transition={{
-                layout: {
-                  duration: 0.7,
-                  ease: [0.25, 1, 0.5, 1],
-                },
-              }}
+              transition={{ layout: { duration: 0.7, ease: [0.25, 1, 0.5, 1] } }}
               style={{
                 display: "flex",
                 alignItems: "center",
-                background: "#14141A",
-                borderTopLeftRadius: "0",
-                borderBottomLeftRadius: "0",
-                borderTopRightRadius: "10px",
-                borderBottomRightRadius: "10px",
-                padding: "12px 20px",
+                background: BG,
+                border: `1px solid rgba(245,246,252,0.08)`,
+                borderTopRightRadius: "8px",
+                borderBottomRightRadius: "8px",
+                padding: "12px 24px",
                 width: "fit-content",
-                boxShadow: "0 4px 16px rgba(0, 0, 0, 0.15)",
                 overflow: "hidden",
                 zIndex: 1,
               }}
@@ -194,27 +184,24 @@ export default function Navbar() {
                       className="nav-link"
                       style={{
                         position: "relative",
-                        fontFamily: "var(--font-display)",
-                        fontWeight: 600,
+                        fontFamily: MONO_FONT,
+                        fontWeight: 500,
                         textTransform: "uppercase",
-                        fontSize: "clamp(10px, 1.5vw, 12px)",
-                        letterSpacing: "0.08em",
-                        color: activeSection === anchor ? "#CEFF1A" : "#F5F6FC",
+                        fontSize: "11px",
+                        letterSpacing: "0.2em",
+                        color: activeSection === anchor ? ICE_WHITE : DARK_GRAY,
                         textDecoration: "none",
                         whiteSpace: "nowrap",
                         marginRight: "36px",
                         padding: "2px 0",
+                        transition: "color 0.2s ease",
                       }}
                     >
                       <motion.span
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: 20 }}
-                        transition={{
-                          duration: 0.5,
-                          delay: i * 0.1,
-                          ease: [0.25, 1, 0.5, 1],
-                        }}
+                        transition={{ duration: 0.5, delay: i * 0.1, ease: [0.25, 1, 0.5, 1] }}
                       >
                         {label}
                       </motion.span>
@@ -222,7 +209,7 @@ export default function Navbar() {
                   ))}
               </AnimatePresence>
 
-              {/* 🔧 FIXED Menu/Close button — no more X glimpse */}
+              {/* Menu Button — Ubuntu Sans Mono */}
               <button
                 onClick={handleToggle}
                 aria-label="Menu"
@@ -241,14 +228,8 @@ export default function Navbar() {
               >
                 <motion.span
                   animate={{ rotate: open ? 90 : 0 }}
-                  // Disable hover during toggle to avoid rotation conflict
                   whileHover={isToggling ? undefined : { rotate: open ? 450 : 360 }}
-                  transition={{
-                    duration: 0.8,
-                    ease: [0.16, 1, 0.3, 1],
-                    // Fix: delay reverse rotation until X fully exits
-                    delay: open ? 0 : 0.35,
-                  }}
+                  transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: open ? 0 : 0.35 }}
                   style={{ position: "relative", width: "12px", height: "12px" }}
                 >
                   <AnimatePresence mode="wait" initial={false}>
@@ -261,30 +242,8 @@ export default function Navbar() {
                         transition={{ duration: 0.3, ease: "easeOut" }}
                         style={{ position: "absolute", inset: 0 }}
                       >
-                        <span
-                          style={{
-                            position: "absolute",
-                            top: "50%",
-                            left: 0,
-                            width: "100%",
-                            height: "2px",
-                            background: "#CEFF1A",
-                            transform: "translateY(-50%) rotate(45deg)",
-                            borderRadius: "1px",
-                          }}
-                        />
-                        <span
-                          style={{
-                            position: "absolute",
-                            top: "50%",
-                            left: 0,
-                            width: "100%",
-                            height: "2px",
-                            background: "#CEFF1A",
-                            transform: "translateY(-50%) rotate(-45deg)",
-                            borderRadius: "1px",
-                          }}
-                        />
+                        <span style={{ position: "absolute", top: "50%", left: 0, width: "100%", height: "1px", background: ICE_WHITE, transform: "translateY(-50%) rotate(45deg)" }} />
+                        <span style={{ position: "absolute", top: "50%", left: 0, width: "100%", height: "1px", background: ICE_WHITE, transform: "translateY(-50%) rotate(-45deg)" }} />
                       </motion.span>
                     ) : (
                       <motion.span
@@ -293,31 +252,25 @@ export default function Navbar() {
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.8 }}
                         transition={{ duration: 0.3, ease: "easeOut" }}
-                        style={{
-                          position: "absolute", inset: 0,
-                          display: "grid",
-                          gridTemplateColumns: "repeat(2, 1fr)",
-                          gap: "3px",
-                        }}
+                        style={{ position: "absolute", inset: 0, display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "3px" }}
                       >
                         {[0, 1, 2, 3].map((i) => (
-                          <span key={i} style={{ width: "4px", height: "4px", borderRadius: "1px", background: "#CEFF1A" }} />
+                          <span key={i} style={{ width: "4px", height: "4px", borderRadius: "1px", background: DARK_GRAY }} />
                         ))}
                       </motion.span>
                     )}
                   </AnimatePresence>
                 </motion.span>
-                <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, textTransform: "uppercase", fontSize: "clamp(10px, 1.5vw, 12px)", letterSpacing: "0.08em", color: "#CEFF1A", whiteSpace: "nowrap" }}>
+                <span style={{ fontFamily: MONO_FONT, fontWeight: 500, textTransform: "uppercase", fontSize: "11px", letterSpacing: "0.2em", color: DARK_GRAY, whiteSpace: "nowrap" }}>
                   {open ? "CLOSE" : "MENU"}
                 </span>
               </button>
             </motion.div>
           )}
 
-          {/* 🔹 MOBILE: Hamburger button — right side, logo stays left */}
+          {/* Mobile Navigation — Ubuntu Sans Mono */}
           {isMobile && (
             <>
-              {/* Hamburger button — right side */}
               <button
                 onClick={() => setOpen((prev) => !prev)}
                 aria-label="Menu"
@@ -326,13 +279,12 @@ export default function Navbar() {
                   display: "flex",
                   alignItems: "center",
                   gap: "8px",
-                  background: "#14141A",
-                  border: "none",
-                  borderRadius: "10px",
+                  background: BG,
+                  border: `1px solid rgba(245,246,252,0.08)`,
+                  borderRadius: "8px",
                   padding: "12px 18px",
                   cursor: "pointer",
                   flexShrink: 0,
-                  boxShadow: "0 4px 16px rgba(0, 0, 0, 0.15)",
                 }}
               >
                 <motion.span
@@ -350,8 +302,8 @@ export default function Navbar() {
                         transition={{ duration: 0.3, ease: "easeOut" }}
                         style={{ position: "absolute", inset: 0 }}
                       >
-                        <span style={{ position: "absolute", top: "50%", left: 0, width: "100%", height: "2px", background: "#CEFF1A", transform: "translateY(-50%) rotate(45deg)", borderRadius: "1px" }} />
-                        <span style={{ position: "absolute", top: "50%", left: 0, width: "100%", height: "2px", background: "#CEFF1A", transform: "translateY(-50%) rotate(-45deg)", borderRadius: "1px" }} />
+                        <span style={{ position: "absolute", top: "50%", left: 0, width: "100%", height: "1px", background: ICE_WHITE, transform: "translateY(-50%) rotate(45deg)" }} />
+                        <span style={{ position: "absolute", top: "50%", left: 0, width: "100%", height: "1px", background: ICE_WHITE, transform: "translateY(-50%) rotate(-45deg)" }} />
                       </motion.span>
                     ) : (
                       <motion.span
@@ -363,18 +315,17 @@ export default function Navbar() {
                         style={{ position: "absolute", inset: 0, display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "3px" }}
                       >
                         {[0, 1, 2, 3].map((i) => (
-                          <span key={i} style={{ width: "4px", height: "4px", borderRadius: "1px", background: "#CEFF1A" }} />
+                          <span key={i} style={{ width: "4px", height: "4px", borderRadius: "1px", background: DARK_GRAY }} />
                         ))}
                       </motion.span>
                     )}
                   </AnimatePresence>
                 </motion.span>
-                <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, textTransform: "uppercase", fontSize: "11px", letterSpacing: "0.08em", color: "#CEFF1A", whiteSpace: "nowrap" }}>
+                <span style={{ fontFamily: MONO_FONT, fontWeight: 500, textTransform: "uppercase", fontSize: "11px", letterSpacing: "0.2em", color: DARK_GRAY, whiteSpace: "nowrap" }}>
                   {open ? "CLOSE" : "MENU"}
                 </span>
               </button>
 
-              {/* Mobile dropdown panel — right-aligned */}
               <AnimatePresence>
                 {open && (
                   <motion.div
@@ -387,26 +338,14 @@ export default function Navbar() {
                       top: "calc(100% + 12px)",
                       right: 0,
                       minWidth: "200px",
-                      background: "#14141A",
-                      borderRadius: "12px",
-                      padding: "10px",
-                      boxShadow: "0 12px 40px rgba(0, 0, 0, 0.35)",
+                      background: BG,
+                      border: `1px solid rgba(245,246,252,0.08)`,
+                      borderRadius: "10px",
+                      padding: "8px 0",
                       zIndex: 99,
                       transformOrigin: "top right",
                     }}
                   >
-                    {/* Arrow pointer */}
-                    <div style={{
-                      position: "absolute",
-                      top: "-6px",
-                      right: "28px",
-                      width: "12px",
-                      height: "12px",
-                      background: "#14141A",
-                      transform: "rotate(45deg)",
-                      borderRadius: "2px",
-                    }} />
-
                     {LINKS.map(({ label, href, anchor }, i) => (
                       <motion.div
                         key={label}
@@ -420,18 +359,15 @@ export default function Navbar() {
                           className="nav-link-mobile"
                           style={{
                             display: "block",
-                            position: "relative",
-                            fontFamily: "var(--font-display)",
-                            fontWeight: 600,
+                            fontFamily: MONO_FONT,
+                            fontWeight: 500,
                             textTransform: "uppercase",
-                            fontSize: "13px",
-                            letterSpacing: "0.08em",
-                            color: activeSection === anchor ? "#CEFF1A" : "#F5F6FC",
+                            fontSize: "12px",
+                            letterSpacing: "0.2em",
+                            color: activeSection === anchor ? ICE_WHITE : DARK_GRAY,
                             textDecoration: "none",
-                            padding: "14px 18px",
-                            borderRadius: "8px",
-                            background: activeSection === anchor ? "rgba(206, 255, 26, 0.08)" : "transparent",
-                            transition: "background 0.2s ease, color 0.2s ease",
+                            padding: "14px 20px",
+                            transition: "color 0.2s ease, background 0.2s ease",
                           }}
                         >
                           {label}
@@ -446,7 +382,6 @@ export default function Navbar() {
         </div>
       </motion.header>
 
-      {/* Backdrop overlay for mobile */}
       <AnimatePresence>
         {isMobile && open && (
           <motion.div
@@ -458,8 +393,8 @@ export default function Navbar() {
             style={{
               position: "fixed",
               inset: 0,
-              background: "rgba(0, 0, 0, 0.45)",
-              backdropFilter: "blur(4px)",
+              background: "rgba(0, 0, 0, 0.55)",
+              backdropFilter: "blur(6px)",
               zIndex: 99,
             }}
           />
@@ -473,16 +408,16 @@ export default function Navbar() {
           bottom: 0;
           left: 0;
           width: 0;
-          height: 2px;
-          background: #CEFF1A;
-          transition: width 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+          height: 1px;
+          background: ${ICE_WHITE};
+          transition: width 0.3s cubic-bezier(0.25, 1, 0.5, 1);
         }
         .nav-link:hover::after { width: 100%; }
-        .nav-link:hover { color: #CEFF1A; }
+        .nav-link:hover { color: ${ICE_WHITE}; }
 
         .nav-link-mobile:hover {
-          background: rgba(206, 255, 26, 0.08) !important;
-          color: #CEFF1A !important;
+          color: ${ICE_WHITE} !important;
+          background: rgba(245,246,252,0.03) !important;
         }
       `}</style>
     </>

@@ -1,11 +1,25 @@
 "use client";
-import { useState, FormEvent, ChangeEvent, KeyboardEvent } from "react";
+import { useState, useEffect, FormEvent, ChangeEvent, KeyboardEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MdCheck, MdErrorOutline, MdClose } from "react-icons/md";
+import { MdCheck, MdErrorOutline, MdClose, MdWarningAmber } from "react-icons/md";
+import { ArrowUpRight } from "lucide-react";
 import emailjs from "@emailjs/browser";
-import { zalando } from "../fonts";
+import { zalando, mono } from "../fonts";
 
 const E = [0.22, 1, 0.36, 1] as [number, number, number, number];
+
+// --------------------------
+// DESIGN TOKENS — matches ProjectsSection
+// --------------------------
+const TOKENS = {
+  bg: "#14141A",
+  accent: "rgba(245,246,252,0.75)",
+  text: "#F5F6FC",
+  textMuted: "rgba(245, 246, 252, 0.65)",
+  line: "rgba(245, 246, 252, 0.1)",
+  error: "#ef4444",
+  warning: "#eab308",
+} as const;
 
 // --------------------------
 // EMAILJS CONFIGURATION
@@ -25,7 +39,6 @@ const submitTimestamps: number[] = [];
 
 function isRateLimited(): boolean {
   const now = Date.now();
-  // Remove timestamps older than the window
   while (submitTimestamps.length && submitTimestamps[0] < now - RATE_LIMIT_MS) {
     submitTimestamps.shift();
   }
@@ -42,15 +55,96 @@ function recordSubmit() {
 // --------------------------
 function sanitize(value: string): string {
   return value
-    .replace(/<[^>]*>/g, "") // strip any HTML tags
-    .replace(/javascript:/gi, "") // block js: URIs
+    .replace(/<[^>]*>/g, "")
+    .replace(/javascript:/gi, "")
     .trim();
+}
+
+// --------------------------
+// TROLL / FAKE-INPUT DETECTION (heuristic, client-side)
+// Flags obviously fake names ("test", "asdf", "aaaaa") and spammy
+// messages ("!!!!!!", repeated words, gibberish) the way social apps
+// nudge back on low-effort junk during signup. These are soft
+// warnings, not hard blocks — see warningAck logic below.
+// --------------------------
+const FAKE_NAME_BLACKLIST = [
+  "test", "asdf", "asdfasdf", "abc", "abcabc", "none", "na", "idk",
+  "xxx", "qwerty", "unknown", "anonymous", "johndoe", "janedoe",
+  "firstlast", "fake", "placeholder", "sample", "trial", "demo", "hello"
+];
+const KEYBOARD_RUNS = ["qwert", "asdfg", "zxcvb", "qazwsx", "poiuy", "lkjhg"];
+
+function isLikelyFakeName(name: string): boolean {
+  const trimmed = name.trim();
+  if (trimmed.length < 2) return false;
+  const lower = trimmed.toLowerCase();
+  const lettersOnly = lower.replace(/[^a-z]/g, "");
+  const collapsedNoSpace = lower.replace(/[^a-z]/g, "");
+
+  // Same character repeated: "aaaaaa", "xxxxxx"
+  if (/^(.)\1{2,}$/.test(trimmed.replace(/\s/g, ""))) return true;
+
+  // Known placeholder / troll names
+  if (FAKE_NAME_BLACKLIST.includes(collapsedNoSpace)) return true;
+
+  // Contains digits — real names generally don't
+  if (/\d/.test(trimmed)) return true;
+
+  // Keyboard-row mashing, e.g. "qwerty", "asdfgh"
+  if (KEYBOARD_RUNS.some(run => lower.includes(run))) return true;
+
+  // No vowels at all in a name of reasonable length = likely mashed
+  if (lettersOnly.length >= 4 && !/[aeiou]/.test(lettersOnly)) return true;
+
+  return false;
+}
+
+function isLikelySpamMessage(message: string): boolean {
+  const trimmed = message.trim();
+  if (trimmed.length < 10) return false;
+
+  // Long run of the same character: "!!!!!!!!", "aaaaaaaaaa"
+  if (/(.)\1{5,}/.test(trimmed)) return true;
+
+  // Same word repeated over and over ("spam spam spam spam")
+  const words = trimmed.toLowerCase().split(/\s+/).filter(Boolean);
+  const uniqueWords = new Set(words);
+  if (words.length >= 4 && uniqueWords.size / words.length < 0.4) return true;
+
+  // ALL CAPS shouting on a message long enough to judge fairly
+  const letters = trimmed.replace(/[^a-zA-Z]/g, "");
+  if (letters.length > 15 && letters === letters.toUpperCase()) return true;
+
+  // Multiple links dropped in a "vision" field usually means spam
+  const linkMatches = trimmed.match(/https?:\/\/|www\./gi);
+  if (linkMatches && linkMatches.length >= 2) return true;
+
+  // Low vowel ratio on a longer string = keyboard-mash gibberish
+  const lettersLower = letters.toLowerCase();
+  if (lettersLower.length >= 15) {
+    const vowels = (lettersLower.match(/[aeiou]/g) || []).length;
+    if (vowels / lettersLower.length < 0.15) return true;
+  }
+
+  return false;
 }
 
 type ContactFormPopupProps = {
   isOpen: boolean;
   onClose: () => void;
 };
+
+// Small helper — plain emphasis span, no underline.
+function Hi({ children }: { children: React.ReactNode }) {
+  return <span style={{ color: TOKENS.text }}>{children}</span>;
+}
+
+const STEP_META: { tag: string; eyebrow: string }[] = [
+  { tag: "IDENTITY", eyebrow: "01 — WHO ARE YOU" },
+  { tag: "CONTACT CHANNEL", eyebrow: "02 — YOUR EMAIL" },
+  { tag: "SCOPE", eyebrow: "03 — PROJECT TYPE" },
+  { tag: "BRIEF", eyebrow: "04 — YOUR VISION" },
+];
 
 // --------------------------
 // Multi-Step Contact Form Popup
@@ -62,21 +156,54 @@ export default function ContactFormPopup({ isOpen, onClose }: ContactFormPopupPr
     email: "",
     projectType: "",
     customProject: "",
-    vision: ""
+    vision: "",
   });
   const [errors, setErrors] = useState({
     fullName: "",
     email: "",
     projectType: "",
     customProject: "",
-    vision: ""
+    vision: "",
   });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState("");
+
+  // Soft "does this look real" warnings for name + message, and whether
+  // the user has already clicked through once despite the warning.
+  const [warnings, setWarnings] = useState({ fullName: "", vision: "" });
+  const [warningAck, setWarningAck] = useState({ fullName: false, vision: false });
+
   const totalSteps = 4;
 
   const progress = (step / totalSteps) * 100;
+
+  // --------------------------
+  // DEBOUNCED TROLL CHECK — NAME
+  // Waits until the user pauses typing (500ms) before running the
+  // heuristic, instead of re-checking on every keystroke.
+  // --------------------------
+  useEffect(() => {
+    const t = setTimeout(() => {
+      const flagged = formData.fullName.trim() && isLikelyFakeName(formData.fullName);
+      setWarnings((w) => ({ ...w, fullName: flagged ? "This doesn't look like a real name — double check it's correct." : "" }));
+      setWarningAck((a) => ({ ...a, fullName: false }));
+    }, 500);
+    return () => clearTimeout(t);
+  }, [formData.fullName]);
+
+  // --------------------------
+  // DEBOUNCED TROLL CHECK — MESSAGE
+  // Slightly longer delay since this field is longer-form.
+  // --------------------------
+  useEffect(() => {
+    const t = setTimeout(() => {
+      const flagged = formData.vision.trim() && isLikelySpamMessage(formData.vision);
+      setWarnings((w) => ({ ...w, vision: flagged ? "This message looks like spam or a placeholder — please make sure it's a genuine inquiry." : "" }));
+      setWarningAck((a) => ({ ...a, vision: false }));
+    }, 600);
+    return () => clearTimeout(t);
+  }, [formData.vision]);
 
   const getCurrentDateTime = () => {
     return new Intl.DateTimeFormat("en-PH", {
@@ -87,7 +214,7 @@ export default function ContactFormPopup({ isOpen, onClose }: ContactFormPopupPr
       hour: "2-digit",
       minute: "2-digit",
       second: "2-digit",
-      hour12: true
+      hour12: true,
     }).format(new Date());
   };
 
@@ -154,12 +281,32 @@ export default function ContactFormPopup({ isOpen, onClose }: ContactFormPopupPr
 
   const nextStep = () => {
     if (!validateStep()) return;
-    if (step < totalSteps) setStep(prev => prev + 1);
+
+    // Soft-block once on a flagged name/message, mirroring the "are you
+    // sure?" nudge social apps show on suspicious signup input. A second
+    // click through proceeds — this never permanently locks anyone out.
+    if (step === 1 && warnings.fullName && !warningAck.fullName) {
+      setWarningAck((a) => ({ ...a, fullName: true }));
+      return;
+    }
+    if (step === 4 && warnings.vision && !warningAck.vision) {
+      setWarningAck((a) => ({ ...a, vision: true }));
+      return;
+    }
+
+    if (step < totalSteps) setStep((prev) => prev + 1);
     else handleSubmit();
   };
 
+  const getButtonLabel = () => {
+    if (loading) return "SENDING...";
+    if (step === 1 && warnings.fullName && warningAck.fullName) return "CONTINUE ANYWAY";
+    if (step === 4 && warnings.vision && warningAck.vision) return "SEND ANYWAY";
+    return step === 4 ? "SEND IT" : "CONTINUE";
+  };
+
   const prevStep = () => {
-    if (step > 1) setStep(prev => prev - 1);
+    if (step > 1) setStep((prev) => prev - 1);
     setSubmitError("");
   };
 
@@ -174,7 +321,6 @@ export default function ContactFormPopup({ isOpen, onClose }: ContactFormPopupPr
     e?.preventDefault();
     if (!validateStep()) return;
 
-    // Rate limit check — prevents spam without a backend
     if (isRateLimited()) {
       setSubmitError("Too many submissions. Please wait a few minutes before trying again.");
       return;
@@ -183,7 +329,6 @@ export default function ContactFormPopup({ isOpen, onClose }: ContactFormPopupPr
     setLoading(true);
     setSubmitError("");
 
-    // Sanitize all user inputs before sending
     const safeName = sanitize(formData.fullName);
     const safeEmail = sanitize(formData.email);
     const safeProjectType = sanitize(
@@ -218,24 +363,24 @@ export default function ContactFormPopup({ isOpen, onClose }: ContactFormPopupPr
     }
   };
 
-  // Fully resets the form AND closes the popup — used by the header close
-  // button and backdrop click.
   const closeAndReset = () => {
     setStep(1);
     setFormData({ fullName: "", email: "", projectType: "", customProject: "", vision: "" });
     setErrors({ fullName: "", email: "", projectType: "", customProject: "", vision: "" });
+    setWarnings({ fullName: "", vision: "" });
+    setWarningAck({ fullName: false, vision: false });
     setSubmitted(false);
     setLoading(false);
     setSubmitError("");
     onClose();
   };
 
-  // Resets the form back to step 1 WITHOUT closing the popup — used by
-  // "Send another message" on the success screen.
   const startNewMessage = () => {
     setStep(1);
     setFormData({ fullName: "", email: "", projectType: "", customProject: "", vision: "" });
     setErrors({ fullName: "", email: "", projectType: "", customProject: "", vision: "" });
+    setWarnings({ fullName: "", vision: "" });
+    setWarningAck({ fullName: false, vision: false });
     setSubmitted(false);
     setLoading(false);
     setSubmitError("");
@@ -244,8 +389,10 @@ export default function ContactFormPopup({ isOpen, onClose }: ContactFormPopupPr
   const pageVariants = {
     initial: { opacity: 0, x: 40 },
     animate: { opacity: 1, x: 0 },
-    exit: { opacity: 0, x: -40 }
+    exit: { opacity: 0, x: -40 },
   };
+
+  const activeMeta = STEP_META[Math.min(step, 4) - 1];
 
   return (
     <AnimatePresence>
@@ -267,7 +414,7 @@ export default function ContactFormPopup({ isOpen, onClose }: ContactFormPopupPr
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            padding: "16px"
+            padding: "16px",
           }}
         >
           <motion.div
@@ -277,30 +424,63 @@ export default function ContactFormPopup({ isOpen, onClose }: ContactFormPopupPr
             transition={{ duration: 0.28, ease: E }}
             onClick={(e) => e.stopPropagation()}
             style={{
-              background: "#14141A",
+              background: TOKENS.bg,
               width: "100%",
               maxWidth: "850px",
               maxHeight: "90vh",
               overflowY: "auto",
               padding: "40px 32px",
               position: "relative",
-              /* ✅ Matches your About modal exactly */
-              borderRadius: "16px",
-              border: "1px solid rgba(245,246,252,0.12)"
+              borderRadius: "2px",
+              border: `1px solid ${TOKENS.line}`,
             }}
             onKeyDown={handleKeyDown}
             tabIndex={-1}
           >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "40px" }}>
-              <h2 style={{
-                fontSize: "20px",
-                fontWeight: 800,
-                color: "#CEFF1A",
-                fontFamily: zalando.style.fontFamily,
-                letterSpacing: "0.05em"
-              }}>
-                ...JCN
-              </h2>
+            {/* Header — mirrors the "SELECTED WORK" eyebrow + title pattern */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "36px" }}>
+              <div>
+                {!submitted ? (
+                  <>
+                    <p
+                      className={mono.className}
+                      style={{
+                        fontSize: "10px",
+                        letterSpacing: "0.3em",
+                        color: TOKENS.textMuted,
+                        textTransform: "uppercase",
+                        marginBottom: "6px",
+                      }}
+                    >
+                      GET IN TOUCH
+                    </p>
+                    <h2
+                      style={{
+                        fontFamily: zalando.style.fontFamily,
+                        fontWeight: 800,
+                        color: TOKENS.text,
+                        fontSize: "20px",
+                        letterSpacing: "0.12em",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      JCN
+                    </h2>
+                  </>
+                ) : (
+                  <p
+                    className={mono.className}
+                    style={{
+                      fontSize: "10px",
+                      letterSpacing: "0.3em",
+                      color: TOKENS.textMuted,
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    STATUS · SENT
+                  </p>
+                )}
+              </div>
               <button
                 onClick={closeAndReset}
                 aria-label="Close contact form"
@@ -312,28 +492,28 @@ export default function ContactFormPopup({ isOpen, onClose }: ContactFormPopupPr
                   justifyContent: "center",
                   borderRadius: "50%",
                   background: "transparent",
-                  border: "none",
-                  color: "#888",
+                  border: `1px solid ${TOKENS.line}`,
+                  color: TOKENS.textMuted,
                   cursor: "pointer",
-                  transition: "background-color 0.2s ease, color 0.2s ease, transform 0.2s ease"
+                  transition: "background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease",
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = "#CEFF1A";
-                  e.currentTarget.style.color = "#14141A";
-                  e.currentTarget.style.transform = "scale(1.05)";
+                  e.currentTarget.style.background = TOKENS.text;
+                  e.currentTarget.style.color = TOKENS.bg;
+                  e.currentTarget.style.borderColor = TOKENS.text;
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.background = "transparent";
-                  e.currentTarget.style.color = "#888";
-                  e.currentTarget.style.transform = "scale(1)";
+                  e.currentTarget.style.color = TOKENS.textMuted;
+                  e.currentTarget.style.borderColor = TOKENS.line;
                 }}
                 onFocus={(e) => {
-                  e.currentTarget.style.background = "#CEFF1A";
-                  e.currentTarget.style.color = "#14141A";
+                  e.currentTarget.style.background = TOKENS.text;
+                  e.currentTarget.style.color = TOKENS.bg;
                 }}
                 onBlur={(e) => {
                   e.currentTarget.style.background = "transparent";
-                  e.currentTarget.style.color = "#888";
+                  e.currentTarget.style.color = TOKENS.textMuted;
                 }}
               >
                 <MdClose size={18} />
@@ -341,46 +521,61 @@ export default function ContactFormPopup({ isOpen, onClose }: ContactFormPopupPr
             </div>
 
             {!submitted && (
-              <div style={{ height: "2px", background: "#333", marginBottom: "36px", position: "relative" }}>
+              <div style={{ height: "1px", background: TOKENS.line, marginBottom: "32px", position: "relative" }}>
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${progress}%` }}
                   transition={{ duration: 0.5, ease: E }}
-                  style={{ height: "100%", background: "#CEFF1A" }}
+                  style={{ height: "100%", background: TOKENS.text }}
                 />
               </div>
             )}
 
             {!submitted && (
-              <div style={{ display: "flex", gap: "8px", marginBottom: "40px" }}>
-                {Array.from({ length: 4 }).map((_, i) => {
-                  const num = i + 1;
-                  const isDone = num < step;
-                  const isActive = num === step;
-                  return (
-                    <motion.div
-                      key={num}
-                      animate={{
-                        background: isDone ? "#CEFF1A" : isActive ? "#14141A" : "transparent",
-                        border: `2px solid ${isDone || isActive ? "#CEFF1A" : "#444"}`,
-                        color: isDone ? "#14141A" : isActive ? "#CEFF1A" : "#888"
-                      }}
-                      style={{
-                        width: "26px",
-                        height: "26px",
-                        borderRadius: "50%",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontWeight: 700,
-                        fontSize: "12px",
-                        fontFamily: '"Ubuntu Sans", monospace'
-                      }}
-                    >
-                      {isDone ? <MdCheck size={14} /> : num.toString().padStart(2, "0")}
-                    </motion.div>
-                  );
-                })}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "40px" }}>
+                <div style={{ display: "flex", gap: "8px" }}>
+                  {Array.from({ length: 4 }).map((_, i) => {
+                    const num = i + 1;
+                    const isDone = num < step;
+                    const isActive = num === step;
+                    return (
+                      <motion.div
+                        key={num}
+                        animate={{
+                          background: isDone ? TOKENS.text : "transparent",
+                          borderColor: isDone || isActive ? TOKENS.text : TOKENS.line,
+                          color: isDone ? TOKENS.bg : isActive ? TOKENS.text : TOKENS.textMuted,
+                        }}
+                        style={{
+                          width: "26px",
+                          height: "26px",
+                          borderRadius: "50%",
+                          borderWidth: "1px",
+                          borderStyle: "solid",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontWeight: 700,
+                          fontSize: "11px",
+                          fontFamily: mono.style.fontFamily,
+                        }}
+                      >
+                        {isDone ? <MdCheck size={13} /> : num.toString().padStart(2, "0")}
+                      </motion.div>
+                    );
+                  })}
+                </div>
+                <span
+                  className={mono.className}
+                  style={{
+                    fontSize: "10px",
+                    letterSpacing: "0.2em",
+                    color: TOKENS.textMuted,
+                    textTransform: "uppercase",
+                  }}
+                >
+                  {activeMeta.tag} · {step}/{totalSteps}
+                </span>
               </div>
             )}
 
@@ -395,15 +590,15 @@ export default function ContactFormPopup({ isOpen, onClose }: ContactFormPopupPr
                     display: "flex",
                     alignItems: "center",
                     gap: "10px",
-                    background: "rgba(220, 38, 38, 0.1)",
-                    border: "1px solid rgba(220, 38, 38, 0.3)",
+                    background: "rgba(239, 68, 68, 0.08)",
+                    border: `1px solid rgba(239, 68, 68, 0.3)`,
                     padding: "12px 14px",
                     marginBottom: "24px",
-                    borderRadius: "4px"
+                    borderRadius: "2px",
                   }}
                 >
-                  <MdErrorOutline size={18} color="#ef4444" />
-                  <p style={{ color: "#ef4444", fontSize: "13px", fontFamily: '"Ubuntu Sans", monospace', margin: 0 }}>
+                  <MdErrorOutline size={18} color={TOKENS.error} />
+                  <p style={{ color: TOKENS.error, fontSize: "13px", fontFamily: mono.style.fontFamily, margin: 0 }}>
                     {submitError}
                   </p>
                 </motion.div>
@@ -422,16 +617,34 @@ export default function ContactFormPopup({ isOpen, onClose }: ContactFormPopupPr
                 >
                   {step === 1 && (
                     <div>
-                      <p style={{ color: "#CEFF1A", fontSize: "13px", letterSpacing: "0.1em", marginBottom: "10px", fontFamily: '"Ubuntu Sans", monospace' }}>01 — WHO ARE YOU</p>
-                      <h2 style={{ fontSize: "clamp(24px, 3.2vw, 34px)", lineHeight: 1.15, marginBottom: "20px", fontFamily: zalando.style.fontFamily, fontWeight: 800, textTransform: "uppercase" }}>
-                        PLEASE STATE YOUR <span style={{ color: "#CEFF1A" }}>NAME.</span>
+                      <p
+                        className={mono.className}
+                        style={{ color: TOKENS.accent, fontSize: "11px", letterSpacing: "0.25em", marginBottom: "10px", textTransform: "uppercase" }}
+                      >
+                        01 — WHO ARE YOU
+                      </p>
+                      <h2
+                        style={{
+                          fontFamily: zalando.style.fontFamily,
+                          fontWeight: 800,
+                          color: TOKENS.text,
+                          fontSize: "clamp(24px, 3.2vw, 34px)",
+                          lineHeight: 1.15,
+                          marginBottom: "20px",
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        PLEASE STATE YOUR <Hi>NAME.</Hi>
                       </h2>
-                      <p style={{ color: "#aaa", maxWidth: "500px", marginBottom: "32px", fontFamily: '"Ubuntu Sans", monospace', fontSize: "15px" }}>
-                        Hello there! Let’s start with a simple introduction — I’d love to know what I should call you.
+                      <p style={{ color: TOKENS.textMuted, maxWidth: "500px", marginBottom: "32px", fontFamily: mono.style.fontFamily, fontSize: "14px", lineHeight: 1.75 }}>
+                        Hello there! Let&apos;s start with a simple introduction — I&apos;d love to know what I should call you.
                       </p>
 
                       <div style={{ marginBottom: "12px" }}>
-                        <label style={{ display: "block", color: errors.fullName ? "#ef4444" : "#CEFF1A", fontSize: "13px", marginBottom: "10px", fontFamily: '"Ubuntu Sans", monospace' }}>
+                        <label
+                          className={mono.className}
+                          style={{ display: "block", color: errors.fullName ? TOKENS.error : TOKENS.accent, fontSize: "10px", letterSpacing: "0.2em", marginBottom: "10px", textTransform: "uppercase" }}
+                        >
                           FULL NAME
                         </label>
                         <input
@@ -444,13 +657,13 @@ export default function ContactFormPopup({ isOpen, onClose }: ContactFormPopupPr
                             width: "100%",
                             background: "transparent",
                             border: "none",
-                            borderBottom: `1px solid ${errors.fullName ? "#ef4444" : "#CEFF1A"}`,
+                            borderBottom: `1px solid ${errors.fullName ? TOKENS.error : TOKENS.line}`,
                             padding: "10px 0",
                             fontSize: "16px",
-                            color: "#F5F6FC",
+                            color: TOKENS.text,
                             outline: "none",
-                            fontFamily: '"Ubuntu Sans", monospace',
-                            transition: "border-color 0.2s ease"
+                            fontFamily: mono.style.fontFamily,
+                            transition: "border-color 0.2s ease",
                           }}
                         />
                         <AnimatePresence>
@@ -461,18 +674,41 @@ export default function ContactFormPopup({ isOpen, onClose }: ContactFormPopupPr
                               exit={{ opacity: 0, y: -5 }}
                               transition={{ duration: 0.2 }}
                               style={{
-                                color: "#ef4444",
+                                color: TOKENS.error,
                                 fontSize: "12px",
                                 marginTop: "6px",
                                 marginBottom: "0",
-                                fontFamily: '"Ubuntu Sans", monospace',
+                                fontFamily: mono.style.fontFamily,
                                 display: "flex",
                                 alignItems: "center",
-                                gap: "6px"
+                                gap: "6px",
                               }}
                             >
                               <MdErrorOutline size={13} />
                               {errors.fullName}
+                            </motion.p>
+                          )}
+                        </AnimatePresence>
+                        <AnimatePresence>
+                          {!errors.fullName && warnings.fullName && (
+                            <motion.p
+                              initial={{ opacity: 0, y: -5 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -5 }}
+                              transition={{ duration: 0.2 }}
+                              style={{
+                                color: TOKENS.warning,
+                                fontSize: "12px",
+                                marginTop: "6px",
+                                marginBottom: "0",
+                                fontFamily: mono.style.fontFamily,
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "6px",
+                              }}
+                            >
+                              <MdWarningAmber size={13} />
+                              {warnings.fullName}{warningAck.fullName ? " Click Continue again to proceed anyway." : ""}
                             </motion.p>
                           )}
                         </AnimatePresence>
@@ -482,16 +718,34 @@ export default function ContactFormPopup({ isOpen, onClose }: ContactFormPopupPr
 
                   {step === 2 && (
                     <div>
-                      <p style={{ color: "#CEFF1A", fontSize: "13px", letterSpacing: "0.1em", marginBottom: "10px", fontFamily: '"Ubuntu Sans", monospace' }}>02 — YOUR EMAIL</p>
-                      <h2 style={{ fontSize: "clamp(24px, 3.2vw, 34px)", lineHeight: 1.15, marginBottom: "20px", fontFamily: zalando.style.fontFamily, fontWeight: 800, textTransform: "uppercase" }}>
-                        WHERE DO I <span style={{ color: "#CEFF1A" }}>FIND YOU?</span>
+                      <p
+                        className={mono.className}
+                        style={{ color: TOKENS.accent, fontSize: "11px", letterSpacing: "0.25em", marginBottom: "10px", textTransform: "uppercase" }}
+                      >
+                        02 — YOUR EMAIL
+                      </p>
+                      <h2
+                        style={{
+                          fontFamily: zalando.style.fontFamily,
+                          fontWeight: 800,
+                          color: TOKENS.text,
+                          fontSize: "clamp(24px, 3.2vw, 34px)",
+                          lineHeight: 1.15,
+                          marginBottom: "20px",
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        WHERE DO I <Hi>FIND YOU?</Hi>
                       </h2>
-                      <p style={{ color: "#aaa", maxWidth: "500px", marginBottom: "32px", fontFamily: '"Ubuntu Sans", monospace', fontSize: "15px" }}>
+                      <p style={{ color: TOKENS.textMuted, maxWidth: "500px", marginBottom: "32px", fontFamily: mono.style.fontFamily, fontSize: "14px", lineHeight: 1.75 }}>
                         Great to meet you! Drop your email so I can reach out and get back to you as soon as possible.
                       </p>
 
                       <div style={{ marginBottom: "12px" }}>
-                        <label style={{ display: "block", color: errors.email ? "#ef4444" : "#CEFF1A", fontSize: "13px", marginBottom: "10px", fontFamily: '"Ubuntu Sans", monospace' }}>
+                        <label
+                          className={mono.className}
+                          style={{ display: "block", color: errors.email ? TOKENS.error : TOKENS.accent, fontSize: "10px", letterSpacing: "0.2em", marginBottom: "10px", textTransform: "uppercase" }}
+                        >
                           EMAIL ADDRESS
                         </label>
                         <input
@@ -504,13 +758,13 @@ export default function ContactFormPopup({ isOpen, onClose }: ContactFormPopupPr
                             width: "100%",
                             background: "transparent",
                             border: "none",
-                            borderBottom: `1px solid ${errors.email ? "#ef4444" : "#CEFF1A"}`,
+                            borderBottom: `1px solid ${errors.email ? TOKENS.error : TOKENS.line}`,
                             padding: "10px 0",
                             fontSize: "16px",
-                            color: "#F5F6FC",
+                            color: TOKENS.text,
                             outline: "none",
-                            fontFamily: '"Ubuntu Sans", monospace',
-                            transition: "border-color 0.2s ease"
+                            fontFamily: mono.style.fontFamily,
+                            transition: "border-color 0.2s ease",
                           }}
                         />
                         <AnimatePresence>
@@ -521,14 +775,14 @@ export default function ContactFormPopup({ isOpen, onClose }: ContactFormPopupPr
                               exit={{ opacity: 0, y: -5 }}
                               transition={{ duration: 0.2 }}
                               style={{
-                                color: "#ef4444",
+                                color: TOKENS.error,
                                 fontSize: "12px",
                                 marginTop: "6px",
                                 marginBottom: "0",
-                                fontFamily: '"Ubuntu Sans", monospace',
+                                fontFamily: mono.style.fontFamily,
                                 display: "flex",
                                 alignItems: "center",
-                                gap: "6px"
+                                gap: "6px",
                               }}
                             >
                               <MdErrorOutline size={13} />
@@ -542,16 +796,31 @@ export default function ContactFormPopup({ isOpen, onClose }: ContactFormPopupPr
 
                   {step === 3 && (
                     <div>
-                      <p style={{ color: "#CEFF1A", fontSize: "13px", letterSpacing: "0.1em", marginBottom: "10px", fontFamily: '"Ubuntu Sans", monospace' }}>03 — PROJECT TYPE</p>
-                      <h2 style={{ fontSize: "clamp(24px, 3.2vw, 34px)", lineHeight: 1.15, marginBottom: "20px", fontFamily: zalando.style.fontFamily, fontWeight: 800, textTransform: "uppercase" }}>
-                        SO, {formData.fullName.trim() ? <span style={{ color: "#CEFF1A" }}>{formData.fullName}</span> : "HAVE YOU ALREADY"} HAVE YOU ALREADY <span style={{ color: "#CEFF1A" }}>DECIDED?</span>
+                      <p
+                        className={mono.className}
+                        style={{ color: TOKENS.accent, fontSize: "11px", letterSpacing: "0.25em", marginBottom: "10px", textTransform: "uppercase" }}
+                      >
+                        03 — PROJECT TYPE
+                      </p>
+                      <h2
+                        style={{
+                          fontFamily: zalando.style.fontFamily,
+                          fontWeight: 800,
+                          color: TOKENS.text,
+                          fontSize: "clamp(24px, 3.2vw, 34px)",
+                          lineHeight: 1.15,
+                          marginBottom: "20px",
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        {formData.fullName.trim() ? <Hi>{formData.fullName}</Hi> : "SO"}, HAVE YOU ALREADY <Hi>DECIDED?</Hi>
                       </h2>
-                      <p style={{ color: "#aaa", maxWidth: "500px", marginBottom: "32px", fontFamily: '"Ubuntu Sans", monospace', fontSize: "15px" }}>
+                      <p style={{ color: TOKENS.textMuted, maxWidth: "500px", marginBottom: "32px", fontFamily: mono.style.fontFamily, fontSize: "14px", lineHeight: 1.75 }}>
                         Awesome! What kind of project are you looking to build? Pick the option that fits best.
                       </p>
 
-                      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "12px", marginBottom: "12px" }}>
-                        {["WEB DESIGN", "WEB APP", "BRANDING", "UI/UX", "FREELANCE", "OTHER"].map(type => (
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "10px", marginBottom: "12px" }}>
+                        {["WEB DESIGN", "WEB APP", "BRANDING", "UI/UX", "FREELANCE", "OTHER"].map((type) => (
                           <motion.button
                             key={type}
                             onClick={() => handleSelect(type)}
@@ -559,15 +828,17 @@ export default function ContactFormPopup({ isOpen, onClose }: ContactFormPopupPr
                             whileTap={{ scale: 0.98 }}
                             style={{
                               padding: "12px",
-                              border: `1px solid ${formData.projectType === type ? "#CEFF1A" : errors.projectType ? "#ef4444" : "#333"}`,
-                              background: formData.projectType === type ? "#CEFF1A" : "transparent",
-                              color: formData.projectType === type ? "#14141A" : "#F5F6FC",
+                              border: `1px solid ${formData.projectType === type ? TOKENS.text : errors.projectType ? TOKENS.error : TOKENS.line}`,
+                              borderRadius: "2px",
+                              background: formData.projectType === type ? TOKENS.text : "transparent",
+                              color: formData.projectType === type ? TOKENS.bg : TOKENS.text,
                               fontWeight: 600,
                               cursor: "pointer",
-                              fontFamily: '"Ubuntu Sans", monospace',
-                              fontSize: "14px",
+                              fontFamily: mono.style.fontFamily,
+                              fontSize: "12px",
+                              letterSpacing: "0.05em",
                               textTransform: "uppercase",
-                              transition: "border-color 0.2s ease"
+                              transition: "border-color 0.2s ease",
                             }}
                           >
                             {type}
@@ -583,14 +854,14 @@ export default function ContactFormPopup({ isOpen, onClose }: ContactFormPopupPr
                             exit={{ opacity: 0, y: -5 }}
                             transition={{ duration: 0.2 }}
                             style={{
-                              color: "#ef4444",
+                              color: TOKENS.error,
                               fontSize: "12px",
                               marginTop: "0",
                               marginBottom: "12px",
-                              fontFamily: '"Ubuntu Sans", monospace',
+                              fontFamily: mono.style.fontFamily,
                               display: "flex",
                               alignItems: "center",
-                              gap: "6px"
+                              gap: "6px",
                             }}
                           >
                             <MdErrorOutline size={13} />
@@ -608,7 +879,10 @@ export default function ContactFormPopup({ isOpen, onClose }: ContactFormPopupPr
                             transition={{ duration: 0.3 }}
                             style={{ marginBottom: "12px", overflow: "hidden" }}
                           >
-                            <label style={{ display: "block", color: errors.customProject ? "#ef4444" : "#CEFF1A", fontSize: "13px", marginBottom: "10px", fontFamily: '"Ubuntu Sans", monospace' }}>
+                            <label
+                              className={mono.className}
+                              style={{ display: "block", color: errors.customProject ? TOKENS.error : TOKENS.accent, fontSize: "10px", letterSpacing: "0.2em", marginBottom: "10px", textTransform: "uppercase" }}
+                            >
                               PLEASE DESCRIBE YOUR PROJECT TYPE
                             </label>
                             <input
@@ -621,13 +895,13 @@ export default function ContactFormPopup({ isOpen, onClose }: ContactFormPopupPr
                                 width: "100%",
                                 background: "transparent",
                                 border: "none",
-                                borderBottom: `1px solid ${errors.customProject ? "#ef4444" : "#CEFF1A"}`,
+                                borderBottom: `1px solid ${errors.customProject ? TOKENS.error : TOKENS.line}`,
                                 padding: "10px 0",
                                 fontSize: "16px",
-                                color: "#F5F6FC",
+                                color: TOKENS.text,
                                 outline: "none",
-                                fontFamily: '"Ubuntu Sans", monospace',
-                                transition: "border-color 0.2s ease"
+                                fontFamily: mono.style.fontFamily,
+                                transition: "border-color 0.2s ease",
                               }}
                             />
                             <AnimatePresence>
@@ -638,14 +912,14 @@ export default function ContactFormPopup({ isOpen, onClose }: ContactFormPopupPr
                                   exit={{ opacity: 0, y: -5 }}
                                   transition={{ duration: 0.2 }}
                                   style={{
-                                    color: "#ef4444",
+                                    color: TOKENS.error,
                                     fontSize: "12px",
                                     marginTop: "6px",
                                     marginBottom: "0",
-                                    fontFamily: '"Ubuntu Sans", monospace',
+                                    fontFamily: mono.style.fontFamily,
                                     display: "flex",
                                     alignItems: "center",
-                                    gap: "6px"
+                                    gap: "6px",
                                   }}
                                 >
                                   <MdErrorOutline size={13} />
@@ -661,37 +935,55 @@ export default function ContactFormPopup({ isOpen, onClose }: ContactFormPopupPr
 
                   {step === 4 && (
                     <div>
-                      <p style={{ color: "#CEFF1A", fontSize: "13px", letterSpacing: "0.1em", marginBottom: "10px", fontFamily: '"Ubuntu Sans", monospace' }}>04 — YOUR VISION</p>
-                      <h2 style={{ fontSize: "clamp(24px, 3.2vw, 34px)", lineHeight: 1.15, marginBottom: "20px", fontFamily: zalando.style.fontFamily, fontWeight: 800, textTransform: "uppercase" }}>
-                        GREAT! CAN YOU PLEASE TELL ME <span style={{ color: "#CEFF1A" }}>ABOUT IT?</span>
+                      <p
+                        className={mono.className}
+                        style={{ color: TOKENS.accent, fontSize: "11px", letterSpacing: "0.25em", marginBottom: "10px", textTransform: "uppercase" }}
+                      >
+                        04 — YOUR VISION
+                      </p>
+                      <h2
+                        style={{
+                          fontFamily: zalando.style.fontFamily,
+                          fontWeight: 800,
+                          color: TOKENS.text,
+                          fontSize: "clamp(24px, 3.2vw, 34px)",
+                          lineHeight: 1.15,
+                          marginBottom: "20px",
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        GREAT! CAN YOU PLEASE TELL ME <Hi>ABOUT IT?</Hi>
                       </h2>
-                      <p style={{ color: "#aaa", maxWidth: "500px", marginBottom: "32px", fontFamily: '"Ubuntu Sans", monospace', fontSize: "15px" }}>
+                      <p style={{ color: TOKENS.textMuted, maxWidth: "500px", marginBottom: "32px", fontFamily: mono.style.fontFamily, fontSize: "14px", lineHeight: 1.75 }}>
                         This is the fun part! Feel free to share all the details, ideas, and goals you have in mind — no need to hold back.
                       </p>
 
                       <div style={{ marginBottom: "12px" }}>
-                        <label style={{ display: "block", color: errors.vision ? "#ef4444" : "#CEFF1A", fontSize: "13px", marginBottom: "10px", fontFamily: '"Ubuntu Sans", monospace' }}>
+                        <label
+                          className={mono.className}
+                          style={{ display: "block", color: errors.vision ? TOKENS.error : TOKENS.accent, fontSize: "10px", letterSpacing: "0.2em", marginBottom: "10px", textTransform: "uppercase" }}
+                        >
                           YOUR VISION
                         </label>
                         <textarea
                           name="vision"
                           value={formData.vision}
                           onChange={handleChange}
-                          placeholder="Tell me about your project, timeline, goals, or anything else you’d like to share..."
+                          placeholder="Tell me about your project, timeline, goals, or anything else you'd like to share..."
                           maxLength={500}
                           rows={3}
                           style={{
                             width: "100%",
                             background: "transparent",
                             border: "none",
-                            borderBottom: `1px solid ${errors.vision ? "#ef4444" : "#CEFF1A"}`,
+                            borderBottom: `1px solid ${errors.vision ? TOKENS.error : TOKENS.line}`,
                             padding: "10px 0",
                             fontSize: "16px",
-                            color: "#F5F6FC",
+                            color: TOKENS.text,
                             outline: "none",
                             resize: "none",
-                            fontFamily: '"Ubuntu Sans", monospace',
-                            transition: "border-color 0.2s ease"
+                            fontFamily: mono.style.fontFamily,
+                            transition: "border-color 0.2s ease",
                           }}
                         />
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "6px" }}>
@@ -703,13 +995,13 @@ export default function ContactFormPopup({ isOpen, onClose }: ContactFormPopupPr
                                 exit={{ opacity: 0, y: -5 }}
                                 transition={{ duration: 0.2 }}
                                 style={{
-                                  color: "#ef4444",
+                                  color: TOKENS.error,
                                   fontSize: "12px",
                                   margin: "0",
-                                  fontFamily: '"Ubuntu Sans", monospace',
+                                  fontFamily: mono.style.fontFamily,
                                   display: "flex",
                                   alignItems: "center",
-                                  gap: "6px"
+                                  gap: "6px",
                                 }}
                               >
                                 <MdErrorOutline size={13} />
@@ -717,30 +1009,53 @@ export default function ContactFormPopup({ isOpen, onClose }: ContactFormPopupPr
                               </motion.p>
                             )}
                           </AnimatePresence>
-                          <p style={{ textAlign: "right", color: "#666", fontSize: "11px", margin: "0", fontFamily: '"Ubuntu Sans", monospace' }}>
+                          <p className={mono.className} style={{ textAlign: "right", color: TOKENS.textMuted, fontSize: "10px", margin: 0, letterSpacing: "0.1em" }}>
                             {formData.vision.length}/500
                           </p>
                         </div>
+                        <AnimatePresence>
+                          {!errors.vision && warnings.vision && (
+                            <motion.p
+                              initial={{ opacity: 0, y: -5 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -5 }}
+                              transition={{ duration: 0.2 }}
+                              style={{
+                                color: TOKENS.warning,
+                                fontSize: "12px",
+                                marginTop: "6px",
+                                marginBottom: "0",
+                                fontFamily: mono.style.fontFamily,
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "6px",
+                              }}
+                            >
+                              <MdWarningAmber size={13} />
+                              {warnings.vision}{warningAck.vision ? " Click Send again to proceed anyway." : ""}
+                            </motion.p>
+                          )}
+                        </AnimatePresence>
                       </div>
                     </div>
                   )}
 
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "8px" }}>
                     <button
                       onClick={prevStep}
+                      className={mono.className}
                       style={{
                         background: "transparent",
-                        border: "1px solid #444",
-                        color: "#aaa",
+                        border: `1px solid ${TOKENS.line}`,
+                        color: TOKENS.textMuted,
                         padding: "10px 20px",
-                        borderRadius: "6px",
+                        borderRadius: "2px",
                         cursor: "pointer",
                         display: step === 1 ? "none" : "block",
-                        fontFamily: '"Ubuntu Sans", monospace',
                         fontWeight: 700,
                         letterSpacing: "0.14em",
                         textTransform: "uppercase",
-                        fontSize: "14px"
+                        fontSize: "12px",
                       }}
                       disabled={loading}
                     >
@@ -749,26 +1064,30 @@ export default function ContactFormPopup({ isOpen, onClose }: ContactFormPopupPr
 
                     <motion.button
                       onClick={nextStep}
+                      className={mono.className}
                       whileHover={!loading ? { scale: 1.03 } : {}}
                       whileTap={!loading ? { scale: 0.97 } : {}}
                       style={{
-                        background: loading ? "#888" : "#CEFF1A",
+                        background: loading ? TOKENS.textMuted : TOKENS.text,
                         border: "none",
-                        color: "#14141A",
-                        padding: "12px 28px",
-                        borderRadius: "6px",
-                        fontSize: "15px",
+                        color: TOKENS.bg,
+                        padding: "12px 24px",
+                        borderRadius: "2px",
+                        fontSize: "13px",
                         fontWeight: 700,
                         letterSpacing: "0.14em",
                         cursor: loading ? "not-allowed" : "pointer",
                         marginLeft: "auto",
-                        fontFamily: '"Ubuntu Sans", monospace',
                         textTransform: "uppercase",
-                        transition: "background 0.2s"
+                        transition: "background 0.2s",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
                       }}
                       disabled={loading}
                     >
-                      {loading ? "SENDING..." : step === 4 ? "SEND IT →" : "CONTINUE"}
+                      {getButtonLabel()}
+                      {!loading && <ArrowUpRight size={14} />}
                     </motion.button>
                   </div>
                 </motion.div>
@@ -784,49 +1103,70 @@ export default function ContactFormPopup({ isOpen, onClose }: ContactFormPopupPr
                     animate={{ scale: 1, rotate: 0 }}
                     transition={{ type: "spring", stiffness: 200, damping: 15 }}
                     style={{
-                      width: "64px",
-                      height: "64px",
-                      background: "#CEFF1A",
+                      width: "60px",
+                      height: "60px",
+                      background: TOKENS.text,
                       margin: "0 auto 24px",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      borderRadius: "50%"
+                      borderRadius: "50%",
                     }}
                   >
-                    <MdCheck size={32} color="#14141A" />
+                    <MdCheck size={30} color={TOKENS.bg} />
                   </motion.div>
 
-                  <p style={{ color: "#CEFF1A", fontSize: "13px", letterSpacing: "0.1em", marginBottom: "12px", fontFamily: '"Ubuntu Sans", monospace', textTransform: "uppercase" }}>MESSAGE SENT SUCCESSFULLY</p>
-                  <h2 style={{ fontSize: "clamp(24px, 3.2vw, 34px)", lineHeight: 1.15, marginBottom: "20px", fontFamily: zalando.style.fontFamily, fontWeight: 800, textTransform: "uppercase" }}>
-                    THANK YOU{formData.fullName.trim() ? <>, <span style={{ color: "#CEFF1A" }}>{formData.fullName}</span></> : ""} FOR REACHING OUT! <span style={{ color: "#CEFF1A" }}>I’LL GET BACK TO YOU SOON.</span>
+                  <p
+                    className={mono.className}
+                    style={{ color: TOKENS.accent, fontSize: "11px", letterSpacing: "0.25em", marginBottom: "12px", textTransform: "uppercase" }}
+                  >
+                    MESSAGE SENT SUCCESSFULLY
+                  </p>
+                  <h2
+                    style={{
+                      fontFamily: zalando.style.fontFamily,
+                      fontWeight: 800,
+                      color: TOKENS.text,
+                      fontSize: "clamp(24px, 3.2vw, 34px)",
+                      lineHeight: 1.15,
+                      marginBottom: "20px",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    THANK YOU{formData.fullName.trim() ? <>, <Hi>{formData.fullName}</Hi></> : ""} FOR REACHING OUT! <Hi>I&apos;LL GET BACK TO YOU SOON.</Hi>
                   </h2>
-                  <p style={{ color: "#aaa", marginBottom: "28px", fontFamily: '"Ubuntu Sans", monospace', fontSize: "15px" }}>
-                    I really appreciate you taking the time to share your ideas. Sit tight, and we’ll start turning your vision into reality very soon!
+                  <p style={{ color: TOKENS.textMuted, marginBottom: "28px", fontFamily: mono.style.fontFamily, fontSize: "14px", lineHeight: 1.75 }}>
+                    I really appreciate you taking the time to share your ideas. Sit tight, and we&apos;ll start turning your vision into reality very soon!
                   </p>
 
                   <div style={{ display: "flex", gap: "20px", justifyContent: "center", marginBottom: "32px" }}>
-                    <a href="mailto:jhoncedrick.fuentes@gmail.com" style={{ color: "#F5F6FC", textDecoration: "none", fontFamily: '"Ubuntu Sans", monospace', textTransform: "uppercase", fontSize: "14px" }}>EMAIL</a>
-                    <a href="https://github.com/uzercedrick/" target="_blank" rel="noopener noreferrer" style={{ color: "#F5F6FC", textDecoration: "none", fontFamily: '"Ubuntu Sans", monospace', textTransform: "uppercase", fontSize: "14px" }}>GITHUB</a>
-                    <a href="https://linkedin.com/in/jcnungay" target="_blank" rel="noopener noreferrer" style={{ color: "#F5F6FC", textDecoration: "none", fontFamily: '"Ubuntu Sans", monospace', textTransform: "uppercase", fontSize: "14px" }}>LINKEDIN</a>
+                    <a href="mailto:jhoncedrick.fuentes@gmail.com" className={mono.className} style={{ color: TOKENS.text, textDecoration: "none", textTransform: "uppercase", fontSize: "12px", letterSpacing: "0.1em" }}>
+                      EMAIL
+                    </a>
+                    <a href="https://github.com/uzercedrick/" target="_blank" rel="noopener noreferrer" className={mono.className} style={{ color: TOKENS.text, textDecoration: "none", textTransform: "uppercase", fontSize: "12px", letterSpacing: "0.1em" }}>
+                      GITHUB
+                    </a>
+                    <a href="https://linkedin.com/in/jcnungay" target="_blank" rel="noopener noreferrer" className={mono.className} style={{ color: TOKENS.text, textDecoration: "none", textTransform: "uppercase", fontSize: "12px", letterSpacing: "0.1em" }}>
+                      LINKEDIN
+                    </a>
                   </div>
 
                   <motion.button
                     onClick={startNewMessage}
+                    className={mono.className}
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.97 }}
                     style={{
-                      background: "#CEFF1A",
+                      background: TOKENS.text,
                       border: "none",
-                      color: "#14141A",
-                      padding: "12px 28px",
-                      borderRadius: "6px",
-                      fontSize: "15px",
+                      color: TOKENS.bg,
+                      padding: "12px 24px",
+                      borderRadius: "2px",
+                      fontSize: "13px",
                       fontWeight: 700,
                       letterSpacing: "0.14em",
                       cursor: "pointer",
-                      fontFamily: '"Ubuntu Sans", monospace',
-                      textTransform: "uppercase"
+                      textTransform: "uppercase",
                     }}
                   >
                     SEND ANOTHER MESSAGE

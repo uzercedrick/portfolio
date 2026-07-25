@@ -2,7 +2,12 @@
 import { motion } from "framer-motion";
 import { MdEmail } from "react-icons/md";
 import { FaLinkedinIn, FaGithub } from "react-icons/fa";
-import { zalando } from "../fonts";
+import { zalando, mono } from "../fonts";
+
+const DARK_GRAY = "rgba(245,246,252,0.75)";
+const ICE_WHITE = "#F5F6FC";
+const MUTED_GRAY = "rgba(245,246,252,0.55)";
+const BG = "#14141A";
 
 const SOCIAL = [
   { Icon: MdEmail,      href: "mailto:jhoncedrick.fuentes@gmail.com", label: "Email"    },
@@ -13,64 +18,93 @@ const SOCIAL = [
 export default function Footer() {
   return (
     <motion.footer
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ duration: 0.6 }}
+      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
       style={{
-        background: "#CEFF1A",
+        background: BG,
         width: "100%",
-        padding: "clamp(24px, 4vw, 32px) 0",
+        padding: "clamp(32px, 5vw, 48px) 0 clamp(24px, 4vw, 32px)",
+        borderTop: `1px solid rgba(245,246,252,0.08)`,
       }}
     >
-      <div className="footer-container" style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: "clamp(14px, 2.5vw, 20px)",
-        minHeight: "60px",
-        padding: "0 20px",
-        position: "relative",
-      }}>
-
-        {/* ✅ CENTERED COPYRIGHT & CREDITS — stays centered on all screens */}
-        <div style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "6px",
+      <div 
+        className="footer-container" 
+        style={{
+          maxWidth: "1080px",
+          margin: "0 auto",
+          padding: "0 28px",
+          display: "grid",
+          gridTemplateColumns: "1fr auto 1fr",
           alignItems: "center",
-          textAlign: "center",
-        }}>
-          <p className="fd" style={{
-            color: "#14141A",
-            fontFamily: zalando.style.fontFamily,
-            fontSize: "clamp(12px, 1.8vw, 15px)",
-            fontWeight: 700,
-            letterSpacing: "0.08em",
+          gap: "24px",
+          position: "relative",
+        }}
+      >
+        {/* Left: subtle label */}
+        <div 
+          className={`${mono.className} footer-label`}
+          style={{
+            fontSize: "10px",
+            letterSpacing: "0.3em",
             textTransform: "uppercase",
-            margin: 0,
-            lineHeight: 1.2,
-          }}>
+            color: MUTED_GRAY,
+            justifySelf: "start",
+          }}
+        >
+          PORTFOLIO · 2026
+        </div>
+
+        {/* Center: copyright + credits */}
+        <div 
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "6px",
+            alignItems: "center",
+            textAlign: "center",
+          }}
+        >
+          <p 
+            className={`${zalando.className} fd`} 
+            style={{
+              color: ICE_WHITE,
+              fontSize: "clamp(12px, 1.6vw, 14px)",
+              fontWeight: 700,
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              margin: 0,
+              lineHeight: 1.2,
+            }}
+          >
             © {new Date().getFullYear()} JHON CEDRICK F. NUNGAY
           </p>
-          <p className="fb" style={{
-            color: "#14141A",
-            fontSize: "clamp(11px, 1.4vw, 13px)",
-            letterSpacing: "0.06em",
-            margin: 0,
-            lineHeight: 1.2,
-          }}>
-            DESIGNED IN FIGMA • BUILT WITH REACT
+          <p 
+            className={`${mono.className} fb`} 
+            style={{
+              color: MUTED_GRAY,
+              fontSize: "clamp(10px, 1.2vw, 12px)",
+              letterSpacing: "0.15em",
+              textTransform: "uppercase",
+              margin: 0,
+              lineHeight: 1.2,
+            }}
+          >
+            DESIGNED IN FIGMA · BUILT WITH REACT
           </p>
         </div>
 
-        {/* ✅ ICONS — centered on mobile, pushed to right on desktop */}
-        <div className="footer-icons" style={{
-          display: "flex",
-          gap: "12px",
-          alignItems: "center",
-        }}>
+        {/* Right: social icons */}
+        <div 
+          className="footer-icons" 
+          style={{
+            display: "flex",
+            gap: "10px",
+            alignItems: "center",
+            justifySelf: "end",
+          }}
+        >
           {SOCIAL.map(({ Icon, href, label }) => (
             <a
               key={label}
@@ -79,52 +113,50 @@ export default function Footer() {
               rel="noopener noreferrer"
               aria-label={label}
               style={{
-                width: "32px",
-                height: "32px",
-                borderRadius: "4px",
-                background: "#14141A",
-                color: "#CEFF1A",
+                width: "34px",
+                height: "34px",
+                borderRadius: "2px",
+                background: "transparent",
+                border: `1px solid rgba(245,246,252,0.15)`,
+                color: DARK_GRAY,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 textDecoration: "none",
-                transition: "all 0.2s ease",
+                transition: "all 0.25s ease",
                 flexShrink: 0,
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.background = "#0E0E14";
-                e.currentTarget.style.color = "#F5F6FC";
+                e.currentTarget.style.borderColor = ICE_WHITE;
+                e.currentTarget.style.color = ICE_WHITE;
+                e.currentTarget.style.background = "rgba(245,246,252,0.05)";
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.background = "#14141A";
-                e.currentTarget.style.color = "#CEFF1A";
+                e.currentTarget.style.borderColor = "rgba(245,246,252,0.15)";
+                e.currentTarget.style.color = DARK_GRAY;
+                e.currentTarget.style.background = "transparent";
               }}
             >
               <Icon size={14} />
             </a>
           ))}
         </div>
-
       </div>
 
       <style>{`
-        /* Desktop: icons to the right, text stays centered */
-        @media (min-width: 641px) {
+        @media (max-width: 768px) {
           .footer-container {
-            flex-direction: row !important;
-            justify-content: center !important;
-            position: relative !important;
+            grid-template-columns: 1fr !important;
+            text-align: center !important;
+            gap: 20px !important;
+          }
+          .footer-label {
+            justify-self: center !important;
+            order: 3;
           }
           .footer-icons {
-            position: absolute !important;
-            right: 20px !important;
-          }
-        }
-
-        /* Mobile: keep everything centered in a column */
-        @media (max-width: 640px) {
-          .footer-container {
-            padding: 20px 24px !important;
+            justify-self: center !important;
+            order: 2;
           }
         }
       `}</style>

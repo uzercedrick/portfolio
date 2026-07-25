@@ -1,22 +1,23 @@
 "use client";
 import { useRef, useState } from "react";
-import Image from "next/image";
-import { motion, useInView, AnimatePresence, PanInfo } from "framer-motion";
+import { motion, useInView } from "framer-motion";
 import { mono, zalando } from "../fonts";
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
-const ACCENT = "#CEFF1A";
+const ICE_WHITE = "#F5F6FC";
 const BG = "#14141A";
+const DARK_GRAY = "rgba(245,246,252,0.75)";
+const MUTED_GRAY = "rgba(245,246,252,0.65)";
 
 const DETAILS = [
-  { label: "EDUCATION", value: "Bs Information Technology" },
+  { label: "EDUCATION", value: "BS Information Technology" },
   { label: "LOCATION", value: "Navotas, Philippines" },
   { label: "ACHIEVEMENT", value: "Research Congress Awardee" },
   { label: "ROLE", value: "UX/UI Designer" },
   { label: "OPEN TO", value: "Full Time & Hybrid" },
 ];
 
-const CARDS = [
+const INFO_ITEMS = [
   { title: "PROJECTS", lines: ["2 Created Projects", "Led UX/UI Design"] },
   { title: "AWARD", lines: ["Research Congress Awardee 2025", "for Capstone System"] },
   { title: "YEAR GRADUATED", lines: ["Graduated June 30, 2026"] },
@@ -47,12 +48,6 @@ const CATEGORIES: Category[] = [
       "Figma, Miro, VS Code, Git & GitHub, and version-controlled development.",
   },
 ];
-
-const cardVariants = {
-  enter: (dir: number) => ({ x: dir > 0 ? 60 : -60, opacity: 0 }),
-  center: { x: 0, opacity: 1 },
-  exit: (dir: number) => ({ x: dir > 0 ? -60 : 60, opacity: 0 }),
-};
 
 const TILT = [-2, 0, 2];
 
@@ -111,7 +106,7 @@ function SkillCurve({ inView }: { inView: boolean }) {
         <path
           d="M 0 100 Q 600 20 1200 100"
           fill="none"
-          stroke={ACCENT}
+          stroke={DARK_GRAY}
           strokeWidth="1.5"
           strokeLinecap="round"
           strokeDasharray="6 8"
@@ -141,7 +136,7 @@ function SkillCurve({ inView }: { inView: boolean }) {
               style={{
                 fontFamily: zalando.style.fontFamily,
                 fontSize: "clamp(70px, 9vw, 110px)",
-                WebkitTextStroke: "1.8px #CEFF1A",
+                WebkitTextStroke: `1.8px ${DARK_GRAY}`,
                 transform: `rotate(${TILT[i]}deg)`,
                 margin: "0 0 8px 0",
               }}
@@ -154,7 +149,7 @@ function SkillCurve({ inView }: { inView: boolean }) {
               style={{
                 fontFamily: zalando.style.fontFamily,
                 fontSize: "clamp(15px, 1.8vw, 20px)",
-                background: ACCENT,
+                background: DARK_GRAY,
                 transform: `rotate(${TILT[i]}deg)`,
                 margin: "0 0 14px 0",
               }}
@@ -163,10 +158,11 @@ function SkillCurve({ inView }: { inView: boolean }) {
             </span>
 
             <p
-              className={`${mono.className} max-w-[550px] text-[#F5F6FC]/80`}
+              className={`${mono.className} max-w-[550px]`}
               style={{
                 fontSize: "clamp(16px, 1.9vw, 20px)",
-                lineHeight: 1.65,
+                lineHeight: 1.7,
+                color: MUTED_GRAY,
                 margin: 0,
               }}
             >
@@ -189,44 +185,44 @@ export default function About() {
   const ref = useRef<HTMLElement>(null);
   const inView = useInView(ref, { once: true, margin: "-60px 0px" });
 
-  const [[page, direction], setPage] = useState([0, 0]);
-  const cardIndex = ((page % CARDS.length) + CARDS.length) % CARDS.length;
-  const activeCard = CARDS[cardIndex];
-
-  const paginate = (dir: number) => setPage(([p]) => [p + dir, dir]);
-  const onCardDragEnd = (_: unknown, info: PanInfo) => {
-    if (info.offset.x < -50) paginate(1);
-    if (info.offset.x > 50) paginate(-1);
-  };
-
   return (
     <section
       id="about"
       ref={ref}
       style={{ background: BG, padding: "clamp(60px, 8vw, 100px) 0", width: "100%", overflow: "hidden" }}
     >
-      <div className="container" style={{ width: "100%", margin: "0 auto", padding: "0 24px" }}>
+      <div className="container" style={{ width: "100%", margin: "0 auto", padding: "0 24px", maxWidth: "1020px" }}>
+        {/* ✅ LEFT-ALIGNED SECTION TITLE — matches Projects style exactly */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 12 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, ease: EASE }}
-          style={{ marginBottom: "clamp(40px, 5vw, 50px)", textAlign: "center" }}
+          transition={{ duration: 0.5, ease: EASE }}
+          style={{ marginBottom: "clamp(48px, 6vw, 64px)", textAlign: "left" }}
         >
+          <p
+            style={{
+              fontFamily: mono.style.fontFamily,
+              fontSize: "12px",
+              letterSpacing: "0.35em",
+              textTransform: "uppercase",
+              color: MUTED_GRAY,
+              margin: "0 0 8px 0",
+            }}
+          >
+            BACKGROUND
+          </p>
           <h2
-            className="about-title"
             style={{
               fontFamily: zalando.style.fontFamily,
-              fontWeight: 900,
+              fontWeight: 800,
               textTransform: "uppercase",
-              fontSize: "clamp(36px, 5.5vw, 56px)",
-              letterSpacing: "0.15em",
-              lineHeight: 1.2,
+              fontSize: "clamp(22px, 3.2vw, 32px)",
+              letterSpacing: "0.18em",
+              color: ICE_WHITE,
               margin: 0,
             }}
           >
-            <span style={{ color: "#F5F6FC" }}>A LITTLE</span>
-            <br />
-            <span style={{ color: ACCENT }}>BACKGROUND</span>
+            ABOUT ME
           </h2>
         </motion.div>
 
@@ -240,179 +236,92 @@ export default function About() {
             <h3
               style={{
                 fontFamily: zalando.style.fontFamily,
-                fontWeight: 900,
-                textTransform: "uppercase",
-                fontSize: "clamp(28px, 3.4vw, 38px)",
-                letterSpacing: "0.1em",
-                color: ACCENT,
-                marginBottom: "16px",
+                fontWeight: 800,
+                fontSize: "clamp(20px, 2.8vw, 28px)",
+                letterSpacing: "0.08em",
+                color: ICE_WHITE,
+                marginBottom: "12px",
               }}
             >
-              ABOUT ME
+              Who I Am
             </h3>
             <p
               className={`${mono.className} about-desc`}
               style={{
-                fontSize: "clamp(18px, 2.2vw, 24px)",
-                lineHeight: 1.75,
-                color: "rgba(245,246,252,0.9)",
-                maxWidth: "460px",
+                fontSize: "clamp(15px, 1.9vw, 17px)",
+                lineHeight: 1.8,
+                color: DARK_GRAY,
+                maxWidth: "480px",
+                margin: 0,
               }}
             >
-              <span
-                style={{
-                  background: ACCENT,
-                  color: BG,
-                  fontWeight: 600,
-                  padding: "2px 6px",
-                  borderRadius: "2px",
-                  WebkitBoxDecorationBreak: "clone",
-                  boxDecorationBreak: "clone",
-                }}
-              >
-                BS Information Technology
-              </span>{" "}
-              graduate bridging design and development. I create user-centered digital experiences that are both intuitive and technically feasible – including a Research Congress-recognized classroom monitoring platform.
+              BS Information Technology graduate bridging design and development. I create user-centered digital experiences that are both intuitive and technically feasible — including a Research Congress-recognized classroom monitoring platform.
             </p>
           </motion.div>
 
           <motion.div
-            className="cell-image"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={inView ? { opacity: 1, scale: 1 } : {}}
+            className="cell-plain-info"
+            initial={{ opacity: 0, x: 20 }}
+            animate={inView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.6, delay: 0.15, ease: EASE }}
+            style={{ width: "100%", display: "flex", flexDirection: "column", gap: "16px" }}
           >
-            <div
-              className="profile-img"
-              style={{
-                position: "relative",
-                width: "clamp(240px, 25vw, 320px)",
-                aspectRatio: "4 / 5",
-                overflow: "hidden",
-                borderRadius: "4px",
-              }}
-            >
-              <Image
-                src="/nnnungay.jpg"
-                alt="Profile photo"
-                fill
-                style={{ objectFit: "cover" }}
-                sizes="(max-width: 768px) 220px, 320px"
-                priority
-              />
-            </div>
-          </motion.div>
-
-          <motion.div
-            className="cell-card"
-            initial={{ opacity: 0, y: 20 }}
-            animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.2, ease: EASE }}
-            style={{ position: "relative", width: "100%", maxWidth: "270px", minHeight: "clamp(260px, 52vw, 340px)" }}
-          >
-            <AnimatePresence initial={false} custom={direction} mode="popLayout">
-              <motion.div
-                key={cardIndex}
-                custom={direction}
-                variants={cardVariants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={{ duration: 0.3, ease: EASE }}
-                drag="x"
-                dragConstraints={{ left: 0, right: 0 }}
-                dragElastic={0.5}
-                onDragEnd={onCardDragEnd}
-                whileTap={{ cursor: "grabbing", scale: 0.98 }}
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  background: ACCENT,
-                  borderRadius: "24px",
-                  padding: "clamp(14px, 4vw, 20px)",
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "flex-end",
-                  gap: "8px",
-                  cursor: "grab",
-                  overflow: "hidden",
-                }}
-              >
+            {INFO_ITEMS.map((item) => (
+              <div key={item.title}>
                 <p
                   style={{
                     fontFamily: zalando.style.fontFamily,
-                    fontWeight: 950,
+                    fontWeight: 800,
+                    fontSize: "clamp(14px, 1.8vw, 16px)",
+                    letterSpacing: "0.12em",
                     textTransform: "uppercase",
-                    fontSize: "clamp(15px, 4vw, 20px)",
-                    letterSpacing: "-0.02em",
-                    lineHeight: 1.1,
-                    color: BG,
-                    margin: 0,
+                    color: DARK_GRAY,
+                    margin: "0 0 4px 0",
                   }}
                 >
-                  {activeCard.title}
+                  {item.title}
                 </p>
                 <p
                   className={mono.className}
                   style={{
-                    fontSize: "clamp(12px, 2.8vw, 14px)",
-                    lineHeight: 1.5,
-                    fontWeight: 600,
-                    color: BG,
+                    fontSize: "clamp(13px, 1.7vw, 15px)",
+                    lineHeight: 1.6,
+                    color: ICE_WHITE,
                     margin: 0,
                   }}
                 >
-                  {activeCard.lines.map((l, i) => (
+                  {item.lines.map((l, i) => (
                     <span key={i}>
                       {l}
-                      {i < activeCard.lines.length - 1 && <br />}
+                      {i < item.lines.length - 1 && <br />}
                     </span>
                   ))}
                 </p>
-              </motion.div>
-            </AnimatePresence>
-
-            <div style={{ display: "flex", gap: "8px", marginTop: "16px", justifyContent: "center" }}>
-              {CARDS.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setPage([i, i > cardIndex ? 1 : -1])}
-                  aria-label={`Go to card ${i + 1}`}
-                  style={{
-                    width: i === cardIndex ? "22px" : "8px",
-                    height: "8px",
-                    borderRadius: "999px",
-                    border: "none",
-                    background: i === cardIndex ? ACCENT : "rgba(245,246,252,0.2)",
-                    cursor: "pointer",
-                    transition: "all 0.2s ease",
-                  }}
-                />
-              ))}
-            </div>
+              </div>
+            ))}
           </motion.div>
 
-          {/* DIVIDER + INFO: divider left, text bigger, tighter spacing */}
           <motion.div
             className="cell-details"
-            initial={{ opacity: 0, x: 20 }}
-            animate={inView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.25, ease: EASE }}
-            style={{ display: "flex", gap: "20px", width: "100%" }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6, delay: 0.2, ease: EASE }}
+            style={{ display: "flex", gap: "16px", width: "100%", gridColumn: "1 / -1" }}
           >
             <div
               style={{
-                width: "6px",
-                background: ACCENT,
+                width: "4px",
+                background: DARK_GRAY,
                 flexShrink: 0,
                 alignSelf: "stretch",
+                opacity: 0.7,
               }}
             />
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(2, 1fr)",
-                gap: "clamp(6px, 1vw, 10px) clamp(32px, 4vw, 56px)",
+                gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+                gap: "clamp(8px, 1.2vw, 12px) clamp(28px, 3.5vw, 48px)",
                 flex: 1,
                 width: "100%",
               }}
@@ -423,13 +332,12 @@ export default function About() {
                     className="info-label"
                     style={{
                       fontFamily: zalando.style.fontFamily,
-                      fontWeight: 900,
+                      fontWeight: 700,
+                      fontSize: "clamp(13px, 1.8vw, 15px)",
+                      letterSpacing: "0.12em",
                       textTransform: "uppercase",
-                      fontSize: "clamp(16px, 2.2vw, 20px)",
-                      letterSpacing: "0.08em",
-                      color: ACCENT,
-                      marginBottom: "1px",
-                      whiteSpace: "nowrap",
+                      color: ICE_WHITE,
+                      marginBottom: "2px",
                     }}
                   >
                     {d.label}
@@ -437,8 +345,9 @@ export default function About() {
                   <p
                     className={mono.className}
                     style={{
-                      fontSize: "clamp(15px, 2.1vw, 19px)",
-                      color: "rgba(245,246,252,0.95)",
+                      fontSize: "clamp(12px, 1.6vw, 14px)",
+                      color: MUTED_GRAY,
+                      margin: 0,
                     }}
                   >
                     {d.value}
@@ -449,7 +358,7 @@ export default function About() {
           </motion.div>
         </div>
 
-        <div style={{ marginTop: "clamp(40px, 4vw, 60px)", width: "100%" }}>
+        <div style={{ marginTop: "clamp(50px, 5vw, 70px)", width: "100%" }}>
           <SkillCurve inView={inView} />
         </div>
       </div>
@@ -457,61 +366,21 @@ export default function About() {
       <style>{`
         .about-grid {
           display: grid;
-          grid-template-columns: clamp(300px, 36vw, 460px) 1fr;
-          grid-template-rows: auto auto;
-          column-gap: clamp(24px, 3vw, 48px);
-          row-gap: clamp(48px, 6vw, 72px);
-          align-items: center;
-          justify-items: center;
+          grid-template-columns: 1fr 1fr;
+          column-gap: clamp(28px, 3.5vw, 52px);
+          row-gap: clamp(44px, 5.5vw, 64px);
+          align-items: start;
           width: 100%;
-          max-width: 1100px;
-          margin: 0 auto;
         }
-        .about-grid .cell-text    { grid-column: 1; grid-row: 1; justify-self: start; width: 100%; }
-        .about-grid .cell-image   { grid-column: 2; grid-row: 1; display: flex; justify-content: flex-start; }
-        .about-grid .cell-card    { grid-column: 1; grid-row: 2; justify-self: center; align-self: stretch; }
-        .about-grid .cell-details { grid-column: 2; grid-row: 2; align-self: stretch; justify-self: start; }
+        .about-grid .cell-text        { grid-column: 1; justify-self: start; width: 100%; }
+        .about-grid .cell-plain-info  { grid-column: 2; justify-self: end; width: 100%; max-width: 360px; }
+        .about-grid .cell-details     { grid-column: 1 / -1; align-self: stretch; justify-self: stretch; }
 
         @media (max-width: 768px) {
-          .about-grid { grid-template-columns: 1fr; row-gap: 40px; }
-          .about-grid .cell-text    { grid-column: 1; grid-row: 1; }
-          .about-grid .cell-image   { grid-column: 1; grid-row: 2; justify-self: center; }
-          .about-grid .cell-card    { grid-column: 1; grid-row: 3; justify-self: center; width: 230px !important; max-width: 70% !important; }
-          .about-grid .cell-details { grid-column: 1; grid-row: 4; align-self: auto; }
-
-          .about-title {
-            font-size: clamp(28px, 7vw, 38px) !important;
-            letter-spacing: 0.1em !important;
-            max-width: 100% !important;
-            margin: 0 auto !important;
-          }
-
-          .about-desc {
-            font-size: clamp(14px, 3.8vw, 16px) !important;
-            line-height: 1.7 !important;
-            max-width: 100% !important;
-          }
-
-          .profile-img {
-            width: clamp(200px, 55vw, 260px) !important;
-          }
-
-          .cell-card {
-            max-width: 230px !important;
-            min-height: clamp(230px, 48vw, 280px) !important;
-          }
-          .cell-card > div {
-            padding: clamp(12px, 4vw, 18px) !important;
-          }
-          .cell-card p:first-child {
-            font-size: clamp(14px, 4vw, 18px) !important;
-          }
-
-          .info-label {
-            font-size: clamp(14px, 3vw, 16px) !important;
-            letter-spacing: 0.06em !important;
-            white-space: nowrap !important;
-          }
+          .about-grid { grid-template-columns: 1fr; row-gap: 36px; }
+          .about-grid .cell-text        { grid-column: 1; }
+          .about-grid .cell-plain-info  { grid-column: 1; justify-self: start; max-width: 100% !important; }
+          .about-grid .cell-details     { grid-column: 1; align-self: auto; }
         }
 
         .no-scrollbar::-webkit-scrollbar { display: none; }

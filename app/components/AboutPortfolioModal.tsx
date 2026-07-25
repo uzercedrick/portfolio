@@ -2,18 +2,17 @@
 
 import React, { useEffect, useRef } from "react";
 import { X } from "lucide-react";
+import { zalando, mono } from "../fonts";
+
+const DARK_GRAY = "rgba(245,246,252,0.75)";
+const ICE_WHITE = "#F5F6FC";
+const MUTED_GRAY = "rgba(245,246,252,0.55)";
+const BG = "#14141A";
 
 interface AboutPortfolioModalProps {
   open: boolean;
   onClose: () => void;
 }
-
-/* ------------------------------
-   OFFICIAL COLOR THEME
-   🟢 LIME      = #CEFF1A  (--volt)
-   ⚫ MIDNIGHT  = #14141A  (--ink)
-   ⚪ ICE WHITE = #F5F6FC  (--bone)
------------------------------- */
 
 export default function AboutPortfolioModal({ open, onClose }: AboutPortfolioModalProps) {
   const closeBtnRef = useRef<HTMLButtonElement>(null);
@@ -66,109 +65,95 @@ export default function AboutPortfolioModal({ open, onClose }: AboutPortfolioMod
     >
       {/* Backdrop */}
       <div
-        className={`absolute inset-0 bg-black/70 backdrop-blur-sm ${closing ? "backdrop-exit" : "animate-[fadeIn_.2s_ease]"}`}
+        className={`absolute inset-0 backdrop-blur-sm ${closing ? "backdrop-exit" : "animate-[fadeIn_.2s_ease]"}`}
+        style={{ background: "rgba(0,0,0,0.65)" }}
         onClick={onClose}
         aria-hidden="true"
       />
 
       {/* Modal */}
       <div
-        className={`relative w-full max-w-2xl max-h-[92vh] overflow-y-auto rounded-t-2xl sm:rounded-2xl border border-[rgba(245,246,252,0.12)] bg-[#14141A] text-[#F5F6FC] ${closing ? "view-exit" : "view-enter"}`}
+        className={`relative w-full max-w-2xl max-h-[92vh] overflow-y-auto rounded-t-2xl sm:rounded-xl border ${closing ? "view-exit" : "view-enter"}`}
+        style={{
+          background: BG,
+          borderColor: "rgba(245,246,252,0.08)",
+          color: ICE_WHITE,
+        }}
         onClick={(e) => e.stopPropagation()}
         onAnimationEnd={handleExitAnimationEnd}
       >
-        {/* Official Color Theme + Typography (scoped to modal) */}
         <style>{`
-          @import url('https://fonts.googleapis.com/css2?family=Zalando+Sans+Expanded:wght@400;500;600;700;800;900&family=Ubuntu+Sans+Mono:wght@400;500;700&display=swap');
-
-          :root {
-            --volt: #CEFF1A;   /* LIME */
-            --ink: #14141A;    /* MIDNIGHT */
-            --bone: #F5F6FC;   /* ICE WHITE */
-            --muted: rgba(245,246,252,0.7);
-          }
-
-          .font-display { font-family: 'Zalando Sans Expanded', sans-serif; letter-spacing: 0.01em; }
-          .font-mono { font-family: 'Ubuntu Sans Mono', monospace; }
-          .text-volt { color: var(--volt); }
-          .text-bone { color: var(--bone); }
-          .text-muted { color: var(--muted); }
-
-          .reveal { opacity: 0; transform: translateY(10px); animation: fadeUp .55s ease forwards; }
-          .reveal:nth-of-type(2){animation-delay:.1s}.reveal:nth-of-type(3){animation-delay:.2s}
           @keyframes fadeUp { to { opacity:1; transform:translateY(0); } }
           @keyframes fadeIn { to { opacity:1; } }
           @keyframes fadeSlide { from { opacity:0; transform:translateY(16px);} to { opacity:1; transform:none; } }
           @keyframes fadeSlideOut { from { opacity:1; transform:none; } to { opacity:0; transform:translateY(16px); } }
           @keyframes fadeOut { from { opacity:1; } to { opacity:0; } }
-          .view-enter { animation: fadeSlide .35s ease both; }
-          .view-exit { animation: fadeSlideOut .28s ease both; }
+          .view-enter { animation: fadeSlide .35s cubic-bezier(0.22,1,0.36,1) both; }
+          .view-exit { animation: fadeSlideOut .28s cubic-bezier(0.22,1,0.36,1) both; }
           .backdrop-exit { animation: fadeOut .28s ease both; }
+          .reveal { opacity: 0; transform: translateY(10px); animation: fadeUp .55s ease forwards; }
+          .reveal:nth-of-type(2){animation-delay:.1s}.reveal:nth-of-type(3){animation-delay:.2s}
 
-          .close-btn { transition: background-color .2s ease, color .2s ease, transform .2s ease; }
-          .close-btn:hover, .close-btn:focus-visible { background-color: var(--volt); color: var(--ink); transform: scale(1.05); }
-
-          ::selection { background: var(--volt); color: var(--ink); }
-          button:focus-visible { outline: 2px solid var(--volt); outline-offset: 2px; }
-
-          /* ✅ Shift close button left on mobile */
-          @media (max-width: 640px) {
-            .modal-header { padding-left: 20px !important; padding-right: 20px !important; }
-            .close-btn { margin-right: 8px; }
+          .close-btn { transition: all 0.2s ease; }
+          .close-btn:hover, .close-btn:focus-visible { 
+            background: rgba(245,246,252,0.08); 
+            color: ${ICE_WHITE};
           }
+
+          ::selection { background: ${DARK_GRAY}; color: ${BG}; }
+          button:focus-visible { outline: 2px solid ${DARK_GRAY}; outline-offset: 2px; }
         `}</style>
 
-        {/* Header — adjusted padding for mobile */}
-        <div className="modal-header sticky top-0 z-10 flex items-start justify-between gap-4 px-6 sm:px-10 pt-6 sm:pt-8 pb-5 bg-[var(--ink)]">
+        {/* Header */}
+        <div className="sticky top-0 z-10 flex items-start justify-between gap-4 px-6 sm:px-10 pt-6 sm:pt-8 pb-5" style={{ background: BG }}>
           <div>
-            <div className="font-mono text-volt text-[11px] tracking-[0.22em] uppercase mb-3">
-              Portfolio · v1.0
+            <div className={`${mono.className} text-[11px] tracking-[0.22em] uppercase mb-3`} style={{ color: DARK_GRAY }}>
+              PORTFOLIO · V1.0
             </div>
             <h2
               id="about-portfolio-heading"
-              className="font-display font-black uppercase leading-[0.95] text-[clamp(1.6rem,4.5vw,2.75rem)]"
+              className={`${zalando.className} font-black uppercase leading-[0.95] text-[clamp(1.6rem,4.5vw,2.75rem)]`}
             >
-              About <span className="text-volt">This Website</span>
+              ABOUT <span style={{ color: DARK_GRAY }}>THIS WEBSITE</span>
             </h2>
           </div>
           <button
             ref={closeBtnRef}
             onClick={onClose}
             aria-label="Close about modal"
-            className="close-btn shrink-0 p-2 rounded-full text-muted"
+            className="close-btn shrink-0 p-2 rounded-lg"
+            style={{ color: MUTED_GRAY, border: "1px solid rgba(245,246,252,0.08)" }}
           >
             <X size={18} />
           </button>
         </div>
 
+        {/* Content */}
         <div className="px-6 sm:px-10 pb-10 sm:pb-12 space-y-6">
-          <p className="reveal font-display text-bone text-[15px] sm:text-base leading-relaxed">
+          <p className={`reveal ${zalando.className} text-[15px] sm:text-base leading-relaxed`} style={{ color: ICE_WHITE }}>
             Designed and built by{" "}
             <span
               style={{
-                background: "var(--volt)",
-                color: "var(--ink)",
+                color: ICE_WHITE,
                 fontWeight: 700,
-                padding: "2px 6px",
-                borderRadius: "2px",
-                WebkitBoxDecorationBreak: "clone",
-                boxDecorationBreak: "clone",
+                boxShadow: `inset 0 -1px 0 0 ${DARK_GRAY}`,
+                paddingBottom: "1px",
               }}
             >
-              Jhon Cedrick F. Nungay
+              JHON CEDRICK F. NUNGAY
             </span>{" "}
             — a UX/UI designer and front-end developer —
             this site walks through real, shipped work end to end: the Ultrafood Distributors Inc. B2B website and
             the ClassGuard IoT monitoring system, each broken down from problem to approach to result.
           </p>
 
-          <p className="reveal font-mono text-muted text-[13px] sm:text-[14px] leading-relaxed">
+          <p className={`reveal ${mono.className} text-[13px] sm:text-[14px] leading-relaxed`} style={{ color: MUTED_GRAY }}>
             Built on Next.js (App Router), React 18, and TypeScript, styled with Tailwind CSS, typeset in Zalando
             Sans Expanded and Ubuntu Sans Mono, with icons from Lucide and charts from Recharts.
           </p>
 
-          <p className="reveal font-mono text-[11px] tracking-[0.18em] uppercase text-muted pt-2">
-            Navotas City, Philippines · Built 2026 · Actively maintained
+          <p className={`reveal ${mono.className} text-[11px] tracking-[0.18em] uppercase pt-2`} style={{ color: MUTED_GRAY }}>
+            NAVOTAS CITY, PHILIPPINES · BUILT 2026 · ACTIVELY MAINTAINED
           </p>
         </div>
       </div>

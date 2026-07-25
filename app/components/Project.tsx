@@ -1,15 +1,14 @@
 "use client";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
-import { zalando } from "../fonts";
+import { zalando, mono } from "../fonts";
 
 const TOKENS = {
   bg: "#14141A",
-  accent: "#CEFF1A",
+  accent: "rgba(245,246,252,0.75)",
   text: "#F5F6FC",
-  textMuted: "rgba(245, 246, 252, 0.9)",
-  panel: "rgba(245, 246, 252, 0.045)",
-  hair: "rgba(245, 246, 252, 0.12)",
+  textMuted: "rgba(245, 246, 252, 0.65)",
+  line: "rgba(245, 246, 252, 0.1)",
 } as const;
 
 interface MetaItem {
@@ -22,144 +21,123 @@ interface Project {
   tag: string;
   title: string;
   description: string;
-  descriptionHighlight?: string;
   meta: MetaItem[];
   caseStudyHref: string;
   windowLabel: string;
-  headerColor: string;
 }
 
 const PROJECTS: Project[] = [
   {
     index: "01",
-    tag: "IoT dashboard · Real-time monitoring",
+    tag: "IoT DASHBOARD · REAL-TIME MONITORING",
     title: "CLASSGUARD MONITORING SYSTEM",
     description:
-      "Web-based real-time classroom monitoring platform — Tracks live temperature and humidity via IoT sensors, with interactive dashboards, instant safety alerts, and historical trend logs. Led UX/UI design & front-end dev, and a University Research Congress awardee.",
-    descriptionHighlight: "Web-based real-time classroom monitoring platform",
+      "Web-based platform for real-time classroom monitoring — tracking live temperature and humidity via IoT sensors, interactive dashboards, safety alerts, and historical logs. Led UX/UI design and front-end development; recognized at the University Research Congress.",
     meta: [
-      { label: "Role", value: "UX/UI + Full-Stack" },
-      { label: "Team", value: "5-person capstone team" },
-      { label: "Recognition", value: "Research Congress Finalist" },
+      { label: "ROLE", value: "UX/UI + Full-Stack" },
+      { label: "TEAM", value: "5-Person Capstone" },
+      { label: "STATUS", value: "Research Congress Finalist" },
     ],
     caseStudyHref: "/studies?project=classguard",
     windowLabel: "classguard.app",
-    headerColor: "#2B1F4D",
   },
   {
     index: "02",
-    tag: "FMCG client · B2B website",
+    tag: "CORPORATE · B2B WEBSITE",
     title: "ULTRAFOOD DISTRIBUTORS INC",
     description:
-      "End-to-end UX/UI design and front-end build for Ultrafood's full company website — Delivered a unified design system, scalable landing page, and a library of reusable, production-ready components for their internal marketing team.",
-    descriptionHighlight: "Ultrafood's full company website",
+      "End-to-end UX/UI design and front-end build — delivering a unified design system, scalable landing page, and reusable production-ready components for their internal marketing team.",
     meta: [
-      { label: "Role", value: "UX/UI + Landing Page Dev" },
-      { label: "Team", value: "4-person team" },
-      { label: "Status", value: "Replaced old site company-wide" },
+      { label: "ROLE", value: "UX/UI + Landing Page Dev" },
+      { label: "TEAM", value: "4-Person Team" },
+      { label: "STATUS", value: "Company-Wide Launch" },
     ],
     caseStudyHref: "/studies?project=ultrafood",
     windowLabel: "ultrafoodinc.com",
-    headerColor: "#1F3A16",
   },
 ];
 
-function renderHighlighted(text: string, highlight?: string) {
-  if (!highlight) return text;
-  const idx = text.indexOf(highlight);
-  if (idx === -1) return text;
-  return (
-    <>
-      {text.slice(0, idx)}
-      <span
-        style={{
-          background: TOKENS.accent,
-          color: TOKENS.bg,
-          fontWeight: 700,
-          padding: "1px 4px",
-          borderRadius: "2px",
-          WebkitBoxDecorationBreak: "clone",
-          boxDecorationBreak: "clone",
-        }}
-      >
-        {text.slice(idx, idx + highlight.length)}
-      </span>
-      {text.slice(idx + highlight.length)}
-    </>
-  );
-}
-
-function ProjectCard({ project }: { project: Project }) {
+function ProjectItem({ project }: { project: Project }) {
   return (
     <Link
       href={project.caseStudyHref}
       aria-label={`View case study: ${project.title}`}
-      className="project-card group block rounded-2xl border overflow-hidden w-full max-w-[480px] mx-auto flex flex-col min-h-[320px] sm:min-h-[420px]"
-      style={{ borderColor: TOKENS.hair, background: TOKENS.panel }}
+      className="project-item group block w-full max-w-[520px]"
+      style={{ borderBottom: `1px solid ${TOKENS.line}`, paddingBottom: "clamp(28px, 4vw, 40px)" }}
     >
-      <div
-        className="flex items-center gap-2 px-3 py-2 border-b"
-        style={{ background: project.headerColor, borderColor: TOKENS.hair }}
-      >
-        <span className="w-2 h-2 rounded-full" style={{ background: "#FF5F57" }} />
-        <span className="w-2 h-2 rounded-full" style={{ background: "#FEBC2E" }} />
-        <span className="w-2 h-2 rounded-full" style={{ background: "#28C840" }} />
-        <span className="font-mono text-[9px] ml-2" style={{ color: TOKENS.accent }}>
-          {project.windowLabel}
-        </span>
-      </div>
-
-      <div className="p-4 sm:p-6 flex flex-col flex-1">
-        <div className="flex items-center justify-between mb-2.5">
+      {/* Top line: index + tag + arrow */}
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-3">
           <span
-            className="font-mono text-[10px] tracking-[0.2em] uppercase"
+            className={`${mono.className} text-[11px] tracking-[0.25em]`}
             style={{ color: TOKENS.accent }}
           >
-            {project.index} — {project.tag}
+            {project.index}
           </span>
-          <ArrowUpRight
-            size={14}
+          <span
+            className={`${mono.className} text-[10px] tracking-[0.2em] uppercase`}
             style={{ color: TOKENS.textMuted }}
-            className="shrink-0 transition-all group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-          />
+          >
+            {project.tag}
+          </span>
         </div>
+        <ArrowUpRight
+          size={16}
+          style={{ color: TOKENS.textMuted }}
+          className="shrink-0 transition-all duration-300 group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:text-[#F5F6FC]"
+        />
+      </div>
 
-        <h3
-          style={{
-            fontFamily: zalando.style.fontFamily,
-            fontWeight: 800,
-            color: TOKENS.text,
-          }}
-          className="uppercase text-base sm:text-xl leading-tight mb-2"
+      {/* Title */}
+      <h3
+        style={{
+          fontFamily: zalando.style.fontFamily,
+          fontWeight: 800,
+          color: TOKENS.text,
+          letterSpacing: "0.1em",
+        }}
+        className="uppercase text-xl sm:text-2xl leading-snug mb-3"
+      >
+        {project.title}
+      </h3>
+
+      {/* Description */}
+      <p
+        style={{
+          color: TOKENS.textMuted,
+          fontFamily: mono.style.fontFamily,
+          lineHeight: 1.75,
+        }}
+        className="text-xs sm:text-sm mb-5"
+      >
+        {project.description}
+      </p>
+
+      {/* Metadata */}
+      <div className="flex flex-wrap gap-x-8 gap-y-2">
+        {project.meta.map((m) => (
+          <div key={m.label} className="flex items-center gap-2">
+            <span
+              className={`${mono.className} text-[9px] tracking-[0.18em] uppercase`}
+              style={{ color: TOKENS.accent }}
+            >
+              {m.label}
+            </span>
+            <span className={`${mono.className} text-[11px]`} style={{ color: TOKENS.text }}>
+              {m.value}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {/* Window label — subtle tech touch */}
+      <div className="mt-4">
+        <span
+          className={`${mono.className} text-[9px] tracking-[0.2em] uppercase`}
+          style={{ color: TOKENS.textMuted }}
         >
-          {project.title}
-        </h3>
-
-        <p
-          style={{
-            color: TOKENS.textMuted,
-            fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
-          }}
-          className="text-xs sm:text-sm leading-relaxed mb-4"
-        >
-          {renderHighlighted(project.description, project.descriptionHighlight)}
-        </p>
-
-        <div className="grid grid-cols-3 gap-3 mt-auto">
-          {project.meta.map((m) => (
-            <div key={m.label} className="font-mono">
-              <div
-                className="text-[8px] tracking-[0.16em] uppercase mb-0.5"
-                style={{ color: TOKENS.textMuted }}
-              >
-                {m.label}
-              </div>
-              <div className="text-[10px] leading-snug" style={{ color: TOKENS.text }}>
-                {m.value}
-              </div>
-            </div>
-          ))}
-        </div>
+          {project.windowLabel}
+        </span>
       </div>
     </Link>
   );
@@ -171,64 +149,40 @@ export default function ProjectsSection() {
       id="projects"
       style={{
         background: TOKENS.bg,
-        padding: "clamp(40px, 6vw, 80px) 0",
+        padding: "clamp(60px, 8vw, 100px) 0",
         position: "relative",
       }}
     >
-      <div className="container mx-auto px-5 max-w-7xl">
-        <h2
-          style={{
-            fontFamily: zalando.style.fontFamily,
-            fontWeight: 800,
-            textAlign: "center",
-            color: TOKENS.text,
-            fontSize: "clamp(24px, 4vw, 44px)",
-            lineHeight: 1.1,
-            marginBottom: "clamp(32px, 5vw, 56px)",
-            letterSpacing: "-0.01em",
-          }}
-        >
-          FEEL FREE TO VIEW
-          <br />
-          <span style={{ color: TOKENS.accent }}>MY PROJECTS !</span>
-        </h2>
+      <div className="container mx-auto px-5 max-w-5xl">
+        {/* Editorial Section Header */}
+        <div className="mb-12">
+          <p
+            className={`${mono.className} text-[12px] tracking-[0.35em] uppercase mb-2`}
+            style={{ color: TOKENS.textMuted }}
+          >
+            SELECTED WORK
+          </p>
+          <h2
+            style={{
+              fontFamily: zalando.style.fontFamily,
+              fontWeight: 800,
+              color: TOKENS.text,
+              fontSize: "clamp(24px, 4vw, 40px)",
+              lineHeight: 1.2,
+              letterSpacing: "0.15em",
+            }}
+          >
+            PROJECTS
+          </h2>
+        </div>
 
-        {/* Exact gap values you wanted: mobile = 14, desktop = 20 */}
-        <div className="flex flex-col sm:flex-row sm:justify-center gap-14 sm:gap-20">
+        {/* Clean list layout — no card frames */}
+        <div className="flex flex-col sm:flex-row sm:justify-center gap-12 sm:gap-16">
           {PROJECTS.map((p) => (
-            <div 
-              key={p.index} 
-              className="w-full sm:w-auto sm:flex-1 sm:max-w-[460px]"
-            >
-              <ProjectCard project={p} />
-            </div>
+            <ProjectItem key={p.index} project={p} />
           ))}
         </div>
       </div>
-
-      <style>{`
-        .project-card {
-          transition: border-color 0.2s ease, transform 0.2s ease;
-        }
-        .project-card:hover,
-        .project-card:focus-visible {
-          border-color: ${TOKENS.accent};
-          transform: translateY(-2px);
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .project-card:hover,
-          .project-card:focus-visible {
-            transform: none;
-          }
-        }
-
-        @media (max-width: 640px) {
-          .project-card {
-            min-height: 300px !important;
-            max-width: 90% !important;
-          }
-        }
-      `}</style>
     </section>
   );
 }
