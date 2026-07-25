@@ -21,9 +21,52 @@ type ContactProps = {
 };
 
 /**
+ * Reveals the ORIGINAL outlined heading style (single continuous text run,
+ * exactly like the untouched .contact-outline/::before CSS) with a smooth
+ * left-to-right clip-path wipe, instead of animating individual letters.
+ * Per-letter spans don't kern identically to a normal text run, which is
+ * what caused the double-outline/misalignment glitch — revealing the real,
+ * single text node avoids that entirely and keeps it fully readable.
+ */
+function TypedOutlineLine({
+  text,
+  className,
+  style,
+  inView,
+  delay = 0,
+  duration = 0.7,
+}: {
+  text: string;
+  className?: string;
+  style?: React.CSSProperties;
+  inView: boolean;
+  delay?: number;
+  duration?: number;
+}) {
+  return (
+    <motion.h3
+      className={className}
+      data-text={text}
+      style={style}
+      initial={{ clipPath: "inset(0 100% 0 0)" }}
+      animate={
+        inView
+          ? { clipPath: "inset(0 0% 0 0)" }
+          : { clipPath: "inset(0 100% 0 0)" }
+      }
+      transition={{ duration, ease: E, delay }}
+    >
+      {text}
+    </motion.h3>
+  );
+}
+
+/**
  * Renders a line of text as individually-animated <span> characters.
  * `segments` lets you mix colors and insert line breaks while keeping
- * a single continuous stagger sequence across the whole line.
+ * a single continuous stagger sequence across the whole line. Used for
+ * plain filled text (no outline/stroke), where per-letter kerning drift
+ * isn't visually noticeable.
  */
 type TypedSegment = { text: string; color?: string } | { break: true };
 
@@ -34,7 +77,6 @@ function TypedLine({
   inView,
   charDelay = 0.045,
   startDelay = 0,
-  variant = "fill",
 }: {
   segments: TypedSegment[];
   className?: string;
@@ -42,12 +84,6 @@ function TypedLine({
   inView: boolean;
   charDelay?: number;
   startDelay?: number;
-  /** "outline" strokes each letter directly (hollow look), instead of
-   *  relying on the .contact-outline class's data-text ghost overlay —
-   *  per-letter spans don't kern identically to a normal text run, so
-   *  overlaying a separate full-word stroke behind them causes visible
-   *  misalignment/doubling. Stroking each letter itself avoids that. */
-  variant?: "fill" | "outline";
 }) {
   let counter = 0;
   return (
@@ -73,13 +109,7 @@ function TypedLine({
               style={{
                 display: "inline-block",
                 whiteSpace: char === " " ? "pre" : "normal",
-                ...(variant === "outline"
-                  ? {
-                      color: "transparent",
-                      WebkitTextFillColor: "transparent",
-                      WebkitTextStroke: "clamp(2px, 0.26vw, 4px) #CEFF1A",
-                    }
-                  : { color: seg.color }),
+                color: seg.color,
               }}
             >
               {char}
@@ -154,7 +184,7 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
         <div className="contact-grid">
 
           <div className="contact-heading">
-            <TypedLine
+            <TypedOutlineLine
               inView={inView}
               className="contact-outline"
               style={{
@@ -165,12 +195,12 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
                 width: "max-content",
                 maxWidth: "100%",
               }}
-              startDelay={0.15}
-              variant="outline"
-              segments={[{ text: "GOT A VISION?" }]}
+              delay={0.15}
+              duration={0.7}
+              text="GOT A VISION?"
             />
 
-            <TypedLine
+            <TypedOutlineLine
               inView={inView}
               className="contact-outline"
               style={{
@@ -181,9 +211,9 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
                 width: "max-content",
                 maxWidth: "100%",
               }}
-              startDelay={0.15 + "GOT A VISION?".length * 0.045 + 0.15}
-              variant="outline"
-              segments={[{ text: "I'D LOVE TO" }]}
+              delay={0.15 + 0.7 + 0.15}
+              duration={0.7}
+              text="I'D LOVE TO"
             />
 
             <TypedLine
@@ -196,10 +226,7 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
                 letterSpacing: "-0.015em",
                 marginBottom: "28px",
               }}
-              startDelay={
-                0.15 + "GOT A VISION?".length * 0.045 + 0.15 +
-                "I'D LOVE TO".length * 0.045 + 0.15
-              }
+              startDelay={0.15 + 0.7 + 0.15 + 0.7 + 0.15}
               segments={[
                 { text: "HEAR ALL", color: "#F5F6FC" },
                 { break: true },
