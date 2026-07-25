@@ -484,6 +484,10 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
           .contact-start-wrap {
             justify-content: center;
           }
+          .contact-info-col {
+            align-items: center;
+            text-align: center;
+          }
           #contact {
             padding: 48px 0 !important;
           }
