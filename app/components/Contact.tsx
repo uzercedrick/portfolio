@@ -34,6 +34,7 @@ function TypedLine({
   inView,
   charDelay = 0.045,
   startDelay = 0,
+  variant = "fill",
 }: {
   segments: TypedSegment[];
   className?: string;
@@ -41,18 +42,16 @@ function TypedLine({
   inView: boolean;
   charDelay?: number;
   startDelay?: number;
+  /** "outline" strokes each letter directly (hollow look), instead of
+   *  relying on the .contact-outline class's data-text ghost overlay —
+   *  per-letter spans don't kern identically to a normal text run, so
+   *  overlaying a separate full-word stroke behind them causes visible
+   *  misalignment/doubling. Stroking each letter itself avoids that. */
+  variant?: "fill" | "outline";
 }) {
-  // Flatten to plain text for the `data-text` attribute — the outlined
-  // heading style (.contact-outline) reads this via CSS `content: attr(data-text)`
-  // to draw the lime stroke ghost behind the animated letters. Without it,
-  // the outline never renders.
-  const plainText = segments
-    .map((seg) => ("break" in seg ? " " : seg.text))
-    .join("");
-
   let counter = 0;
   return (
-    <motion.h3 className={className} data-text={plainText} style={style}>
+    <motion.h3 className={className} style={style}>
       {segments.map((seg, si) => {
         if ("break" in seg) return <br key={`br-${si}`} />;
         return seg.text.split("").map((char, ci) => {
@@ -73,8 +72,14 @@ function TypedLine({
               }}
               style={{
                 display: "inline-block",
-                color: seg.color,
                 whiteSpace: char === " " ? "pre" : "normal",
+                ...(variant === "outline"
+                  ? {
+                      color: "transparent",
+                      WebkitTextFillColor: "transparent",
+                      WebkitTextStroke: "clamp(2px, 0.26vw, 4px) #CEFF1A",
+                    }
+                  : { color: seg.color }),
               }}
             >
               {char}
@@ -161,6 +166,7 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
                 maxWidth: "100%",
               }}
               startDelay={0.15}
+              variant="outline"
               segments={[{ text: "GOT A VISION?" }]}
             />
 
@@ -176,6 +182,7 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
                 maxWidth: "100%",
               }}
               startDelay={0.15 + "GOT A VISION?".length * 0.045 + 0.15}
+              variant="outline"
               segments={[{ text: "I'D LOVE TO" }]}
             />
 
