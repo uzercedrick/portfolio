@@ -35,6 +35,26 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
     else setInternalOpen(false);
   };
 
+  // Forces an actual file download instead of opening the PDF in a new tab
+  const downloadResume = async () => {
+    try {
+      const response = await fetch("/resume.pdf");
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "Jhon-Cedrick-Nungay-Resume.pdf";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Resume download failed:", err);
+    }
+  };
+
   const formOpen = isFormOpen !== undefined ? isFormOpen : internalOpen;
 
   return (
@@ -84,17 +104,15 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
                 HEAR ALL<br />ABOUT <span style={{ color: "#CEFF1A" }}>IT.</span>
             </motion.h3>
 
-            <motion.a
+            <motion.button
               initial={{ opacity: 0, y: 20 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.55, delay: 0.28, ease: E }}
-              href="/resume.pdf"
-              target="_blank"
-              rel="noopener noreferrer"
+              onClick={downloadResume}
               className="btn-resume"
             >
-              VIEW RESUME <span style={{ fontSize: "14px" }}>↓</span>
-            </motion.a>
+              DOWNLOAD RESUME <span style={{ fontSize: "14px" }}>↓</span>
+            </motion.button>
 
           </div>
 
