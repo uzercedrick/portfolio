@@ -59,13 +59,17 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
 
   return (
     <section id="contact" ref={ref} style={{ background: "#14141A", padding: "clamp(48px, 6vw, 80px) 0" }}>
-      {/* Inline style guarantees this wins over the global .container max-width (1100px) */}
+      {/*
+        Project section renders at max-w-7xl (1280px) with px-5 (20px) side padding.
+        This is set wider (1440px) than that, with matching 20px side padding, and
+        centered the same way (margin/mx auto) so both sections align visually.
+      */}
       <div
         style={{
           width: "100%",
-          maxWidth: "1300px",
+          maxWidth: "1440px",
           margin: "0 auto",
-          padding: "0 24px",
+          padding: "0 20px",
           boxSizing: "border-box",
         }}
       >
