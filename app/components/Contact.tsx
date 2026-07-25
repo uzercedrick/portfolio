@@ -51,7 +51,7 @@ function TypedOutlineLine({
       initial={{ clipPath: "inset(0 100% 0 0)" }}
       animate={
         inView
-          ? { clipPath: "inset(0 0% 0 0)" }
+          ? { clipPath: "inset(0 -10px 0 0)" }
           : { clipPath: "inset(0 100% 0 0)" }
       }
       transition={{ duration, ease: E, delay }}
