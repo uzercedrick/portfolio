@@ -318,10 +318,10 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
             </h2>
 
             {/* Mobile wording: regrouped + smaller so it doesn't wrap into 3 lines */}
-            <h2 className="fd cta-mobile" style={{ color:"#CEFF1A", fontSize:"clamp(20px,6.5vw,28px)", lineHeight:1.05, letterSpacing:"0.01em", margin:0 }}>
+            <h2 className="fd cta-mobile" style={{ color:"#CEFF1A", fontSize:"clamp(15px,5vw,21px)", lineHeight:1.1, letterSpacing:"0.01em", margin:0, whiteSpace:"nowrap" }}>
               LET&apos;S MAKE SOMETHING
             </h2>
-            <h2 className="fd cta-mobile" style={{ color:"#CEFF1A", fontSize:"clamp(20px,6.5vw,28px)", lineHeight:1.05, letterSpacing:"0.01em", margin:0 }}>
+            <h2 className="fd cta-mobile" style={{ color:"#CEFF1A", fontSize:"clamp(15px,5vw,21px)", lineHeight:1.1, letterSpacing:"0.01em", margin:0, whiteSpace:"nowrap" }}>
               TOGETHER
             </h2>
 

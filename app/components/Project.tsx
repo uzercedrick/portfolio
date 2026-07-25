@@ -193,9 +193,9 @@ export default function ProjectsSection() {
           <span style={{ color: TOKENS.accent }}>MY PROJECTS !</span>
         </h2>
 
-        {/* Increased gaps here: from gap-7 sm:gap-10 → gap-10 sm:gap-14 */}
-        <div className="flex flex-col sm:flex-row sm:justify-center gap-10 sm:gap-14">
-          {PROJECTS.map((p, idx) => (
+        {/* Exact gap values you wanted: mobile = 14, desktop = 20 */}
+        <div className="flex flex-col sm:flex-row sm:justify-center gap-14 sm:gap-20">
+          {PROJECTS.map((p) => (
             <div 
               key={p.index} 
               className="w-full sm:w-auto sm:flex-1 sm:max-w-[460px]"
