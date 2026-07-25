@@ -20,6 +20,56 @@ type ContactProps = {
   onCloseForm?: () => void;
 };
 
+/**
+ * Renders a line of text as individually-animated <span> characters.
+ * `segments` lets you mix colors and insert line breaks while keeping
+ * a single continuous stagger sequence across the whole line.
+ */
+type TypedSegment = { text: string; color?: string } | { break: true };
+
+function TypedLine({
+  segments,
+  className,
+  style,
+  inView,
+  charDelay = 0.028,
+  startDelay = 0,
+}: {
+  segments: TypedSegment[];
+  className?: string;
+  style?: React.CSSProperties;
+  inView: boolean;
+  charDelay?: number;
+  startDelay?: number;
+}) {
+  let counter = 0;
+  return (
+    <motion.h3 className={className} style={style}>
+      {segments.map((seg, si) => {
+        if ("break" in seg) return <br key={`br-${si}`} />;
+        return seg.text.split("").map((char, ci) => {
+          const idx = counter++;
+          return (
+            <motion.span
+              key={`${si}-${ci}`}
+              initial={{ opacity: 0 }}
+              animate={inView ? { opacity: 1 } : { opacity: 0 }}
+              transition={{ duration: 0.01, delay: startDelay + idx * charDelay }}
+              style={{
+                display: "inline-block",
+                color: seg.color,
+                whiteSpace: char === " " ? "pre" : "normal",
+              }}
+            >
+              {char}
+            </motion.span>
+          );
+        });
+      })}
+    </motion.h3>
+  );
+}
+
 export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: ContactProps) {
   const ref = useRef<HTMLElement>(null);
   const inView = useInView(ref, { once: true, margin: "-60px 0px" });
@@ -83,37 +133,57 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
         <div className="contact-grid">
 
           <div className="contact-heading">
-            <motion.h3
-              initial={{ opacity: 0, y:28 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.65, delay: 0.06, ease: E }}
+            <TypedLine
+              inView={inView}
               className="contact-outline"
-              data-text="GOT A VISION?"
-              style={{ fontSize: "clamp(36px, 4.2vw, 56px)", lineHeight: 0.98, letterSpacing: "-0.015em", margin: 0 }}
-            >
-              GOT A VISION?
-            </motion.h3>
+              style={{
+                fontSize: "clamp(36px, 4.2vw, 56px)",
+                lineHeight: 0.98,
+                letterSpacing: "-0.015em",
+                margin: 0,
+                width: "max-content",
+                maxWidth: "100%",
+              }}
+              startDelay={0.06}
+              segments={[{ text: "GOT A VISION?" }]}
+            />
 
-            <motion.h3
-              initial={{ opacity: 0, y: 28 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.65, delay: 0.1, ease: E }}
+            <TypedLine
+              inView={inView}
               className="contact-outline"
-              data-text="I'D LOVE TO"
-              style={{ fontSize: "clamp(36px, 4.2vw, 56px)", lineHeight: 0.98, letterSpacing: "-0.015em", margin: "0.1em 0 0.12em" }}
-            >
-              I&apos;D LOVE TO
-            </motion.h3>
+              style={{
+                fontSize: "clamp(36px, 4.2vw, 56px)",
+                lineHeight: 0.98,
+                letterSpacing: "-0.015em",
+                margin: "0.1em 0 0.12em",
+                width: "max-content",
+                maxWidth: "100%",
+              }}
+              startDelay={0.06 + "GOT A VISION?".length * 0.028 + 0.08}
+              segments={[{ text: "I'D LOVE TO" }]}
+            />
 
-            <motion.h3
-              initial={{ opacity: 0, y: 28 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.65, delay: 0.18, ease: E }}
+            <TypedLine
+              inView={inView}
               className="fd"
-              style={{ color: "#F5F6FC", fontSize: "clamp(36px, 4.2vw, 56px)", lineHeight: 0.98, letterSpacing: "-0.015em", marginBottom: "28px" }}
-            >
-                HEAR ALL<br />ABOUT <span style={{ color: "#CEFF1A" }}>IT.</span>
-            </motion.h3>
+              style={{
+                color: "#F5F6FC",
+                fontSize: "clamp(36px, 4.2vw, 56px)",
+                lineHeight: 0.98,
+                letterSpacing: "-0.015em",
+                marginBottom: "28px",
+              }}
+              startDelay={
+                0.06 + "GOT A VISION?".length * 0.028 + 0.08 +
+                "I'D LOVE TO".length * 0.028 + 0.08
+              }
+              segments={[
+                { text: "HEAR ALL", color: "#F5F6FC" },
+                { break: true },
+                { text: "ABOUT ", color: "#F5F6FC" },
+                { text: "IT.", color: "#CEFF1A" },
+              ]}
+            />
 
             <motion.button
               type="button"
@@ -329,7 +399,7 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
           display: grid;
           grid-template-columns: max-content max-content;
           justify-content: center;
-          column-gap: clamp(32px, 5vw, 56px);
+          column-gap: clamp(16px, 2.5vw, 28px);
           row-gap: clamp(32px, 4vw, 48px);
         }
 
