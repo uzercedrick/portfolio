@@ -309,12 +309,22 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
             transition={{ duration: 0.7, delay: 0.55, ease: E }}
             className="contact-cta-text"
           >
-            <h2 className="fd" style={{ color:"#CEFF1A", fontSize:"clamp(28px,3.5vw,44px)", lineHeight:1.0, letterSpacing:"0.01em", margin:0 }}>
+            {/* Desktop wording: fits "SOMETHING TOGETHER" on one line */}
+            <h2 className="fd cta-desktop" style={{ color:"#CEFF1A", fontSize:"clamp(28px,3.5vw,44px)", lineHeight:1.0, letterSpacing:"0.01em", margin:0 }}>
               LET&apos;S MAKE
             </h2>
-            <h2 className="fd" style={{ color:"#CEFF1A", fontSize:"clamp(28px,3.5vw,44px)", lineHeight:1.0, letterSpacing:"0.01em", margin:0 }}>
+            <h2 className="fd cta-desktop" style={{ color:"#CEFF1A", fontSize:"clamp(28px,3.5vw,44px)", lineHeight:1.0, letterSpacing:"0.01em", margin:0 }}>
               SOMETHING TOGETHER
             </h2>
+
+            {/* Mobile wording: regrouped + smaller so it doesn't wrap into 3 lines */}
+            <h2 className="fd cta-mobile" style={{ color:"#CEFF1A", fontSize:"clamp(20px,6.5vw,28px)", lineHeight:1.05, letterSpacing:"0.01em", margin:0 }}>
+              LET&apos;S MAKE SOMETHING
+            </h2>
+            <h2 className="fd cta-mobile" style={{ color:"#CEFF1A", fontSize:"clamp(20px,6.5vw,28px)", lineHeight:1.05, letterSpacing:"0.01em", margin:0 }}>
+              TOGETHER
+            </h2>
+
             <p className="fd" style={{ color:"#F5F6FC", fontSize:"clamp(16px,2vw,24px)", lineHeight:1.1, letterSpacing:"0.01em", margin:"8px 0 0 0" }}>
               PROMISE I DON&apos;T <span style={{ color:"#CEFF1A" }}>BITE</span>
             </p>
@@ -482,12 +492,17 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
             font-size: 10px;
           }
         }
+        .cta-desktop { display: block; }
+        .cta-mobile { display: none; }
+
         @media (max-width: 480px) {
           .btn-start {
-            width: 72px;
-            height: 72px;
-            font-size: 10px;
+            width: 82px;
+            height: 82px;
+            font-size: 11px;
           }
+          .cta-desktop { display: none; }
+          .cta-mobile { display: block; }
           .contact-row {
             gap: 10px !important;
           }

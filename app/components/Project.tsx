@@ -193,11 +193,12 @@ export default function ProjectsSection() {
           <span style={{ color: TOKENS.accent }}>MY PROJECTS !</span>
         </h2>
 
-        <div className="flex flex-col sm:flex-row sm:justify-center gap-7 sm:gap-10">
+        {/* Increased gaps here: from gap-7 sm:gap-10 → gap-10 sm:gap-14 */}
+        <div className="flex flex-col sm:flex-row sm:justify-center gap-10 sm:gap-14">
           {PROJECTS.map((p, idx) => (
             <div 
               key={p.index} 
-              className={`w-full sm:w-auto sm:flex-1 sm:max-w-[460px] ${idx === 1 ? 'mobile-gap' : ''}`}
+              className="w-full sm:w-auto sm:flex-1 sm:max-w-[460px]"
             >
               <ProjectCard project={p} />
             </div>
@@ -225,10 +226,6 @@ export default function ProjectsSection() {
           .project-card {
             min-height: 300px !important;
             max-width: 90% !important;
-          }
-          /* Balanced extra space only for mobile */
-          .mobile-gap {
-            margin-top: 1.5rem !important; /* ~24px — perfect middle ground */
           }
         }
       `}</style>
