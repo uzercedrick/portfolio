@@ -463,6 +463,9 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
           row-gap: clamp(32px, 4vw, 48px);
         }
 
+        .cta-desktop { display: block; }
+        .cta-mobile { display: none; }
+
         @media (max-width: 900px) {
           .contact-grid {
             grid-template-columns: 1fr;
@@ -484,6 +487,8 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
           #contact {
             padding: 48px 0 !important;
           }
+          .cta-desktop { display: none; }
+          .cta-mobile { display: block; }
         }
         @media (max-width: 768px) {
           .btn-start {
@@ -492,8 +497,6 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
             font-size: 10px;
           }
         }
-        .cta-desktop { display: block; }
-        .cta-mobile { display: none; }
 
         @media (max-width: 480px) {
           .btn-start {
@@ -501,8 +504,6 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
             height: 82px;
             font-size: 11px;
           }
-          .cta-desktop { display: none; }
-          .cta-mobile { display: block; }
           .contact-row {
             gap: 10px !important;
           }
