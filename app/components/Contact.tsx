@@ -48,11 +48,11 @@ function TypedOutlineLine({
       className={className}
       data-text={text}
       style={style}
-      initial={{ clipPath: "inset(0 100% 0 0)" }}
+      initial={{ clipPath: "inset(0 100% 0 -10px)" }}
       animate={
         inView
-          ? { clipPath: "inset(0 -10px 0 0)" }
-          : { clipPath: "inset(0 100% 0 0)" }
+          ? { clipPath: "inset(0 -10px 0 -10px)" }
+          : { clipPath: "inset(0 100% 0 -10px)" }
       }
       transition={{ duration, ease: E, delay }}
     >
