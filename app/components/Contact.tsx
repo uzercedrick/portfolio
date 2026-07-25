@@ -59,7 +59,16 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
 
   return (
     <section id="contact" ref={ref} style={{ background: "#14141A", padding: "clamp(48px, 6vw, 80px) 0" }}>
-      <div className="container contact-container">
+      {/* Inline style guarantees this wins over the global .container max-width (1100px) */}
+      <div
+        style={{
+          width: "100%",
+          maxWidth: "1300px",
+          margin: "0 auto",
+          padding: "0 24px",
+          boxSizing: "border-box",
+        }}
+      >
 
         <div className="contact-top">
           <div className="contact-heading">
@@ -212,11 +221,6 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
           font-family: var(--font-zalando-expanded), "Arial Black", Impact, system-ui, sans-serif;
           font-weight: 900;
           text-transform: uppercase;
-        }
-
-        .contact-container {
-          max-width: 1300px;
-          margin: 0 auto;
         }
 
         .contact-outline {
