@@ -74,7 +74,14 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
         }}
       >
 
-        <div className="contact-top">
+        {/*
+          Shared 2-column grid: row 1 = heading + contact info, row 2 = closing CTA + Start.
+          Because both rows sit in the SAME grid (same two columns), column 1 always shares
+          one left edge across both rows, and column 2 shares another — so the closing CTA
+          text lines up with the heading/download button, and Start sits right next to it.
+        */}
+        <div className="contact-grid">
+
           <div className="contact-heading">
             <motion.h3
               initial={{ opacity: 0, y:28 }}
@@ -131,7 +138,6 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
                 borderRadius: "6px",
                 cursor: "pointer",
                 transition: "all .2s ease",
-                marginBottom: "20px",
               }}
               onMouseEnter={(e) => {
                 const el = e.currentTarget as HTMLButtonElement;
@@ -148,10 +154,9 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
             >
               DOWNLOAD RESUME <span style={{ fontSize: "14px" }}>↓</span>
             </motion.button>
-
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "clamp(28px, 3vw, 40px)" }}>
+          <div className="contact-info-col">
             {CONTACT_ITEMS.map(({ eyebrow, Icon, text, href }, i) => (
               <motion.div
                 key={eyebrow}
@@ -177,23 +182,13 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
               </motion.div>
             ))}
           </div>
-        </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 44 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.7, delay: 0.55, ease: E }}
-          style={{
-            display:        "flex",
-            alignItems:     "center",
-            justifyContent: "center",
-            gap:            "clamp(24px, 4vw, 48px)",
-            width:          "100%",
-            marginTop:      "16px",
-            flexWrap: "wrap",
-          }}
-        >
-          <div>
+          <motion.div
+            initial={{ opacity: 0, y: 44 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.7, delay: 0.55, ease: E }}
+            className="contact-cta-text"
+          >
             <h2 className="fd" style={{ color:"#CEFF1A", fontSize:"clamp(28px,3.5vw,44px)", lineHeight:1.0, letterSpacing:"0.01em", margin:0 }}>
               LET&apos;S MAKE
             </h2>
@@ -203,18 +198,26 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
             <p className="fd" style={{ color:"#F5F6FC", fontSize:"clamp(16px,2vw,24px)", lineHeight:1.1, letterSpacing:"0.01em", margin:"8px 0 0 0" }}>
               PROMISE I DON&apos;T <span style={{ color:"#CEFF1A" }}>BITE</span>
             </p>
-          </div>
+          </motion.div>
 
-          <motion.button
-            onClick={openForm}
-            className="btn-start"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            style={{ textTransform:"uppercase", flexShrink:0, fontSize:12 }}
+          <motion.div
+            initial={{ opacity: 0, y: 44 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.7, delay: 0.6, ease: E }}
+            className="contact-start-wrap"
           >
-            START
-          </motion.button>
-        </motion.div>
+            <motion.button
+              onClick={openForm}
+              className="btn-start"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              style={{ textTransform:"uppercase", flexShrink:0, fontSize:11 }}
+            >
+              START
+            </motion.button>
+          </motion.div>
+
+        </div>
 
       </div>
 
@@ -253,12 +256,32 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
 
         .contact-heading {
           max-width: 720px;
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 20px;
+        }
+
+        .contact-info-col {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(28px, 3vw, 40px);
+        }
+
+        .contact-cta-text {
+          display: flex;
+          flex-direction: column;
+        }
+
+        .contact-start-wrap {
+          display: flex;
+          align-items: center;
+          justify-content: flex-start;
         }
 
         .btn-start {
-          /* Wider on desktop to match official CTA style */
-          width: clamp(110px, 12vw, 130px);
-          height: clamp(110px, 12vw, 130px);
+          width: clamp(90px, 9vw, 108px);
+          height: clamp(90px, 9vw, 108px);
           border-radius: 50%;
           background: #CEFF1A;
           color: #14141A;
@@ -272,8 +295,8 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
           transition: all 0.25s ease;
           flex-shrink: 0;
           box-shadow: 0 0 15px rgba(206, 255, 26, 0.2);
-          min-width: 80px; /* Minimum touch target size */
-          min-height: 80px;
+          min-width: 70px;
+          min-height: 70px;
         }
         .btn-start:hover {
           background: #D8FF48;
@@ -301,20 +324,32 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
         .contact-row:hover .contact-text {
           color: #CEFF1A;
         }
-        .contact-top {
-          display: flex;
-          flex-wrap: wrap;
+
+        .contact-grid {
+          display: grid;
+          grid-template-columns: max-content max-content;
           justify-content: center;
-          align-items: flex-start;
-          gap: clamp(40px, 5vw, 64px);
-          margin-bottom: clamp(24px, 3vw, 32px);
+          column-gap: clamp(32px, 5vw, 56px);
+          row-gap: clamp(32px, 4vw, 48px);
         }
+
         @media (max-width: 900px) {
-          .contact-top {
-            flex-direction: column;
+          .contact-grid {
+            grid-template-columns: 1fr;
+            justify-items: center;
+            row-gap: 32px;
+          }
+          .contact-heading {
             align-items: center;
-            gap: 36px;
-            margin-bottom: 24px;
+            text-align: center;
+            max-width: 100%;
+          }
+          .contact-cta-text {
+            align-items: center;
+            text-align: center;
+          }
+          .contact-start-wrap {
+            justify-content: center;
           }
           #contact {
             padding: 48px 0 !important;
@@ -322,16 +357,16 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
         }
         @media (max-width: 768px) {
           .btn-start {
-            width: 90px;
-            height: 90px;
-            font-size: 11px;
+            width: 80px;
+            height: 80px;
+            font-size: 10px;
           }
         }
         @media (max-width: 480px) {
           .btn-start {
-            width: 80px;
-            height: 80px;
-            font-size: 11px;
+            width: 72px;
+            height: 72px;
+            font-size: 10px;
           }
           .contact-row {
             gap: 10px !important;
