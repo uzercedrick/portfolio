@@ -291,9 +291,9 @@ export default function Hero({ openContactForm }: HeroProps) {
                   }}
                   onMouseEnter={(e) => {
                     const el = e.currentTarget as HTMLButtonElement;
-                    el.style.background = "#CEFF1A";
+                    el.style.background = "#F5F6FC";
                     el.style.color = "#14141A";
-                    el.style.borderColor = "#CEFF1A";
+                    el.style.borderColor = "#F5F6FC";
                   }}
                   onMouseLeave={(e) => {
                     const el = e.currentTarget as HTMLButtonElement;

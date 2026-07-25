@@ -105,11 +105,42 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
             </motion.h3>
 
             <motion.button
+              type="button"
               initial={{ opacity: 0, y: 20 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.55, delay: 0.28, ease: E }}
               onClick={downloadResume}
-              className="btn-resume"
+              className={mono.className}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "10px",
+                background: "transparent",
+                color: "#F5F6FC",
+                border: "2px solid #F5F6FC",
+                fontWeight: 700,
+                fontSize: "clamp(14px, 1.6vw, 16px)",
+                letterSpacing: "0.14em",
+                textTransform: "uppercase",
+                padding: "18px 40px",
+                borderRadius: "6px",
+                cursor: "pointer",
+                transition: "all .2s ease",
+                marginBottom: "20px",
+              }}
+              onMouseEnter={(e) => {
+                const el = e.currentTarget as HTMLButtonElement;
+                el.style.background = "#F5F6FC";
+                el.style.color = "#14141A";
+                el.style.borderColor = "#F5F6FC";
+              }}
+              onMouseLeave={(e) => {
+                const el = e.currentTarget as HTMLButtonElement;
+                el.style.background = "transparent";
+                el.style.color = "#F5F6FC";
+                el.style.borderColor = "#F5F6FC";
+              }}
             >
               DOWNLOAD RESUME <span style={{ fontSize: "14px" }}>↓</span>
             </motion.button>
@@ -231,30 +262,6 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
 
         .contact-heading {
           max-width: 720px;
-        }
-
-        .btn-resume {
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          background: #CEFF1A;
-          color: #14141A;
-          font-family: "Ubuntu Sans Mono", monospace;
-          font-weight: 500;
-          font-size: clamp(15px, 1.3vw, 19px);
-          letter-spacing: 0.02em;
-          text-transform: uppercase;
-          padding: 12px 20px;
-          text-decoration: none;
-          border-radius: 6px;
-          border: none;
-          cursor: pointer;
-          transition: background 0.25s ease, transform 0.2s ease;
-          margin-bottom: 20px;
-        }
-        .btn-resume:hover {
-          background: #D8FF48;
-          transform: translateY(-2px);
         }
 
         .btn-start {
