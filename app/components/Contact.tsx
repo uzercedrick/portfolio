@@ -32,7 +32,7 @@ function TypedLine({
   className,
   style,
   inView,
-  charDelay = 0.028,
+  charDelay = 0.045,
   startDelay = 0,
 }: {
   segments: TypedSegment[];
@@ -42,9 +42,17 @@ function TypedLine({
   charDelay?: number;
   startDelay?: number;
 }) {
+  // Flatten to plain text for the `data-text` attribute — the outlined
+  // heading style (.contact-outline) reads this via CSS `content: attr(data-text)`
+  // to draw the lime stroke ghost behind the animated letters. Without it,
+  // the outline never renders.
+  const plainText = segments
+    .map((seg) => ("break" in seg ? " " : seg.text))
+    .join("");
+
   let counter = 0;
   return (
-    <motion.h3 className={className} style={style}>
+    <motion.h3 className={className} data-text={plainText} style={style}>
       {segments.map((seg, si) => {
         if ("break" in seg) return <br key={`br-${si}`} />;
         return seg.text.split("").map((char, ci) => {
@@ -52,9 +60,17 @@ function TypedLine({
           return (
             <motion.span
               key={`${si}-${ci}`}
-              initial={{ opacity: 0 }}
-              animate={inView ? { opacity: 1 } : { opacity: 0 }}
-              transition={{ duration: 0.01, delay: startDelay + idx * charDelay }}
+              initial={{ opacity: 0, y: 8, filter: "blur(2px)" }}
+              animate={
+                inView
+                  ? { opacity: 1, y: 0, filter: "blur(0px)" }
+                  : { opacity: 0, y: 8, filter: "blur(2px)" }
+              }
+              transition={{
+                duration: 0.4,
+                ease: E,
+                delay: startDelay + idx * charDelay,
+              }}
               style={{
                 display: "inline-block",
                 color: seg.color,
@@ -144,7 +160,7 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
                 width: "max-content",
                 maxWidth: "100%",
               }}
-              startDelay={0.06}
+              startDelay={0.15}
               segments={[{ text: "GOT A VISION?" }]}
             />
 
@@ -159,7 +175,7 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
                 width: "max-content",
                 maxWidth: "100%",
               }}
-              startDelay={0.06 + "GOT A VISION?".length * 0.028 + 0.08}
+              startDelay={0.15 + "GOT A VISION?".length * 0.045 + 0.15}
               segments={[{ text: "I'D LOVE TO" }]}
             />
 
@@ -174,8 +190,8 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
                 marginBottom: "28px",
               }}
               startDelay={
-                0.06 + "GOT A VISION?".length * 0.028 + 0.08 +
-                "I'D LOVE TO".length * 0.028 + 0.08
+                0.15 + "GOT A VISION?".length * 0.045 + 0.15 +
+                "I'D LOVE TO".length * 0.045 + 0.15
               }
               segments={[
                 { text: "HEAR ALL", color: "#F5F6FC" },
