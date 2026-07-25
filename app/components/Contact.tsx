@@ -186,7 +186,7 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
           style={{
             display:        "flex",
             alignItems:     "center",
-            justifyContent: "flex-start",
+            justifyContent: "center",
             gap:            "clamp(24px, 4vw, 48px)",
             width:          "100%",
             marginTop:      "16px",
@@ -302,15 +302,17 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
           color: #CEFF1A;
         }
         .contact-top {
-          display: grid;
-          grid-template-columns: minmax(0, 1.05fr) minmax(360px, 0.95fr);
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          align-items: flex-start;
           gap: clamp(40px, 5vw, 64px);
-          align-items: start;
           margin-bottom: clamp(24px, 3vw, 32px);
         }
         @media (max-width: 900px) {
           .contact-top {
-            grid-template-columns: 1fr;
+            flex-direction: column;
+            align-items: center;
             gap: 36px;
             margin-bottom: 24px;
           }
