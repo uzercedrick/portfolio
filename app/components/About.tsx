@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import Image from "next/image";
 import { motion, useInView, AnimatePresence, PanInfo } from "framer-motion";
 import { mono, zalando } from "../fonts";
@@ -59,8 +59,39 @@ const TILT = [-2, 0, 2];
 function SkillCurve({ inView }: { inView: boolean }) {
   const [active, setActive] = useState(0);
   const trackRef = useRef<HTMLDivElement>(null);
+  const svgRef = useRef<SVGSVGElement>(null);
   const touchStartY = useRef(0);
   const gestureLocked = useRef(false);
+
+  // Track scroll + viewport size to map cards to the curve
+  const [scrollState, setScrollState] = useState({
+    scrollLeft: 0,
+    clientWidth: 0,
+    svgHeight: 120,
+  });
+
+  useEffect(() => {
+    const track = trackRef.current;
+    const svg = svgRef.current;
+    if (!track) return;
+
+    const updateState = () => {
+      setScrollState({
+        scrollLeft: track.scrollLeft,
+        clientWidth: track.clientWidth,
+        svgHeight: svg?.clientHeight || 120,
+      });
+    };
+
+    updateState();
+    track.addEventListener("scroll", updateState, { passive: true });
+    window.addEventListener("resize", updateState);
+
+    return () => {
+      track.removeEventListener("scroll", updateState);
+      window.removeEventListener("resize", updateState);
+    };
+  }, []);
 
   const goTo = (i: number) => {
     const el = trackRef.current;
@@ -104,6 +135,7 @@ function SkillCurve({ inView }: { inView: boolean }) {
   return (
     <div className="relative w-full">
       <svg
+        ref={svgRef}
         viewBox="0 0 1200 120"
         preserveAspectRatio="none"
         className="pointer-events-none absolute inset-x-0 top-[46px] block h-[44px] w-full md:top-[30px] md:h-[120px]"
@@ -126,54 +158,76 @@ function SkillCurve({ inView }: { inView: boolean }) {
         onWheel={handleWheel}
         className="no-scrollbar relative flex w-full snap-x snap-mandatory overflow-x-auto overscroll-y-none scroll-smooth pt-10 pb-6"
       >
-        {CATEGORIES.map((cat, i) => (
-          <motion.div
-            key={cat.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.5, delay: 0.1 + i * 0.15, ease: EASE }}
-            className={`flex w-full flex-shrink-0 snap-always flex-col items-center px-[5vw] text-center ${
-              i === 0 ? "snap-start" : i === CATEGORIES.length - 1 ? "snap-end" : "snap-center"
-            }`}
-          >
-            <span
-              className="block font-black leading-[0.8] tracking-[-0.03em] text-transparent"
-              style={{
-                fontFamily: zalando.style.fontFamily,
-                fontSize: "clamp(70px, 9vw, 110px)",
-                WebkitTextStroke: "1.8px #CEFF1A",
-                transform: `rotate(${TILT[i]}deg)`,
-                margin: "0 0 8px 0",
-              }}
-            >
-              {cat.number}
-            </span>
+        {CATEGORIES.map((cat, i) => {
+          const { scrollLeft, clientWidth, svgHeight } = scrollState;
+          const w = clientWidth || 1;
+          // Card center position in viewport coordinates
+          const xView = i * w - scrollLeft + w / 2;
+          // Map to curve t (0 = left end, 1 = right end of viewport)
+          const t = xView / w;
+          // Quadratic Bézier y-offset (matches your SVG curve)
+          const deltaYViewbox = 160 * t * (t - 1);
+          const scale = svgHeight / 120;
+          const deltaYPx = deltaYViewbox * scale;
+          // Curve tangent → slight tilt to follow the curve
+          const slope = (2 * t - 1) / 7.5;
+          const angle = Math.atan(slope) * (180 / Math.PI);
+          const totalY = inView ? deltaYPx : 20;
 
-            <span
-              className="inline-block rounded px-4 py-1.5 font-black uppercase tracking-[0.05em] text-[#14141A]"
+          return (
+            <motion.div
+              key={cat.id}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: inView ? 1 : 0 }}
+              transition={{ duration: 0.5, delay: 0.1 + i * 0.15, ease: EASE }}
               style={{
-                fontFamily: zalando.style.fontFamily,
-                fontSize: "clamp(15px, 1.8vw, 20px)",
-                background: ACCENT,
-                transform: `rotate(${TILT[i]}deg)`,
-                margin: "0 0 14px 0",
+                transform: `translateY(${totalY}px) rotate(${angle}deg)`,
+                transition: "transform 0.15s ease-out",
+                willChange: "transform",
               }}
+              className={`flex w-full flex-shrink-0 snap-always flex-col items-center px-[5vw] text-center ${
+                i === 0 ? "snap-start" : i === CATEGORIES.length - 1 ? "snap-end" : "snap-center"
+              }`}
             >
-              • {cat.label} •
-            </span>
+              <span
+                className="block font-black leading-[0.8] tracking-[-0.03em] text-transparent"
+                style={{
+                  fontFamily: zalando.style.fontFamily,
+                  fontSize: "clamp(70px, 9vw, 110px)",
+                  WebkitTextStroke: "1.8px #CEFF1A",
+                  transform: `rotate(${TILT[i]}deg)`,
+                  margin: "0 0 8px 0",
+                }}
+              >
+                {cat.number}
+              </span>
 
-            <p
-              className={`${mono.className} max-w-[550px] text-[#F5F6FC]/80`}
-              style={{
-                fontSize: "clamp(16px, 1.9vw, 20px)",
-                lineHeight: 1.65,
-                margin: 0,
-              }}
-            >
-              {cat.description}
-            </p>
-          </motion.div>
-        ))}
+              <span
+                className="inline-block rounded px-4 py-1.5 font-black uppercase tracking-[0.05em] text-[#14141A]"
+                style={{
+                  fontFamily: zalando.style.fontFamily,
+                  fontSize: "clamp(15px, 1.8vw, 20px)",
+                  background: ACCENT,
+                  transform: `rotate(${TILT[i]}deg)`,
+                  margin: "0 0 14px 0",
+                }}
+              >
+                • {cat.label} •
+              </span>
+
+              <p
+                className={`${mono.className} max-w-[550px] text-[#F5F6FC]/80`}
+                style={{
+                  fontSize: "clamp(16px, 1.9vw, 20px)",
+                  lineHeight: 1.65,
+                  margin: 0,
+                }}
+              >
+                {cat.description}
+              </p>
+            </motion.div>
+          );
+        })}
       </div>
 
       <p
