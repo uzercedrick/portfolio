@@ -59,16 +59,7 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
 
   return (
     <section id="contact" ref={ref} style={{ background: "#14141A", padding: "clamp(48px, 6vw, 80px) 0" }}>
-      <div className="container">
-
-        <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.55, ease: E }}
-          className="sec-label"
-        >
-          CONTACT
-        </motion.h2>
+      <div className="container contact-container">
 
         <div className="contact-top">
           <div className="contact-heading">
@@ -223,17 +214,9 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
           text-transform: uppercase;
         }
 
-        .sec-label {
-          font-family: var(--font-zalando-expanded), "Arial Black", Impact, system-ui, sans-serif;
-          font-weight: 700;
-          text-transform: uppercase;
-          font-size: clamp(18px, 1.8vw, 22px);
-          letter-spacing: 0.08em;
-          color: #CEFF1A;
-          display: inline-block;
-          padding-bottom: 6px;
-          border-bottom: 2px solid #CEFF1A;
-          margin-bottom: clamp(24px, 3vw, 32px);
+        .contact-container {
+          max-width: 1300px;
+          margin: 0 auto;
         }
 
         .contact-outline {
@@ -335,12 +318,6 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
           }
         }
         @media (max-width: 480px) {
-          .sec-label {
-            font-size: 16px;
-            letter-spacing: 0.07em;
-            border-bottom-width: 1.5px;
-            padding-bottom: 5px;
-          }
           .btn-start {
             width: 80px;
             height: 80px;

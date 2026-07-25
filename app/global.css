@@ -3,9 +3,9 @@
 /* Design tokens — every component already references these names */
 @layer base {
   :root {
-    --volt: #CEFF1A;
-    --ink: #14141A;
-    --bone: #F5F6FC;
+    --lime: #CEFF1A;
+    --midnight: #14141A;
+    --icewhite: #F5F6FC;
 
     --bone-90: rgba(245, 246, 252, 0.9);
     --bone-70: rgba(245, 246, 252, 0.7);
