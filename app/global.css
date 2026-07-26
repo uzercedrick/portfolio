@@ -1,146 +1,91 @@
 @import "tailwindcss";
 
-/* Design tokens — every component already references these names */
-@layer base {
-  :root {
-    --volt: #CEFF1A;
-    --ink: #14141A;
-    --bone: #F5F6FC;
-
-    --bone-90: rgba(245, 246, 252, 0.9);
-    --bone-70: rgba(245, 246, 252, 0.7);
-    --bone-55: rgba(245, 246, 252, 0.55);
-    --bone-30: rgba(245, 246, 252, 0.3);
-    --hairline: rgba(245, 246, 252, 0.12);
-    --panel: rgba(245, 246, 252, 0.045);
-
-    --font-display: "Zalando Sans Expanded", "Arial Black", Impact, system-ui, sans-serif;
-    --font-zalando-expanded: var(--font-display);
-    --font-mono: "Ubuntu Sans Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
-    --font-ubuntu-mono: var(--font-mono);
-
-    --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
-    --nav-height: 80px;
-  }
-
-  html {
-    scroll-behavior: smooth;
-    scroll-padding-top: var(--nav-height);
-    -webkit-text-size-adjust: 100%;
-    -webkit-tap-highlight-color: transparent;
-    overscroll-behavior: contain;
-  }
-
-  body {
-    background-color: var(--ink);
-    color: var(--bone);
-    font-family: var(--font-mono);
-    line-height: 1.5;
-    min-height: 100vh;
-    overflow-x: hidden;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: inherit;
-  }
-
-  h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-display);
-    font-weight: 900;
-    line-height: 1.1;
-  }
-
-  a {
-    color: inherit;
-    text-decoration: none;
-    touch-action: manipulation;
-  }
-
-  button {
-    font-family: inherit;
-    color: inherit;
-    background: none;
-    border: none;
-    cursor: pointer;
-    touch-action: manipulation;
-  }
-
-  img {
-    max-width: 100%;
-    height: auto;
-    display: block;
-  }
-
-  ::selection {
-    background: var(--volt);
-    color: var(--ink);
-  }
-
-  a:focus-visible,
-  button:focus-visible,
-  [tabindex]:focus-visible {
-    outline: 2px solid var(--volt);
-    outline-offset: 2px;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    html {
-      scroll-behavior: auto;
-    }
-    *, *::before, *::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-      scroll-behavior: auto !important;
-    }
-  }
-
-  ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
-  }
-  ::-webkit-scrollbar-track {
-    background: var(--ink);
-  }
-  ::-webkit-scrollbar-thumb {
-    background: rgba(206, 255, 26, 0.35);
-    border-radius: 999px;
-    border: 2px solid var(--ink);
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: rgba(206, 255, 26, 0.6);
-  }
+:root {
+  --bg: #14141A;
+  --ice-white: #F5F6FC;
+  --dark-gray: rgba(245, 246, 252, 0.75);
+  --muted-gray: rgba(245, 246, 252, 0.65);
+  --signal: #e63946;
+  --highlight: #ceff1a;
+  color-scheme: dark;
 }
 
-/* Shared classes used across multiple components (Contact, Footer, About, etc.) */
-@layer components {
-  .container {
-    width: 100%;
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 0 24px;
-    box-sizing: border-box;
-  }
-
-  .fd {
-    font-family: var(--font-display);
-    font-weight: 900;
-    text-transform: uppercase;
-  }
-
-  .fb {
-    font-family: var(--font-mono);
-    font-weight: 400;
-  }
-
-  .no-scrollbar::-webkit-scrollbar { display: none; }
-  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+* {
+  box-sizing: border-box;
 }
 
-@media (max-width: 480px) {
-  #hero {
-    min-height: auto !important;
-    padding-top: 12px;
-    padding-bottom: 12px;
-  }
+html,
+body {
+  background: var(--bg);
+  color: var(--ice-white);
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+img,
+picture,
+video {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+::selection {
+  background: var(--highlight);
+  color: var(--bg);
+}
+
+:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 2px;
+}
+
+/* Dark scrollbar to match the theme */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(245, 246, 252, 0.25) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background: rgba(245, 246, 252, 0.2);
+  border-radius: 4px;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(245, 246, 252, 0.35);
+}
+
+/* Utility for horizontally-scrolling tracks (used in About's skill carousel) */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

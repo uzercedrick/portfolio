@@ -59,6 +59,79 @@ export default function Hero({ openContactForm }: HeroProps) {
           .v1-dot-ping { animation: none; opacity: 0; }
         }
 
+        /* ---------- Tech + editorial logo mark (top-left) ---------- */
+        .site-logo {
+          position: fixed;
+          top: 44px;
+          left: 48px;
+          z-index: 50;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          font-family: ui-monospace, "SF Mono", "IBM Plex Mono", "JetBrains Mono", monospace;
+          pointer-events: none;
+          user-select: none;
+        }
+        .site-logo-mark {
+          position: relative;
+          width: 30px;
+          height: 30px;
+          border: 1px solid rgba(245,246,252,0.35);
+          border-radius: 2px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: rgba(20,20,26,0.4);
+          backdrop-filter: blur(4px);
+        }
+        .site-logo-mark::before,
+        .site-logo-mark::after {
+          content: "";
+          position: absolute;
+          width: 5px;
+          height: 5px;
+          border-color: rgba(245,246,252,0.6);
+        }
+        .site-logo-mark::before {
+          top: -1px;
+          left: -1px;
+          border-top: 1px solid;
+          border-left: 1px solid;
+        }
+        .site-logo-mark::after {
+          bottom: -1px;
+          right: -1px;
+          border-bottom: 1px solid;
+          border-right: 1px solid;
+        }
+        .site-logo-mark span {
+          font-weight: 700;
+          font-size: 12px;
+          letter-spacing: 0.02em;
+          color: #F5F6FC;
+        }
+        .site-logo-text {
+          display: flex;
+          flex-direction: column;
+          line-height: 1.15;
+        }
+        .site-logo-name {
+          font-size: 10px;
+          font-weight: 600;
+          letter-spacing: 0.2em;
+          color: rgba(245,246,252,0.85);
+        }
+        .site-logo-sub {
+          font-size: 8px;
+          font-weight: 500;
+          letter-spacing: 0.24em;
+          color: rgba(245,246,252,0.4);
+        }
+        @media (max-width: 900px) {
+          .site-logo { top: 28px; left: 24px; }
+          .site-logo-mark { width: 26px; height: 26px; }
+        }
+
         .hero-section {
           position: relative;
           min-height: 100vh;
@@ -173,36 +246,71 @@ export default function Hero({ openContactForm }: HeroProps) {
         @media (max-width: 900px) {
           .hero-content-wrap {
             flex-direction: column !important;
-            text-align: center !important;
+            align-items: center !important;
             justify-content: center !important;
-            gap: 32px !important;
+            gap: 28px !important;
           }
           .hero-text {
-            text-align: center !important;
-            align-items: center !important;
+            text-align: left !important;
+            align-items: flex-start !important;
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
           }
           .hero-name {
-            font-size: clamp(24px, 6vw, 40px) !important;
-            line-height: 1.1 !important;
+            font-size: clamp(24px, 7vw, 38px) !important;
+            line-height: 1.15 !important;
             white-space: normal !important;
+            text-align: left !important;
           }
           .hero-desc {
-            font-size: clamp(14px, 3.2vw, 16px) !important;
-            line-height: 1.7 !important;
+            font-size: clamp(14px, 4vw, 16px) !important;
+            line-height: 1.75 !important;
             max-width: 100% !important;
-            margin-left: auto !important;
-            margin-right: auto !important;
+            text-align: left !important;
+            margin: 16px 0 24px 0 !important;
           }
           .hero-btn-group {
-            justify-content: center !important;
+            justify-content: flex-start !important;
           }
           .hero-profile-img {
-            width: clamp(240px, 70vw, 360px) !important;
+            width: clamp(220px, 62vw, 340px) !important;
           }
-          .name-row { justify-content: center; }
+          .name-row {
+            justify-content: flex-start !important;
+            text-align: left !important;
+          }
+          .spec-tag {
+            font-size: 8px !important;
+          }
           .coord-label { display: none; }
         }
+
+        /* Extra safety net for very small phones (SE, small Androids) */
+        @media (max-width: 380px) {
+          .hero-desc {
+            font-size: 13.5px !important;
+            line-height: 1.7 !important;
+          }
+          .hero-name {
+            font-size: 22px !important;
+          }
+          .container {
+            padding-left: 20px !important;
+            padding-right: 20px !important;
+          }
+        }
       `}</style>
+
+      <div className="site-logo" aria-hidden="true">
+        <div className="site-logo-mark">
+          <span>JN</span>
+        </div>
+        <div className="site-logo-text">
+          <span className="site-logo-name">JCN</span>
+          <span className="site-logo-sub">DESIGN LOG · 01</span>
+        </div>
+      </div>
 
       <div style={{ overflowX: "hidden" }}>
         <section id="hero" className="hero-section">

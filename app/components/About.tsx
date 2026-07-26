@@ -7,6 +7,7 @@ const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 const ICE_WHITE = "#F5F6FC";
 const DARK_GRAY = "rgba(245,246,252,0.75)";
 const MUTED_GRAY = "rgba(245,246,252,0.65)";
+const CURVE_RED = "#e63946";
 
 const DETAILS = [
   { label: "EDUCATION", value: "BS Information Technology" },
@@ -105,8 +106,8 @@ function SkillCurve({ inView }: { inView: boolean }) {
         <path
           d="M 0 100 Q 600 20 1200 100"
           fill="none"
-          stroke={DARK_GRAY}
-          strokeWidth="1.5"
+          stroke={CURVE_RED}
+          strokeWidth="2.5"
           strokeLinecap="round"
           strokeDasharray="6 8"
         />
@@ -261,10 +262,9 @@ export default function About() {
             initial={{ opacity: 0, x: 20 }}
             animate={inView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.6, delay: 0.15, ease: EASE }}
-            style={{ width: "100%", display: "flex", flexDirection: "column", gap: "16px" }}
           >
             {INFO_ITEMS.map((item) => (
-              <div key={item.title}>
+              <div key={item.title} className="info-item">
                 <p
                   style={{
                     fontFamily: zalando.style.fontFamily,
@@ -303,28 +303,10 @@ export default function About() {
             initial={{ opacity: 0, y: 20 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6, delay: 0.2, ease: EASE }}
-            style={{ display: "flex", gap: "16px", width: "100%", gridColumn: "1 / -1" }}
           >
-            <div
-              style={{
-                width: "4px",
-                background: DARK_GRAY,
-                flexShrink: 0,
-                alignSelf: "stretch",
-                opacity: 0.7,
-              }}
-            />
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-                gap: "clamp(8px, 1.2vw, 12px) clamp(28px, 3.5vw, 48px)",
-                flex: 1,
-                width: "100%",
-              }}
-            >
+            <div className="details-grid">
               {DETAILS.map((d) => (
-                <div key={d.label}>
+                <div key={d.label} className="details-item">
                   <p
                     style={{
                       fontFamily: zalando.style.fontFamily,
@@ -333,7 +315,7 @@ export default function About() {
                       letterSpacing: "0.12em",
                       textTransform: "uppercase",
                       color: ICE_WHITE,
-                      marginBottom: "2px",
+                      marginBottom: "4px",
                     }}
                   >
                     {d.label}
@@ -394,12 +376,55 @@ export default function About() {
         .about-grid .cell-plain-info  { grid-column: 2; justify-self: end; width: 100%; max-width: 360px; }
         .about-grid .cell-details     { grid-column: 1 / -1; align-self: stretch; justify-self: stretch; }
 
+        /* ---------- Info items (Projects / Award / Year graduated) ---------- */
+        .cell-plain-info {
+          display: flex;
+          flex-direction: column;
+        }
+        .info-item {
+          padding: 14px 0;
+          border-top: 1px solid rgba(245,246,252,0.12);
+        }
+        .info-item:last-child {
+          border-bottom: 1px solid rgba(245,246,252,0.12);
+        }
+
+        /* ---------- Details grid (Education / Location / etc.) ---------- */
+        .details-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+          gap: clamp(20px, 2.5vw, 28px) clamp(28px, 3.5vw, 48px);
+          width: 100%;
+          padding-top: clamp(20px, 2.5vw, 28px);
+          border-top: 1px solid rgba(245,246,252,0.12);
+        }
+
         @media (max-width: 900px) {
           .coord-label { display: none; }
-          .about-grid { grid-template-columns: 1fr; row-gap: 36px; }
+          .about-grid { grid-template-columns: 1fr; row-gap: 40px; }
           .about-grid .cell-text        { grid-column: 1; }
           .about-grid .cell-plain-info  { grid-column: 1; justify-self: start; max-width: 100% !important; }
           .about-grid .cell-details     { grid-column: 1; align-self: auto; }
+
+          .info-item {
+            padding: 16px 0;
+          }
+
+          .details-grid {
+            grid-template-columns: 1fr 1fr;
+            gap: 24px 20px;
+            padding-top: 20px;
+          }
+          .details-item {
+            padding-bottom: 4px;
+          }
+        }
+
+        @media (max-width: 420px) {
+          .details-grid {
+            grid-template-columns: 1fr;
+            gap: 18px;
+          }
         }
 
         .no-scrollbar::-webkit-scrollbar { display: none; }

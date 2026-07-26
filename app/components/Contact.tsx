@@ -94,7 +94,7 @@ function CharReveal({
               initial={{ opacity: 0, y: 8, filter: "blur(2px)" }}
               animate={inView ? { opacity: 1, y: 0, filter: "blur(0)" } : {}}
               transition={{ duration: 0.35, ease: E, delay: startDelay + idx * charDelay }}
-              style={{ display: "inline-block", color: seg.color }}
+              style={{ display: "inline-block", whiteSpace: "pre", color: seg.color }}
             >
               {char}
             </motion.span>
@@ -163,35 +163,6 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
                 { text: "IT.", color: DARK_GRAY },
               ]} />
 
-            <motion.button
-              initial={{ opacity: 0, y: 18 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: 2.3, ease: E }}
-              onClick={downloadResume}
-              className={mono.className}
-              style={{
-                display: "inline-flex", alignItems: "center", gap: "12px",
-                background: "transparent", color: ICE_WHITE,
-                border: `1px solid ${DARK_GRAY}`,
-                fontWeight: 500, fontSize: "clamp(13px, 1.5vw, 15px)",
-                letterSpacing: "0.16em", textTransform: "uppercase",
-                padding: "14px 28px", borderRadius: "2px",
-                cursor: "pointer", transition: "all 0.25s ease",
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.background = ICE_WHITE;
-                e.currentTarget.style.color = BG;
-                e.currentTarget.style.borderColor = ICE_WHITE;
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.background = "transparent";
-                e.currentTarget.style.color = ICE_WHITE;
-                e.currentTarget.style.borderColor = DARK_GRAY;
-              }}
-            >
-              DOWNLOAD RESUME ↓
-            </motion.button>
-
             <motion.div
               initial={{ opacity: 0, y: 24 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
@@ -243,6 +214,36 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
                 START →
               </motion.button>
             </motion.div>
+
+            <motion.button
+              initial={{ opacity: 0, y: 18 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.5, delay: 2.3, ease: E }}
+              onClick={downloadResume}
+              className={mono.className}
+              style={{
+                display: "inline-flex", alignItems: "center", gap: "12px",
+                background: "transparent", color: ICE_WHITE,
+                border: `1px solid ${DARK_GRAY}`,
+                fontWeight: 500, fontSize: "clamp(13px, 1.5vw, 15px)",
+                letterSpacing: "0.16em", textTransform: "uppercase",
+                padding: "14px 28px", borderRadius: "2px",
+                cursor: "pointer", transition: "all 0.25s ease",
+                marginTop: "clamp(28px, 3.5vw, 40px)",
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = ICE_WHITE;
+                e.currentTarget.style.color = BG;
+                e.currentTarget.style.borderColor = ICE_WHITE;
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = "transparent";
+                e.currentTarget.style.color = ICE_WHITE;
+                e.currentTarget.style.borderColor = DARK_GRAY;
+              }}
+            >
+              DOWNLOAD RESUME ↓
+            </motion.button>
           </div>
 
           <div className="col-details">
