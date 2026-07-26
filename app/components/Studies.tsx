@@ -1,9 +1,7 @@
 "use client";
-
 import { motion } from "framer-motion";
 import React, { useEffect, useRef, useState } from "react";
-import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import ThunderScrollButton from "./thunder";
 import { ArrowUpRight, ArrowLeft, ArrowRight } from "lucide-react";
 import { zalando, mono } from "../fonts";
@@ -18,6 +16,8 @@ const DARK_GRAY = "rgba(245,246,252,0.75)";
 const ICE_WHITE = "#F5F6FC";
 const MUTED_GRAY = "rgba(245,246,252,0.65)";
 const BG = "#14141A";
+const HIGHLIGHT_BG = "#CEFF1A"; // Marker background
+const HIGHLIGHT_TEXT = "#14141A"; // Dark text for contrast
 
 interface MetaItem { label: string; value: string; }
 interface NarrativeItem { n: string; h: string; p: string; highlight?: string[]; }
@@ -120,6 +120,7 @@ const CASES: Project[] = [
   },
 ];
 
+// Restore original style for title highlights
 function renderTitle(title: string, highlight?: string) {
   if (!highlight) return title;
   const idx = title.indexOf(highlight);
@@ -133,6 +134,7 @@ function renderTitle(title: string, highlight?: string) {
   );
 }
 
+// Marker-style highlight ONLY for PROBLEM/APPROACH/RESULT: background, no bold
 function renderHighlighted(text: string, highlight?: string | string[]) {
   if (!highlight) return text;
   const highlights = Array.isArray(highlight) ? highlight : [highlight];
@@ -142,11 +144,39 @@ function renderHighlighted(text: string, highlight?: string | string[]) {
     const idx = text.indexOf(h, cursor);
     if (idx === -1) return;
     if (idx > cursor) parts.push(text.slice(cursor, idx));
-    parts.push(<span key={i} style={{ color: ICE_WHITE, fontWeight: 600 }}>{h}</span>);
+    parts.push(
+      <span 
+        key={i} 
+        style={{ 
+          backgroundColor: HIGHLIGHT_BG,
+          color: HIGHLIGHT_TEXT,
+          padding: "0.1em 0.3em",
+          borderRadius: "0.15em",
+          lineHeight: "1.4",
+          fontWeight: "normal"
+        }}
+      >
+        {h}
+      </span>
+    );
     cursor = idx + h.length;
   });
   parts.push(text.slice(cursor));
   return <>{parts}</>;
+}
+
+// Restore original bold/white for subtitle highlights
+function renderSubtitleHighlight(text: string, highlight?: string) {
+  if (!highlight) return text;
+  const idx = text.indexOf(highlight);
+  if (idx === -1) return text;
+  return (
+    <>
+      {text.slice(0, idx)}
+      <span style={{ color: ICE_WHITE, fontWeight: 600 }}>{highlight}</span>
+      {text.slice(idx + highlight.length)}
+    </>
+  );
 }
 
 function useReveal(): [React.RefObject<HTMLDivElement | null>, boolean] {
@@ -238,7 +268,7 @@ function BrowserFrame({
 
   if (href) {
     return (
-      <a href={href} target="_blank" rel="noopener noreferrer" className={`group relative block ${frameClass}`} style={frameStyle}>
+      <a href={href} target="_blank" rel="noopener noreferrer" className="group relative block" style={frameStyle}>
         {inner}
       </a>
     );
@@ -310,12 +340,35 @@ function MockPanel({ project }: { project: Project }) {
 }
 
 function CaseStudyDetail({ project, onSwitch, nextId }: { project: Project; onSwitch: (id: string) => void; nextId: string }) {
+  const router = useRouter();
+
+  const goToProjectSection = () => {
+    if (typeof window === "undefined") return;
+
+    if (window.location.pathname === "/") {
+      // Already on the landing page — just scroll straight to the section
+      document.getElementById("project")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    } else {
+      // On a different route — navigate home, then scroll once the page mounts
+      router.push("/#project");
+      setTimeout(() => {
+        document.getElementById("project")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 400);
+    }
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between flex-wrap gap-4 mb-12">
-        <Link href="/projects" className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.18em] transition-colors" style={{ color: MUTED_GRAY }} onMouseEnter={e => e.currentTarget.style.color = ICE_WHITE} onMouseLeave={e => e.currentTarget.style.color = MUTED_GRAY}>
-          <ArrowLeft size={14} /> BACK TO PROJECTS
-        </Link>
+        <button 
+          onClick={goToProjectSection}
+          className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.18em] transition-colors" 
+          style={{ color: MUTED_GRAY }} 
+          onMouseEnter={e => e.currentTarget.style.color = ICE_WHITE} 
+          onMouseLeave={e => e.currentTarget.style.color = MUTED_GRAY}
+        >
+          <ArrowLeft size={14} /> BACK TO PROJECT
+        </button>
         <button type="button" onClick={() => onSwitch(nextId)} aria-label="Next case study" className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.18em] transition-colors" style={{ color: MUTED_GRAY }} onMouseEnter={e => e.currentTarget.style.color = ICE_WHITE} onMouseLeave={e => e.currentTarget.style.color = MUTED_GRAY}>
           <span className="hidden sm:inline">NEXT CASE STUDY</span>
           <ArrowUpRight size={18} className="sm:hidden" />
@@ -325,7 +378,7 @@ function CaseStudyDetail({ project, onSwitch, nextId }: { project: Project; onSw
 
       <Reveal><p className={`${mono.className} text-[11px] tracking-[0.22em] uppercase mb-4`} style={{ color: DARK_GRAY }}>CASE STUDY — {project.index} / 02</p></Reveal>
       <Reveal><h3 className={`${zalando.className} font-black uppercase leading-[0.95] text-[clamp(2.2rem,6vw,4.2rem)] mb-4`} style={{ color: ICE_WHITE }}>{renderTitle(project.title, project.highlightWord)}</h3></Reveal>
-      <Reveal><p className={`${mono.className} text-base sm:text-lg max-w-2xl mb-10 leading-relaxed`} style={{ color: MUTED_GRAY }}>{renderHighlighted(project.subtitle, project.subtitleHighlight)}</p></Reveal>
+      <Reveal><p className={`${mono.className} text-base sm:text-lg max-w-2xl mb-10 leading-relaxed`} style={{ color: MUTED_GRAY }}>{renderSubtitleHighlight(project.subtitle, project.subtitleHighlight)}</p></Reveal>
       <Reveal className="mb-12"><div className="grid grid-cols-2 sm:grid-cols-4 gap-x-8 gap-y-4">{project.meta.map((m) => <MetaChip key={m.label} {...m} />)}</div></Reveal>
       <Reveal className="mb-16"><MockPanel project={project} /></Reveal>
       <Reveal><p className={`${mono.className} max-w-2xl mb-16 leading-relaxed`} style={{ color: MUTED_GRAY }}>{project.summary}</p></Reveal>

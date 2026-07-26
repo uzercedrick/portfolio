@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
+import { zalando } from "../fonts";
 
 const MONO_FONT = "'Ubuntu Sans Mono', monospace";
 const DARK_GRAY = "rgba(245,246,252,0.55)";
@@ -41,6 +42,7 @@ export default function Navbar() {
 
   const [activeSection, setActiveSection] = useState<string | null>(getInitialState);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [hoveredLink, setHoveredLink] = useState<string | null>(null);
 
   const handleNavClick = useCallback((e: React.MouseEvent, href: string, anchor: string) => {
     e.preventDefault();
@@ -112,46 +114,53 @@ export default function Navbar() {
           pointerEvents: "none",
         }}
       >
-        {/* Desktop row — unchanged */}
+        {/* Desktop row — Zalando Sans Expanded, bold, ICE_WHITE hover */}
         <div
           className="nav-desktop-row"
           style={{ alignItems: "center", gap: "36px", pointerEvents: "auto", whiteSpace: "nowrap" }}
         >
-          {LINKS.map((item, i) => (
-            <Link
-              key={item.label}
-              href={`${item.href}#${item.anchor}`}
-              onClick={(e) => handleNavClick(e, item.href, item.anchor)}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "6px",
-                fontFamily: MONO_FONT,
-                fontSize: "11px",
-                fontWeight: 500,
-                letterSpacing: "0.2em",
-                textTransform: "uppercase",
-                color: activeSection === item.anchor ? ICE_WHITE : DARK_GRAY,
-                textDecoration: "none",
-                position: "relative",
-                transition: "color 0.2s ease",
-              }}
-            >
-              <span>{String(i + 1).padStart(2, "0")}</span>
-              <span>{item.label}</span>
-              <span
+          {LINKS.map((item, i) => {
+            const isActive = activeSection === item.anchor;
+            const isHovered = hoveredLink === item.anchor;
+            const isLit = isActive || isHovered;
+            return (
+              <Link
+                key={item.label}
+                href={`${item.href}#${item.anchor}`}
+                onClick={(e) => handleNavClick(e, item.href, item.anchor)}
+                onMouseEnter={() => setHoveredLink(item.anchor)}
+                onMouseLeave={() => setHoveredLink(null)}
+                className={zalando.className}
                 style={{
-                  position: "absolute",
-                  bottom: "-8px",
-                  left: "0",
-                  width: activeSection === item.anchor ? "100%" : "0",
-                  height: "1px",
-                  background: ACCENT,
-                  transition: "width 0.25s ease",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  letterSpacing: "0.2em",
+                  textTransform: "uppercase",
+                  color: isLit ? ICE_WHITE : DARK_GRAY,
+                  textDecoration: "none",
+                  position: "relative",
+                  transition: "color 0.2s ease",
                 }}
-              />
-            </Link>
-          ))}
+              >
+                <span style={{ fontFamily: MONO_FONT, fontWeight: 500 }}>{String(i + 1).padStart(2, "0")}</span>
+                <span>{item.label}</span>
+                <span
+                  style={{
+                    position: "absolute",
+                    bottom: "-8px",
+                    left: "0",
+                    width: isLit ? "100%" : "0",
+                    height: "1px",
+                    background: ACCENT,
+                    transition: "width 0.25s ease",
+                  }}
+                />
+              </Link>
+            );
+          })}
         </div>
 
         {/* Mobile trigger — tech chip, fixed top-right */}

@@ -52,7 +52,9 @@ export default function Home() {
       <main>
         <Hero openContactForm={openContactForm} />
         <About />
-        <ProjectsSection />
+        <section id="project">
+          <ProjectsSection />
+        </section>
         <Contact
           isFormOpen={isContactFormOpen}
           onOpenForm={openContactForm}
