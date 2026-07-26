@@ -115,12 +115,12 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
 
   const downloadResume = async () => {
     try {
-      const res = await fetch("/resume.pdf");
+      const res = await fetch("/Nungay.resume.pdf");
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = "Jhon-Cedrick-Nungay-Resume.pdf";
+      link.download = "Nungay-Resume.pdf";
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
