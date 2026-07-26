@@ -17,7 +17,8 @@ const STOCK = "#f4f5fb";
 const INK = "#0a0b10";
 const GRAPHITE = "#5a5c68";
 const HAIRLINE = "#c8cad6";
-const SIGNAL = "#e63946";
+const SIGNAL = "#ff1f30";
+const SIGNAL_SOFT = "rgba(255, 31, 48, 0.18)";
 
 const SIZE = 64;
 const RING_R = 24;
@@ -151,6 +152,9 @@ export default function ScrollToTopButton() {
             drop-shadow(0 1px 2px rgba(10, 11, 16, 0.10))
             drop-shadow(0 10px 24px rgba(10, 11, 16, 0.08));
         }
+        .stt-progress-glow {
+          filter: drop-shadow(0 0 1.2px ${SIGNAL}) drop-shadow(0 0 3px ${SIGNAL_SOFT});
+        }
 
         .stt-plate {
           position: absolute;
@@ -224,7 +228,7 @@ export default function ScrollToTopButton() {
           font-weight: 500;
         }
         .stt-coord-label {
-          font-family: ui-monospace, "SF Mono", "IBM Plex Mono", monospace;
+          font-family: ui-monospace, "SF Mono", "IBM Plex Mono", "JetBrains Mono", monospace;
           font-size: 5px;
           fill: ${GRAPHITE};
         }
@@ -311,6 +315,11 @@ export default function ScrollToTopButton() {
                     opacity="0.6"
                   />
                 </pattern>
+                <radialGradient id="clickBurst" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stopColor={SIGNAL} stopOpacity="0.45" />
+                  <stop offset="60%" stopColor={SIGNAL} stopOpacity="0.12" />
+                  <stop offset="100%" stopColor={SIGNAL} stopOpacity="0" />
+                </radialGradient>
               </defs>
 
               <g stroke={INK} strokeWidth="0.9" fill="none" opacity="0.55">
@@ -341,38 +350,85 @@ export default function ScrollToTopButton() {
                 </text>
               ))}
 
-              <motion.circle
-                cx="0" cy="0" r={RING_R}
-                fill="none" stroke={SIGNAL} strokeWidth="1.6" strokeLinecap="round"
-                transform="rotate(-90)"
-                strokeDasharray={RING_C}
-                style={{ strokeDashoffset: dashOffset }}
-              />
+              <g className="stt-progress-glow">
+                <motion.circle
+                  cx="0" cy="0" r={RING_R}
+                  fill="none" stroke={SIGNAL} strokeWidth="2.6" strokeLinecap="round"
+                  transform="rotate(-90)"
+                  strokeDasharray={RING_C}
+                  style={{ strokeDashoffset: dashOffset, opacity: 0.25 }}
+                />
+                <motion.circle
+                  cx="0" cy="0" r={RING_R}
+                  fill="none" stroke={SIGNAL} strokeWidth="2" strokeLinecap="round"
+                  transform="rotate(-90)"
+                  strokeDasharray={RING_C}
+                  style={{ strokeDashoffset: dashOffset }}
+                />
+              </g>
 
               <AnimatePresence>
                 {firing && !reduceMotion && (
-                  <motion.circle
-                    key={`pulse-${fireId}`} cx="0" cy="0" r={RING_R}
-                    fill="none" stroke={SIGNAL} strokeWidth="1"
-                    initial={{ opacity: 0.7, scale: 1 }}
-                    animate={{ opacity: 0, scale: 1.5 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.65, ease: EASE }}
-                  />
+                  <>
+                    <motion.circle
+                      key={`burst-${fireId}`} cx="0" cy="0" r={RING_R + 2}
+                      fill="url(#clickBurst)"
+                      initial={{ opacity: 1, scale: 0.4 }}
+                      animate={{ opacity: 0, scale: 1.8 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.7, ease: EASE }}
+                    />
+                    <motion.circle
+                      key={`pulse1-${fireId}`} cx="0" cy="0" r={RING_R}
+                      fill="none" stroke={SIGNAL} strokeWidth="1.4"
+                      initial={{ opacity: 0.9, scale: 1 }}
+                      animate={{ opacity: 0, scale: 1.9 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.7, ease: EASE }}
+                    />
+                    <motion.circle
+                      key={`pulse2-${fireId}`} cx="0" cy="0" r={RING_R}
+                      fill="none" stroke={SIGNAL} strokeWidth="1"
+                      initial={{ opacity: 0.6, scale: 1 }}
+                      animate={{ opacity: 0, scale: 2.3 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.85, ease: EASE, delay: 0.06 }}
+                    />
+                  </>
                 )}
               </AnimatePresence>
 
               <AnimatePresence>
                 {firing && !reduceMotion && (
-                  <motion.line
-                    key={`beam-${fireId}`}
-                    x1="0" y1={-RING_R - 2} x2="0" y2={-RING_R - 14}
-                    stroke={SIGNAL} strokeWidth="1" strokeLinecap="round"
-                    initial={{ pathLength: 0, opacity: 0.9 }}
-                    animate={{ pathLength: 1, opacity: 0 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.55, ease: EASE }}
-                  />
+                  <>
+                    <motion.line
+                      key={`beam-${fireId}`}
+                      x1="0" y1={-RING_R - 2} x2="0" y2={-RING_R - 22}
+                      stroke={SIGNAL} strokeWidth="1.4" strokeLinecap="round"
+                      initial={{ pathLength: 0, opacity: 1 }}
+                      animate={{ pathLength: 1, opacity: 0 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.6, ease: EASE }}
+                    />
+                    <motion.line
+                      key={`beamL-${fireId}`}
+                      x1="-3" y1={-RING_R - 4} x2="-10" y2={-RING_R - 16}
+                      stroke={SIGNAL} strokeWidth="0.9" strokeLinecap="round"
+                      initial={{ pathLength: 0, opacity: 0.9 }}
+                      animate={{ pathLength: 1, opacity: 0 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.5, ease: EASE, delay: 0.04 }}
+                    />
+                    <motion.line
+                      key={`beamR-${fireId}`}
+                      x1="3" y1={-RING_R - 4} x2="10" y2={-RING_R - 16}
+                      stroke={SIGNAL} strokeWidth="0.9" strokeLinecap="round"
+                      initial={{ pathLength: 0, opacity: 0.9 }}
+                      animate={{ pathLength: 1, opacity: 0 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.5, ease: EASE, delay: 0.04 }}
+                    />
+                  </>
                 )}
               </AnimatePresence>
 
@@ -380,14 +436,14 @@ export default function ScrollToTopButton() {
                 {firing ? (
                   <motion.g
                     key="arrow"
-                    initial={{ opacity: 0, scale: 0.5, rotate: -25 }}
-                    animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                    initial={{ opacity: 0, scale: 0.4, rotate: -35 }}
+                    animate={{ opacity: 1, scale: 1.15, rotate: 0 }}
                     exit={{ opacity: 0, scale: 0.5, rotate: 20 }}
-                    transition={{ type: "spring", stiffness: 380, damping: 22 }}
+                    transition={{ type: "spring", stiffness: 420, damping: 20 }}
                   >
-                    <line x1="0" y1="-9" x2="0" y2="9" stroke={INK} strokeWidth="1.4" strokeLinecap="round" />
-                    <path d="M -7,-3 L 0,-10 L 7,-3" fill="none" stroke={INK} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-                    <path d="M -3,2 L 0,-1 L 3,2" fill="none" stroke={SIGNAL} strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
+                    <line x1="0" y1="-10" x2="0" y2="10" stroke={INK} strokeWidth="1.6" strokeLinecap="round" />
+                    <path d="M -8,-4 L 0,-12 L 8,-4" fill="none" stroke={INK} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M -4,3 L 0,-1 L 4,3" fill="none" stroke={SIGNAL} strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
                   </motion.g>
                 ) : (
                   <motion.g

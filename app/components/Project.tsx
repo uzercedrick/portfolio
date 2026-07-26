@@ -33,7 +33,7 @@ const PROJECTS: Project[] = [
     description:
       "Web-based platform for real-time classroom monitoring — tracking live temperature and humidity via IoT sensors, interactive dashboards, safety alerts, and historical logs. Led UX/UI design and front-end development; recognized at the University Research Congress.",
     meta: [
-      { label: "ROLE", value: "UX/UI + Full-Stack" },
+      { label: "ROLE", value: "UX/UI + Front-end Developer" },
       { label: "TEAM", value: "5-Person Capstone" },
       { label: "STATUS", value: "Research Congress Finalist" },
     ],
