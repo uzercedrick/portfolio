@@ -10,9 +10,9 @@ const MUTED_GRAY = "rgba(245,246,252,0.55)";
 const BG = "#14141A";
 
 const SOCIAL = [
-  { Icon: MdEmail,      href: "mailto:jhoncedrick.fuentes@gmail.com", label: "Email"    },
-  { Icon: FaLinkedinIn, href: "https://linkedin.com/in/jcnungay",     label: "LinkedIn" },
-  { Icon: FaGithub,     href: "https://github.com/uzercedrick/",      label: "GitHub"   },
+  { Icon: MdEmail, href: "mailto:jhoncedrick.fuentes@gmail.com", label: "Email" },
+  { Icon: FaLinkedinIn, href: "https://linkedin.com/in/jcnungay", label: "LinkedIn" },
+  { Icon: FaGithub, href: "https://github.com/uzercedrick/", label: "GitHub" },
 ];
 
 export default function Footer() {
@@ -25,12 +25,14 @@ export default function Footer() {
       style={{
         background: BG,
         width: "100%",
-        padding: "clamp(32px, 5vw, 48px) 0 clamp(24px, 4vw, 32px)",
-        borderTop: `1px solid rgba(245,246,252,0.08)`,
+        padding: "clamp(20px, 3vw, 28px) 0 clamp(56px, 7vw, 68px)",
+        borderTop: "1px solid rgba(245,246,252,0.08)",
+        position: "relative",
+        zIndex: 1,
       }}
     >
-      <div 
-        className="footer-container" 
+      <div
+        className="footer-container"
         style={{
           maxWidth: "1080px",
           margin: "0 auto",
@@ -42,8 +44,7 @@ export default function Footer() {
           position: "relative",
         }}
       >
-        {/* Left: subtle label */}
-        <div 
+        <div
           className={`${mono.className} footer-label`}
           style={{
             fontSize: "10px",
@@ -56,18 +57,17 @@ export default function Footer() {
           PORTFOLIO · 2026
         </div>
 
-        {/* Center: copyright + credits */}
-        <div 
+        <div
           style={{
             display: "flex",
             flexDirection: "column",
-            gap: "6px",
+            gap: "4px",
             alignItems: "center",
             textAlign: "center",
           }}
         >
-          <p 
-            className={`${zalando.className} fd`} 
+          <p
+            className={`${zalando.className} fd`}
             style={{
               color: ICE_WHITE,
               fontSize: "clamp(12px, 1.6vw, 14px)",
@@ -80,8 +80,8 @@ export default function Footer() {
           >
             © {new Date().getFullYear()} JHON CEDRICK F. NUNGAY
           </p>
-          <p 
-            className={`${mono.className} fb`} 
+          <p
+            className={`${mono.className} fb`}
             style={{
               color: MUTED_GRAY,
               fontSize: "clamp(10px, 1.2vw, 12px)",
@@ -95,51 +95,47 @@ export default function Footer() {
           </p>
         </div>
 
-        {/* Right: social icons */}
-        <div 
-          className="footer-icons" 
+        <div
+          className="footer-icons"
           style={{
             display: "flex",
-            gap: "10px",
+            gap: "8px",
             alignItems: "center",
             justifySelf: "end",
           }}
         >
-          {SOCIAL.map(({ Icon, href, label }) => (
-            <a
-              key={label}
-              href={href}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={label}
-              style={{
-                width: "34px",
-                height: "34px",
-                borderRadius: "2px",
-                background: "transparent",
-                border: `1px solid rgba(245,246,252,0.15)`,
-                color: DARK_GRAY,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                textDecoration: "none",
-                transition: "all 0.25s ease",
-                flexShrink: 0,
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = ICE_WHITE;
-                e.currentTarget.style.color = ICE_WHITE;
-                e.currentTarget.style.background = "rgba(245,246,252,0.05)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = "rgba(245,246,252,0.15)";
-                e.currentTarget.style.color = DARK_GRAY;
-                e.currentTarget.style.background = "transparent";
-              }}
-            >
-              <Icon size={14} />
-            </a>
-          ))}
+          {SOCIAL.map((item) => {
+            const Icon = item.Icon;
+            const linkStyle = {
+              width: "30px",
+              height: "30px",
+              borderRadius: "2px",
+              background: "transparent",
+              border: "1px solid rgba(245,246,252,0.15)",
+              color: DARK_GRAY,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              textDecoration: "none",
+              transition: "all 0.25s ease",
+              flexShrink: 0,
+            };
+            const onEnter = (e: React.MouseEvent<HTMLAnchorElement>) => {
+              e.currentTarget.style.borderColor = ICE_WHITE;
+              e.currentTarget.style.color = ICE_WHITE;
+              e.currentTarget.style.background = "rgba(245,246,252,0.05)";
+            };
+            const onLeave = (e: React.MouseEvent<HTMLAnchorElement>) => {
+              e.currentTarget.style.borderColor = "rgba(245,246,252,0.15)";
+              e.currentTarget.style.color = DARK_GRAY;
+              e.currentTarget.style.background = "transparent";
+            };
+            return (
+              <a key={item.label} href={item.href} target="_blank" rel="noopener noreferrer" aria-label={item.label} style={linkStyle} onMouseEnter={onEnter} onMouseLeave={onLeave}>
+                <Icon size={13} />
+              </a>
+            );
+          })}
         </div>
       </div>
 
@@ -148,7 +144,7 @@ export default function Footer() {
           .footer-container {
             grid-template-columns: 1fr !important;
             text-align: center !important;
-            gap: 20px !important;
+            gap: 16px !important;
           }
           .footer-label {
             justify-self: center !important;

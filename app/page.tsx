@@ -6,6 +6,8 @@ import About   from "./components/About";
 import ProjectsSection from "./components/Project";
 import Contact from "./components/Contact";
 import Footer  from "./components/Footer";
+import TechnicalOverlay from "./components/TechnicalOverlay";
+import SectionFrameBar  from "./components/SectionFrameBar";
 import {
   NavbarSkeleton,
   HeroSkeleton,
@@ -30,6 +32,7 @@ export default function Home() {
   if (!ready) {
     return (
       <>
+        <TechnicalOverlay />
         <NavbarSkeleton />
         <main>
           <HeroSkeleton />
@@ -44,6 +47,7 @@ export default function Home() {
 
   return (
     <div className="page-ready">
+      <TechnicalOverlay />
       <Navbar />
       <main>
         <Hero openContactForm={openContactForm} />
@@ -56,6 +60,7 @@ export default function Home() {
         />
       </main>
       <Footer />
+      <SectionFrameBar />
     </div>
   );
 }

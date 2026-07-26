@@ -12,19 +12,6 @@ import {
   useTransform,
 } from "framer-motion";
 
-// ---------------------------------------------------------------------------
-// Tech + Editorial redesign of your registration-mark scroll instrument.
-// All original motion architecture preserved; new visual layer adds:
-//   • print‑plate corner registration marks
-//   • micro‑grid base plate (graph‑paper stock)
-//   • 48‑count, three‑tier instrument dial (major / semi / minor)
-//   • cardinal degree numerals + coordinate labels
-//   • editorial spec‑sheet caption plate with corner brackets
-//   • gauged outer ring (deliberate gap, not a perfect circle)
-//   • calibrated crosshair (center dot + arm ticks)
-//   • arrow morph carries a tiny signal‑red chevron
-// ---------------------------------------------------------------------------
-
 const PAPER = "#fafbff";
 const STOCK = "#f4f5fb";
 const INK = "#0a0b10";
@@ -40,8 +27,6 @@ const EASE = [0.16, 1, 0.3, 1] as [number, number, number, number];
 const HALF = 36;
 const VIEW_BOX = `${-HALF} ${-HALF} ${HALF * 2} ${HALF * 2}`;
 
-// 48‑count instrument dial — three tiers.
-// Major every 6, semi every 3, minor the rest. Like a theodolite.
 const TICKS = Array.from({ length: 48 }, (_, i) => {
   const angle = (i / 48) * Math.PI * 2 - Math.PI / 2;
   const major = i % 6 === 0;
@@ -59,7 +44,6 @@ const TICKS = Array.from({ length: 48 }, (_, i) => {
   };
 });
 
-// Four corner registration marks — the "L" brackets that define a print plate.
 const CORNERS = [
   { d: "M -30 -26 L -30 -30 L -26 -30" },
   { d: "M  26 -30 L  30 -30 L  30 -26" },
@@ -67,7 +51,6 @@ const CORNERS = [
   { d: "M  26  30 L  30  30 L  30  26" },
 ];
 
-// Cardinal numerals on the dial face — editorial/technical reference.
 const CARDINALS = [
   { x: 0, y: -16.5, text: "0" },
   { x: 16.5, y: 2, text: "90" },
@@ -79,13 +62,13 @@ export default function ScrollToTopButton() {
   const reduceMotion = useReducedMotion();
 
   const [visible, setVisible] = useState(false);
-  const [hovering, setHovering] = useState(false);
+  const [showPanel, setShowPanel] = useState(false);
   const [pct, setPct] = useState(0);
   const [scrollYpx, setScrollYpx] = useState(0);
   const [firing, setFiring] = useState(false);
   const [fireId, setFireId] = useState(0);
 
-  const hoveringRef = useRef(false);
+  const panelHideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const fireTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { scrollY, scrollYProgress } = useScroll();
@@ -98,28 +81,31 @@ export default function ScrollToTopButton() {
 
   useMotionValueEvent(scrollY, "change", (v) => {
     setVisible(v > 260);
-    if (hoveringRef.current) setScrollYpx(Math.round(v));
+    setScrollYpx(Math.round(v));
+    setShowPanel(true);
+
+    if (panelHideTimer.current) clearTimeout(panelHideTimer.current);
+    panelHideTimer.current = setTimeout(() => setShowPanel(false), 1200);
   });
+
   useMotionValueEvent(smoothProgress, "change", (v) => {
-    if (hoveringRef.current) setPct(Math.round(v * 100));
+    setPct(Math.round(v * 100));
   });
 
   useEffect(() => {
     return () => {
       if (fireTimeout.current) clearTimeout(fireTimeout.current);
+      if (panelHideTimer.current) clearTimeout(panelHideTimer.current);
     };
   }, []);
 
   const handleEnter = useCallback(() => {
-    hoveringRef.current = true;
-    setHovering(true);
-    setPct(Math.round(smoothProgress.get() * 100));
-    setScrollYpx(Math.round(scrollY.get()));
-  }, [smoothProgress, scrollY]);
+    setShowPanel(true);
+    if (panelHideTimer.current) clearTimeout(panelHideTimer.current);
+  }, []);
 
   const handleLeave = useCallback(() => {
-    hoveringRef.current = false;
-    setHovering(false);
+    panelHideTimer.current = setTimeout(() => setShowPanel(false), 400);
   }, []);
 
   const handleClick = useCallback(() => {
@@ -138,7 +124,7 @@ export default function ScrollToTopButton() {
       <style>{`
         .stt-btn {
           position: fixed;
-          bottom: 36px;
+          bottom: 92px;
           right: 32px;
           width: ${SIZE}px;
           height: ${SIZE}px;
@@ -149,7 +135,7 @@ export default function ScrollToTopButton() {
           border: none;
           padding: 0;
           cursor: pointer;
-          z-index: 999;
+          z-index: 45;
           -webkit-tap-highlight-color: transparent;
         }
         .stt-btn:focus-visible {
@@ -166,7 +152,6 @@ export default function ScrollToTopButton() {
             drop-shadow(0 10px 24px rgba(10, 11, 16, 0.08));
         }
 
-        /* ── Editorial spec‑sheet caption plate ── */
         .stt-plate {
           position: absolute;
           right: calc(100% + 18px);
@@ -243,6 +228,13 @@ export default function ScrollToTopButton() {
           font-size: 5px;
           fill: ${GRAPHITE};
         }
+
+        @media (max-width: 900px) {
+          .stt-btn {
+            bottom: 108px;
+            right: 20px;
+          }
+        }
       `}</style>
 
       <AnimatePresence>
@@ -263,9 +255,8 @@ export default function ScrollToTopButton() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.93 }}
           >
-            {/* ── Spec‑sheet caption plate ── */}
             <AnimatePresence>
-              {hovering && (
+              {showPanel && (
                 <motion.div
                   className="stt-plate stt-mono"
                   initial={{ opacity: 0, x: 6 }}
@@ -306,7 +297,6 @@ export default function ScrollToTopButton() {
               style={{ overflow: "visible" }}
             >
               <defs>
-                {/* Micro‑grid — engineering / graph‑paper stock */}
                 <pattern
                   id="microGrid"
                   width="4"
@@ -323,114 +313,47 @@ export default function ScrollToTopButton() {
                 </pattern>
               </defs>
 
-              {/* ── Corner registration marks (print plate) ── */}
-              <g
-                stroke={INK}
-                strokeWidth="0.9"
-                fill="none"
-                opacity="0.55"
-              >
-                {CORNERS.map((c, i) => (
-                  <path key={i} d={c.d} />
-                ))}
+              <g stroke={INK} strokeWidth="0.9" fill="none" opacity="0.55">
+                {CORNERS.map((c, i) => (<path key={i} d={c.d} />))}
               </g>
 
-              {/* ── Base plate: micro‑grid under a paper wash ── */}
               <circle cx="0" cy="0" r={RING_R + 2} fill="url(#microGrid)" />
-              <circle
-                cx="0"
-                cy="0"
-                r={RING_R + 2}
-                fill={PAPER}
-                opacity="0.55"
-              />
+              <circle cx="0" cy="0" r={RING_R + 2} fill={PAPER} opacity="0.55" />
 
-              {/* ── Outer gauged ring: hairline + deliberate ink gap ── */}
-              <circle
-                cx="0"
-                cy="0"
-                r={RING_R + 2}
-                fill="none"
-                stroke={HAIRLINE}
-                strokeWidth="0.8"
-              />
-              <circle
-                cx="0"
-                cy="0"
-                r={RING_R + 2}
-                fill="none"
-                stroke={INK}
-                strokeWidth="0.9"
-                strokeDasharray="18 147"
-                strokeDashoffset="-9"
-                opacity="0.4"
-              />
+              <circle cx="0" cy="0" r={RING_R + 2} fill="none" stroke={HAIRLINE} strokeWidth="0.8" />
+              <circle cx="0" cy="0" r={RING_R + 2} fill="none" stroke={INK} strokeWidth="0.9" strokeDasharray="18 147" strokeDashoffset="-9" opacity="0.4" />
 
-              {/* ── Inner dashed reference ring ── */}
-              <circle
-                cx="0"
-                cy="0"
-                r="22"
-                fill="none"
-                stroke={HAIRLINE}
-                strokeWidth="0.6"
-                strokeDasharray="1 2"
-              />
+              <circle cx="0" cy="0" r="22" fill="none" stroke={HAIRLINE} strokeWidth="0.6" strokeDasharray="1 2" />
 
-              {/* ── 48‑count instrument dial ── */}
               {TICKS.map((t) => (
                 <line
                   key={t.key}
-                  x1={t.x1}
-                  y1={t.y1}
-                  x2={t.x2}
-                  y2={t.y2}
-                  stroke={INK}
-                  strokeWidth={t.major ? 1 : t.semi ? 0.75 : 0.5}
+                  x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2}
+                  stroke={INK} strokeWidth={t.major ? 1 : t.semi ? 0.75 : 0.5}
                   strokeLinecap="round"
                   opacity={t.major ? 0.55 : t.semi ? 0.3 : 0.18}
                 />
               ))}
 
-              {/* ── Cardinal numerals ── */}
               {CARDINALS.map((c) => (
-                <text
-                  key={c.text}
-                  x={c.x}
-                  y={c.y}
-                  textAnchor="middle"
-                  className="stt-coord-label"
-                  opacity="0.7"
-                >
+                <text key={c.text} x={c.x} y={c.y} textAnchor="middle" className="stt-coord-label" opacity="0.7">
                   {c.text}
                 </text>
               ))}
 
-              {/* ── Scroll‑progress arc (spring‑smoothed) ── */}
               <motion.circle
-                cx="0"
-                cy="0"
-                r={RING_R}
-                fill="none"
-                stroke={SIGNAL}
-                strokeWidth="1.6"
-                strokeLinecap="round"
+                cx="0" cy="0" r={RING_R}
+                fill="none" stroke={SIGNAL} strokeWidth="1.6" strokeLinecap="round"
                 transform="rotate(-90)"
                 strokeDasharray={RING_C}
                 style={{ strokeDashoffset: dashOffset }}
               />
 
-              {/* ── Fire pulse ── */}
               <AnimatePresence>
                 {firing && !reduceMotion && (
                   <motion.circle
-                    key={`pulse-${fireId}`}
-                    cx="0"
-                    cy="0"
-                    r={RING_R}
-                    fill="none"
-                    stroke={SIGNAL}
-                    strokeWidth="1"
+                    key={`pulse-${fireId}`} cx="0" cy="0" r={RING_R}
+                    fill="none" stroke={SIGNAL} strokeWidth="1"
                     initial={{ opacity: 0.7, scale: 1 }}
                     animate={{ opacity: 0, scale: 1.5 }}
                     exit={{ opacity: 0 }}
@@ -439,18 +362,12 @@ export default function ScrollToTopButton() {
                 )}
               </AnimatePresence>
 
-              {/* ── Fire plumb beam ── */}
               <AnimatePresence>
                 {firing && !reduceMotion && (
                   <motion.line
                     key={`beam-${fireId}`}
-                    x1="0"
-                    y1={-RING_R - 2}
-                    x2="0"
-                    y2={-RING_R - 14}
-                    stroke={SIGNAL}
-                    strokeWidth="1"
-                    strokeLinecap="round"
+                    x1="0" y1={-RING_R - 2} x2="0" y2={-RING_R - 14}
+                    stroke={SIGNAL} strokeWidth="1" strokeLinecap="round"
                     initial={{ pathLength: 0, opacity: 0.9 }}
                     animate={{ pathLength: 1, opacity: 0 }}
                     exit={{ opacity: 0 }}
@@ -459,7 +376,6 @@ export default function ScrollToTopButton() {
                 )}
               </AnimatePresence>
 
-              {/* ── Registration mark ↔ arrow morph ── */}
               <AnimatePresence mode="wait">
                 {firing ? (
                   <motion.g
@@ -469,32 +385,9 @@ export default function ScrollToTopButton() {
                     exit={{ opacity: 0, scale: 0.5, rotate: 20 }}
                     transition={{ type: "spring", stiffness: 380, damping: 22 }}
                   >
-                    <line
-                      x1="0"
-                      y1="-9"
-                      x2="0"
-                      y2="9"
-                      stroke={INK}
-                      strokeWidth="1.4"
-                      strokeLinecap="round"
-                    />
-                    <path
-                      d="M -7,-3 L 0,-10 L 7,-3"
-                      fill="none"
-                      stroke={INK}
-                      strokeWidth="1.4"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    {/* Signal‑red chevron inside the arrow */}
-                    <path
-                      d="M -3,2 L 0,-1 L 3,2"
-                      fill="none"
-                      stroke={SIGNAL}
-                      strokeWidth="1"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
+                    <line x1="0" y1="-9" x2="0" y2="9" stroke={INK} strokeWidth="1.4" strokeLinecap="round" />
+                    <path d="M -7,-3 L 0,-10 L 7,-3" fill="none" stroke={INK} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M -3,2 L 0,-1 L 3,2" fill="none" stroke={SIGNAL} strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
                   </motion.g>
                 ) : (
                   <motion.g
@@ -504,42 +397,20 @@ export default function ScrollToTopButton() {
                     exit={{ opacity: 0, scale: 0.5, rotate: -20 }}
                     transition={{ type: "spring", stiffness: 380, damping: 22 }}
                   >
-                    {/* Calibrated crosshair arms */}
-                    <line
-                      x1="-10"
-                      y1="0"
-                      x2="10"
-                      y2="0"
-                      stroke={INK}
-                      strokeWidth="0.9"
-                    />
-                    <line
-                      x1="0"
-                      y1="-10"
-                      x2="0"
-                      y2="10"
-                      stroke={INK}
-                      strokeWidth="0.9"
-                    />
-                    {/* Small tick marks on each arm — instrument feel */}
+                    <line x1="-10" y1="0" x2="10" y2="0" stroke={INK} strokeWidth="0.9" />
+                    <line x1="0" y1="-10" x2="0" y2="10" stroke={INK} strokeWidth="0.9" />
                     <line x1="-6" y1="-0.8" x2="-6" y2="0.8" stroke={INK} strokeWidth="0.6" />
-                    <line x1="6"  y1="-0.8" x2="6"  y2="0.8" stroke={INK} strokeWidth="0.6" />
+                    <line x1="6" y1="-0.8" x2="6" y2="0.8" stroke={INK} strokeWidth="0.6" />
                     <line x1="-0.8" y1="-6" x2="0.8" y2="-6" stroke={INK} strokeWidth="0.6" />
-                    <line x1="-0.8" y1="6"  x2="0.8" y2="6"  stroke={INK} strokeWidth="0.6" />
-                    {/* Center ring + solid dot */}
+                    <line x1="-0.8" y1="6" x2="0.8" y2="6" stroke={INK} strokeWidth="0.6" />
                     <circle cx="0" cy="0" r="4.5" fill="none" stroke={INK} strokeWidth="0.9" />
                     <circle cx="0" cy="0" r="1.2" fill={INK} />
                   </motion.g>
                 )}
               </AnimatePresence>
 
-              {/* ── Coordinate labels ── */}
-              <text x="-25" y="34" className="stt-coord-label" opacity="0.55">
-                Ø {SIZE}
-              </text>
-              <text x="25" y="34" textAnchor="end" className="stt-coord-label" opacity="0.55">
-                R {RING_R}
-              </text>
+              <text x="-25" y="34" className="stt-coord-label" opacity="0.55">Ø {SIZE}</text>
+              <text x="25" y="34" textAnchor="end" className="stt-coord-label" opacity="0.55">R {RING_R}</text>
             </svg>
           </motion.button>
         )}

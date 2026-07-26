@@ -1,11 +1,18 @@
 "use client";
 
+import { motion } from "framer-motion";
 import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import ThunderScrollButton from "./thunder";
 import { ArrowUpRight, ArrowLeft, ArrowRight } from "lucide-react";
 import { zalando, mono } from "../fonts";
+
+const E = [0.22, 1, 0.36, 1] as [number, number, number, number];
+const up = {
+  hidden: { opacity: 0, y: 24 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: E } },
+};
 
 const DARK_GRAY = "rgba(245,246,252,0.75)";
 const ICE_WHITE = "#F5F6FC";
@@ -159,7 +166,7 @@ function useReveal(): [React.RefObject<HTMLDivElement | null>, boolean] {
 
 function Reveal({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   const [ref, visible] = useReveal();
-  return <div ref={ref} className={`reveal ${visible ? "reveal-in" : ""} ${className}`}>{children}</div>;
+  return <motion.div ref={ref} className={`reveal ${className}`} initial={{ opacity: 0, y: 24 }} animate={visible ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, ease: E }}>{children}</motion.div>;
 }
 
 function MetaChip({ label, value }: MetaItem) {
@@ -270,7 +277,6 @@ function MockPanel({ project }: { project: Project }) {
   if (images.length === 1) {
     const img = images[0];
     return (
-      /* ✅ Adjusted: Wider cap, balanced — not too narrow, not too huge */
       <div className="max-w-4xl mx-auto">
         <BrowserFrame
           label={hasLiveUrl ? project.live.replace(/^https?:\/\//, "") : `${project.id}.app`}
@@ -347,22 +353,180 @@ export default function CaseStudyLanding() {
   const nextProject = CASES.find((c) => c.id !== openId) ?? CASES[0];
 
   return (
-    <div style={{ background: BG, color: ICE_WHITE, width: "100%", minHeight: "100vh" }}>
+    <div className="study-section" style={{ background: BG, color: ICE_WHITE, width: "100%", minHeight: "100vh", position: "relative", overflow: "hidden" }}>
       <style>{`
+        .study-section::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          z-index: 1;
+          pointer-events: none;
+          background-image:
+            linear-gradient(rgba(245,246,252,0.14) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(245,246,252,0.14) 1px, transparent 1px);
+          background-size: 48px 48px;
+          opacity: 0.55;
+        }
+        .study-section::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          z-index: 1;
+          pointer-events: none;
+          background-image:
+            linear-gradient(rgba(245,246,252,0.12) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(245,246,252,0.12) 1px, transparent 1px);
+          background-size: 192px 192px;
+          opacity: 0.7;
+        }
+
+        .reg-mark {
+          position: absolute;
+          z-index: 2;
+          pointer-events: none;
+          width: 28px;
+          height: 28px;
+          border: 1px solid rgba(245,246,252,0.25);
+        }
+        .reg-mark.tl { top: 28px; left: 28px; border-right: none; border-bottom: none; }
+        .reg-mark.tr { top: 28px; right: 28px; border-left: none; border-bottom: none; }
+        .reg-mark.bl { bottom: 28px; left: 28px; border-right: none; border-top: none; }
+        .reg-mark.br { bottom: 28px; right: 28px; border-left: none; border-top: none; }
+        .reg-mark::before, .reg-mark::after {
+          content: '';
+          position: absolute;
+          background: rgba(245,246,252,0.45);
+        }
+        .reg-mark::before { width: 1px; height: 8px; }
+        .reg-mark::after  { width: 8px; height: 1px; }
+        .reg-mark.tl::before { top: -1px; left: 50%; transform: translateX(-50%); }
+        .reg-mark.tl::after  { top: 50%; left: -1px; transform: translateY(-50%); }
+        .reg-mark.tr::before { top: -1px; right: 50%; transform: translateX(50%); }
+        .reg-mark.tr::after  { top: 50%; right: -1px; transform: translateY(-50%); }
+        .reg-mark.bl::before { bottom: -1px; left: 50%; transform: translateX(-50%); }
+        .reg-mark.bl::after  { bottom: 50%; left: -1px; transform: translateY(-50%); }
+        .reg-mark.br::before { bottom: -1px; right: 50%; transform: translateX(50%); }
+        .reg-mark.br::after  { bottom: 50%; right: -1px; transform: translateY(-50%); }
+
+        .coord-label {
+          position: absolute;
+          z-index: 2;
+          pointer-events: none;
+          font-family: ui-monospace, "SF Mono", "IBM Plex Mono", "JetBrains Mono", monospace;
+          font-size: 9px;
+          letter-spacing: 0.22em;
+          text-transform: uppercase;
+          color: rgba(245,246,252,0.45);
+        }
+        .coord-label.tl { top: 24px; left: 72px; }
+        .coord-label.tr { top: 24px; right: 72px; }
+        .coord-label.bl { bottom: 24px; left: 72px; }
+        .coord-label.br { bottom: 24px; right: 72px; }
+        .coord-label .val { color: rgba(245,246,252,0.75); font-weight: 500; }
+
+        .edge-rule-left {
+          position: absolute;
+          left: 0;
+          top: 50%;
+          transform: translateY(-50%);
+          z-index: 2;
+          pointer-events: none;
+          display: flex;
+          align-items: center;
+        }
+        .edge-rule-left .line { width: 40px; height: 1px; background: rgba(245,246,252,0.25); }
+        .edge-rule-left .label {
+          font-family: ui-monospace, "SF Mono", "IBM Plex Mono", "JetBrains Mono", monospace;
+          font-size: 8px;
+          letter-spacing: 0.28em;
+          text-transform: uppercase;
+          color: rgba(245,246,252,0.45);
+          padding-left: 10px;
+          writing-mode: vertical-rl;
+          transform: rotate(180deg);
+        }
+
+        .spec-bar {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          z-index: 2;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 14px clamp(24px, 4vw, 64px);
+          border-top: 1px solid rgba(245,246,252,0.08);
+          font-family: ui-monospace, "SF Mono", "IBM Plex Mono", "JetBrains Mono", monospace;
+          font-size: 9px;
+          letter-spacing: 0.2em;
+          text-transform: uppercase;
+          color: rgba(245,246,252,0.45);
+          pointer-events: none;
+        }
+        .spec-bar .group { display: flex; gap: 28px; align-items: center; }
+        .spec-bar .item { display: flex; align-items: center; gap: 8px; }
+        .spec-bar .dot { width: 5px; height: 5px; border-radius: 50%; background: #e63946; }
+        .spec-bar b { color: rgba(245,246,252,0.75); font-weight: 500; }
+        .spec-bar .rule { width: 24px; height: 1px; background: rgba(245,246,252,0.25); }
+
         .reveal { opacity: 0; transform: translateY(12px); transition: opacity 0.6s cubic-bezier(0.22,1,0.36,1), transform 0.6s cubic-bezier(0.22,1,0.36,1); }
-        .reveal-in { opacity: 1; transform: translateY(0); }
         @media (prefers-reduced-motion: reduce) {
           .reveal { transition: none; opacity: 1; transform: none; }
           .animate-ping { animation: none; }
         }
         ::selection { background: ${DARK_GRAY}; color: ${BG}; }
         a:focus-visible, button:focus-visible { outline: 2px solid ${DARK_GRAY}; outline-offset: 2px; }
+
+        @media (max-width: 900px) {
+          .reg-mark, .coord-label, .edge-rule-left { display: none; }
+          .spec-bar {
+            flex-direction: column;
+            gap: 10px;
+            padding: 12px 24px;
+          }
+          .spec-bar .group { gap: 16px; }
+        }
       `}</style>
-      <div className="max-w-6xl mx-auto px-6 sm:px-10 pt-28 sm:pt-36 pb-16 sm:pb-20">
+
+      {/* Corner registration marks */}
+      <div className="reg-mark tl" aria-hidden="true" />
+      <div className="reg-mark tr" aria-hidden="true" />
+      <div className="reg-mark bl" aria-hidden="true" />
+      <div className="reg-mark br" aria-hidden="true" />
+
+      {/* Coordinate labels */}
+      <div className="coord-label tl" aria-hidden="true">X <span className="val">00</span> · Y <span className="val">03</span></div>
+      <div className="coord-label tr" aria-hidden="true">PLATE <span className="val">04</span> / CASE STUDY</div>
+      <div className="coord-label bl" aria-hidden="true">GRID <span className="val">48</span> · MAJOR <span className="val">192</span></div>
+      <div className="coord-label br" aria-hidden="true">SECTION <span className="val">04</span></div>
+
+      {/* Left vertical rule */}
+      <div className="edge-rule-left" aria-hidden="true">
+        <div className="line" />
+        <div className="label">Registration · Vertical Datum</div>
+      </div>
+
+      <div className="relative z-30 max-w-6xl mx-auto px-6 sm:px-10 pt-28 sm:pt-36 pb-16 sm:pb-20">
         <div key={openId} className="view-enter">
           <CaseStudyDetail project={openProject} onSwitch={setOpenId} nextId={nextProject.id} />
         </div>
       </div>
+
+      {/* Bottom spec bar */}
+      <div className="spec-bar" aria-hidden="true">
+        <div className="group">
+          <div className="item"><span className="dot" /> SYSTEM <b>ACTIVE</b></div>
+          <div className="rule" />
+          <div className="item">FRAME <b>{openProject.index}</b> / <b>02</b></div>
+        </div>
+        <div className="group">
+          <div className="item">SCROLL <b>READY</b></div>
+          <div className="rule" />
+          <div className="item">BUILD <b>V1.0</b> · 2026</div>
+        </div>
+      </div>
+
       <ThunderScrollButton />
     </div>
   );

@@ -1,117 +1,215 @@
 "use client";
 
-/* ─── Base shimmer block ─────────────────────────────────── */
-export function SkeletonBlock({
-  width = "100%",
-  height = "20px",
-  borderRadius = "6px",
-  style,
-}: {
-  width?: string | number;
-  height?: string | number;
-  borderRadius?: string;
-  style?: React.CSSProperties;
-}) {
+const BG = "#14141A";
+const LINE = "rgba(245,246,252,0.08)";
+const LINE_STRONG = "rgba(245,246,252,0.14)";
+
+function SkeletonStyles() {
   return (
-    <div
-      className="sk-shimmer"
-      style={{ width, height, borderRadius, flexShrink: 0, ...style }}
-    />
+    <style>{`
+      @keyframes sk-pulse {
+        0%, 100% { opacity: 0.55; }
+        50% { opacity: 1; }
+      }
+      .sk-block {
+        background: ${LINE_STRONG};
+        border-radius: 2px;
+        animation: sk-pulse 1.6s ease-in-out infinite;
+      }
+      .sk-section {
+        position: relative;
+        min-height: 100vh;
+        background: transparent;
+        display: flex;
+        align-items: center;
+        width: 100%;
+        box-sizing: border-box;
+        padding: 80px clamp(24px, 4vw, 64px);
+      }
+      .sk-nav {
+        position: sticky;
+        top: 0;
+        z-index: 30;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20px clamp(24px, 4vw, 64px);
+        background: ${BG};
+        border-bottom: 1px solid ${LINE};
+      }
+      .sk-nav .links { display: flex; gap: 20px; }
+      .sk-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 24px clamp(24px, 4vw, 64px);
+        border-top: 1px solid ${LINE};
+        background: ${BG};
+      }
+      @media (max-width: 900px) {
+        .sk-hero-wrap { flex-direction: column !important; align-items: center !important; }
+        .sk-nav .links { display: none; }
+        .sk-about-grid { grid-template-columns: 1fr !important; }
+        .sk-contact-grid { grid-template-columns: 1fr !important; }
+      }
+    `}</style>
   );
 }
 
-/* ─── Hero skeleton ──────────────────────────────────────── */
-export function HeroSkeleton() {
+export function NavbarSkeleton() {
   return (
-    <section
-      style={{
-        minHeight: "100vh",
-        background: "#262526",
-        display: "flex",
-        alignItems: "center",
-        padding: "80px clamp(16px, 4vw, 64px) 60px",
-        gap: 48,
-      }}
-    >
-      {/* Left text block */}
-      <div style={{ flex: "1 1 400px", display: "flex", flexDirection: "column", gap: 20 }}>
-        <SkeletonBlock width="120px" height="20px" />
-        <SkeletonBlock width="70%" height="48px" borderRadius="8px" />
-        <SkeletonBlock width="55%" height="48px" borderRadius="8px" />
-        <SkeletonBlock width="90%" height="22px" style={{ marginTop: 12 }} />
-        <SkeletonBlock width="75%" height="22px" />
-        <div style={{ display: "flex", gap: 16, marginTop: 16 }}>
-          <SkeletonBlock width="160px" height="52px" borderRadius="6px" />
-          <SkeletonBlock width="160px" height="52px" borderRadius="6px" />
+    <>
+      <SkeletonStyles />
+      <div className="sk-nav">
+        <div className="sk-block" style={{ width: 120, height: 16 }} />
+        <div className="links">
+          <div className="sk-block" style={{ width: 60, height: 12 }} />
+          <div className="sk-block" style={{ width: 60, height: 12 }} />
+          <div className="sk-block" style={{ width: 60, height: 12 }} />
+          <div className="sk-block" style={{ width: 90, height: 34, borderRadius: 2 }} />
         </div>
       </div>
-      {/* Right image block */}
-      <SkeletonBlock
-        width="clamp(200px, 28vw, 360px)"
-        height="clamp(267px, 37vw, 480px)"
-        borderRadius="8px"
-        style={{ flexShrink: 0 }}
-      />
+    </>
+  );
+}
+
+export function HeroSkeleton() {
+  return (
+    <section className="sk-section" style={{ minHeight: "100vh" }}>
+      <div style={{ width: "100%", maxWidth: "100%" }}>
+        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 48 }}>
+          <div className="sk-block" style={{ width: 60, height: 12 }} />
+        </div>
+
+        <div
+          className="sk-hero-wrap"
+          style={{ display: "flex", gap: "clamp(28px, 3.5vw, 56px)", alignItems: "center", width: "100%" }}
+        >
+          <div
+            className="sk-block"
+            style={{
+              flex: "0 0 auto",
+              width: "clamp(280px, 32vw, 420px)",
+              aspectRatio: "1365 / 1767",
+              borderRadius: 2,
+            }}
+          />
+
+          <div style={{ flex: "1 1 380px", minWidth: 320, display: "flex", flexDirection: "column", gap: 18 }}>
+            <div className="sk-block" style={{ width: "80%", height: 40 }} />
+            <div className="sk-block" style={{ width: "50%", height: 40 }} />
+            <div className="sk-block" style={{ width: "100%", maxWidth: 520, height: 14, marginTop: 8 }} />
+            <div className="sk-block" style={{ width: "95%", maxWidth: 500, height: 14 }} />
+            <div className="sk-block" style={{ width: "70%", maxWidth: 380, height: 14 }} />
+            <div style={{ display: "flex", gap: 14, marginTop: 14 }}>
+              <div className="sk-block" style={{ width: 170, height: 46 }} />
+              <div className="sk-block" style={{ width: 150, height: 46 }} />
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
   );
 }
 
-/* ─── Navbar skeleton ────────────────────────────────────── */
-export function NavbarSkeleton() {
+export function AboutSkeleton() {
   return (
-    <div
-      style={{
-        position: "fixed",
-        inset: "0 0 auto 0",
-        zIndex: 100,
-        height: 72,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: "0 clamp(16px, 4vw, 64px)",
-        background: "transparent",
-      }}
-    >
-      <SkeletonBlock width="80px" height="22px" borderRadius="4px" />
-      <div style={{ display: "flex", gap: 48 }}>
-        <SkeletonBlock width="56px" height="16px" borderRadius="4px" />
-        <SkeletonBlock width="56px" height="16px" borderRadius="4px" />
-        <SkeletonBlock width="72px" height="16px" borderRadius="4px" />
+    <section className="sk-section" style={{ minHeight: "auto", padding: "clamp(60px, 8vw, 100px) clamp(24px, 4vw, 64px)" }}>
+      <div style={{ width: "100%", maxWidth: 1020, margin: "0 auto" }}>
+        <div className="sk-block" style={{ width: 100, height: 12, marginBottom: 12 }} />
+        <div className="sk-block" style={{ width: 200, height: 30, marginBottom: 56 }} />
+
+        <div
+          className="sk-about-grid"
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            columnGap: "clamp(28px, 3.5vw, 52px)",
+            rowGap: "clamp(44px, 5.5vw, 64px)",
+          }}
+        >
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <div className="sk-block" style={{ width: "60%", height: 24 }} />
+            <div className="sk-block" style={{ width: "100%", height: 14 }} />
+            <div className="sk-block" style={{ width: "90%", height: 14 }} />
+            <div className="sk-block" style={{ width: "80%", height: 14 }} />
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 16, justifySelf: "end", width: "100%", maxWidth: 360 }}>
+            <div className="sk-block" style={{ width: "40%", height: 16 }} />
+            <div className="sk-block" style={{ width: "70%", height: 12 }} />
+            <div className="sk-block" style={{ width: "40%", height: 16 }} />
+            <div className="sk-block" style={{ width: "70%", height: 12 }} />
+          </div>
+
+          <div style={{ gridColumn: "1 / -1", display: "flex", gap: 16, width: "100%" }}>
+            <div className="sk-block" style={{ width: 4, alignSelf: "stretch" }} />
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12, flex: 1 }}>
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                  <div className="sk-block" style={{ width: "70%", height: 14 }} />
+                  <div className="sk-block" style={{ width: "90%", height: 12 }} />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
+    </section>
   );
 }
 
-/* ─── About skeleton ─────────────────────────────────────── */
-export function AboutSkeleton() {
+export function SkillsSkeleton() {
   return (
-    <section
-      style={{
-        background: "#262526",
-        padding: "clamp(60px, 8vw, 110px) clamp(16px, 4vw, 64px)",
-      }}
-    >
-      <SkeletonBlock width="140px" height="20px" style={{ marginBottom: 48 }} />
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 40 }}>
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <SkeletonBlock width="80%" height="44px" borderRadius="6px" />
-          <SkeletonBlock width="65%" height="44px" borderRadius="6px" />
-          <SkeletonBlock width="100%" height="20px" style={{ marginTop: 12 }} />
-          <SkeletonBlock width="95%" height="20px" />
-          <SkeletonBlock width="85%" height="20px" />
-          <div style={{ display: "flex", gap: 24, marginTop: 24 }}>
-            <SkeletonBlock width="84px" height="84px" borderRadius="50%" />
-            <SkeletonBlock width="84px" height="84px" borderRadius="50%" />
-            <SkeletonBlock width="64px" height="84px" borderRadius="4px" />
+    <section className="sk-section" style={{ minHeight: "auto", padding: "0 clamp(24px, 4vw, 64px) clamp(60px, 8vw, 100px)" }}>
+      <div style={{ width: "100%", maxWidth: 1020, margin: "0 auto", display: "flex", justifyContent: "center", gap: "5vw" }}>
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14, flex: "0 0 auto" }}>
+            <div className="sk-block" style={{ width: 90, height: 90, borderRadius: "50%" }} />
+            <div className="sk-block" style={{ width: 110, height: 20 }} />
+            <div className="sk-block" style={{ width: 220, height: 12 }} />
+            <div className="sk-block" style={{ width: 180, height: 12 }} />
           </div>
-        </div>
-        <div style={{ display: "flex", gap: 24, paddingLeft: 24 }}>
-          <SkeletonBlock width="3px" height="100%" borderRadius="2px" />
-          <div style={{ display: "flex", flexDirection: "column", gap: 32, flex: 1 }}>
-            {[1, 2, 3, 4, 5].map(i => (
-              <div key={i} style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                <SkeletonBlock width="100px" height="16px" borderRadius="3px" />
-                <SkeletonBlock width="160px" height="20px" borderRadius="3px" />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+export function ContactSkeleton() {
+  return (
+    <section className="sk-section" style={{ minHeight: "100vh" }}>
+      <div style={{ width: "100%", maxWidth: 1080, margin: "0 auto" }}>
+        <div className="sk-block" style={{ width: 90, height: 12, marginBottom: 56 }} />
+
+        <div
+          className="sk-contact-grid"
+          style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr", columnGap: "clamp(50px, 7vw, 90px)", alignItems: "start" }}
+        >
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <div className="sk-block" style={{ width: "70%", height: 44 }} />
+            <div className="sk-block" style={{ width: "55%", height: 44 }} />
+            <div className="sk-block" style={{ width: "60%", height: 44, marginBottom: 24 }} />
+            <div className="sk-block" style={{ width: 200, height: 46 }} />
+            <div style={{ display: "flex", gap: 24, marginTop: 40, flexWrap: "wrap" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <div className="sk-block" style={{ width: 180, height: 26 }} />
+                <div className="sk-block" style={{ width: 220, height: 26 }} />
+                <div className="sk-block" style={{ width: 260, height: 12 }} />
+              </div>
+              <div className="sk-block" style={{ width: 90, height: 20, alignSelf: "flex-end" }} />
+            </div>
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <div className="sk-block" style={{ width: 130, height: 12, marginBottom: 4 }} />
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 14, padding: "10px 0" }}>
+                <div className="sk-block" style={{ width: 18, height: 18, borderRadius: "50%" }} />
+                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                  <div className="sk-block" style={{ width: 60, height: 10 }} />
+                  <div className="sk-block" style={{ width: 180, height: 14 }} />
+                </div>
               </div>
             ))}
           </div>
@@ -121,84 +219,11 @@ export function AboutSkeleton() {
   );
 }
 
-/* ─── Skills skeleton ────────────────────────────────────── */
-export function SkillsSkeleton() {
-  return (
-    <section
-      style={{
-        background: "#262526",
-        padding: "clamp(64px, 8vw, 110px) clamp(16px, 4vw, 64px)",
-      }}
-    >
-      <SkeletonBlock width="100px" height="28px" style={{ marginBottom: 52 }} />
-      <div style={{ display: "grid", gridTemplateColumns: "1.55fr 1fr", gap: 28 }}>
-        {/* Left column */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-          {[120, 200].map(h => (
-            <SkeletonBlock key={h} width="100%" height={`${h}px`} borderRadius="28px" />
-          ))}
-        </div>
-        {/* Right column */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-          <SkeletonBlock width="100%" height="220px" borderRadius="28px" />
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, paddingTop: 16 }}>
-            <SkeletonBlock width="100px" height="100px" borderRadius="8px" />
-            <SkeletonBlock width="140px" height="22px" borderRadius="4px" />
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ─── Contact skeleton ───────────────────────────────────── */
-export function ContactSkeleton() {
-  return (
-    <section
-      style={{
-        background: "#262526",
-        padding: "clamp(48px, 6vw, 80px) clamp(16px, 4vw, 64px)",
-      }}
-    >
-      <SkeletonBlock width="120px" height="24px" style={{ marginBottom: 48 }} />
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 48 }}>
-        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-          <SkeletonBlock width="90%" height="52px" borderRadius="6px" />
-          <SkeletonBlock width="75%" height="52px" borderRadius="6px" />
-          <SkeletonBlock width="85%" height="52px" borderRadius="6px" />
-          <SkeletonBlock width="140px" height="44px" borderRadius="8px" style={{ marginTop: 8 }} />
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 36 }}>
-          {[1, 2, 3].map(i => (
-            <div key={i} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              <SkeletonBlock width="180px" height="16px" borderRadius="3px" />
-              <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
-                <SkeletonBlock width="48px" height="48px" borderRadius="4px" />
-                <SkeletonBlock width="200px" height="24px" borderRadius="4px" />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ─── Footer skeleton ────────────────────────────────────── */
 export function FooterSkeleton() {
   return (
-    <div
-      style={{
-        background: "#14141A",
-        width: "100%",
-        height: "80px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "0 clamp(16px, 4vw, 64px)",
-      }}
-    >
-      <SkeletonBlock width="280px" height="18px" borderRadius="4px" style={{ background: "rgba(38,37,38,0.15)" }} />
+    <div className="sk-footer">
+      <div className="sk-block" style={{ width: 140, height: 14 }} />
+      <div className="sk-block" style={{ width: 90, height: 14 }} />
     </div>
   );
 }

@@ -132,27 +132,11 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
 
   return (
     <section id="contact" ref={ref} className="contact-section">
-      {/* ── Corner registration marks ── */}
-      <div className="reg-mark tl" aria-hidden="true" />
-      <div className="reg-mark tr" aria-hidden="true" />
-      <div className="reg-mark bl" aria-hidden="true" />
-      <div className="reg-mark br" aria-hidden="true" />
-
-      {/* ── Coordinate labels ── */}
       <div className="coord-label tl" aria-hidden="true">X <span className="val">00</span> · Y <span className="val">03</span></div>
       <div className="coord-label tr" aria-hidden="true">PLATE <span className="val">04</span> / CONTACT</div>
-      <div className="coord-label bl" aria-hidden="true">GRID <span className="val">48</span> · MAJOR <span className="val">192</span></div>
-      <div className="coord-label br" aria-hidden="true">SECTION <span className="val">04</span></div>
 
-      {/* ── Left vertical rule ── */}
-      <div className="edge-rule-left" aria-hidden="true">
-        <div className="line" />
-        <div className="label">Registration · Vertical Datum</div>
-      </div>
+      <div className="container" style={{ position: "relative", zIndex: 3, maxWidth: "1080px", margin: "0 auto", padding: "clamp(70px, 9vw, 110px) clamp(24px, 4vw, 64px) clamp(90px, 10vw, 130px)", boxSizing: "border-box" }}>
 
-      <div className="container" style={{ position: "relative", zIndex: 3, maxWidth: "1080px", margin: "0 auto", padding: "clamp(70px, 9vw, 110px) clamp(24px, 4vw, 64px)", boxSizing: "border-box" }}>
-
-        {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
@@ -164,9 +148,7 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
           </p>
         </motion.div>
 
-        {/* Modern Editorial Grid */}
         <div className="contact-grid">
-          {/* Left Column — Heading & CTA */}
           <div className="col-main">
             <RevealLine inView={inView} delay={0.1} text="GOT A VISION?"
               style={{ fontSize: "clamp(34px, 4.2vw, 52px)" }} />
@@ -210,7 +192,6 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
               DOWNLOAD RESUME ↓
             </motion.button>
 
-            {/* Bottom CTA + New Text Button Side-by-Side */}
             <motion.div
               initial={{ opacity: 0, y: 24 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
@@ -229,7 +210,6 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
                 </p>
               </div>
 
-              {/* ✅ Modern Text Button — replaces circle button */}
               <motion.button
                 onClick={openForm}
                 initial={{ opacity: 0, x: 12 }}
@@ -265,7 +245,6 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
             </motion.div>
           </div>
 
-          {/* Right Column — Contact List Only */}
           <div className="col-details">
             <p style={{ fontFamily: mono.style.fontFamily, fontSize: "10px", letterSpacing: "0.25em", textTransform: "uppercase", color: MUTED_GRAY, marginBottom: "18px" }}>
               WHERE TO FIND ME
@@ -300,85 +279,15 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
         </div>
       </div>
 
-      {/* ── Bottom spec bar ── */}
-      <div className="spec-bar" aria-hidden="true">
-        <div className="group">
-          <div className="item"><span className="dot" /> SYSTEM <b>ACTIVE</b></div>
-          <div className="rule" />
-          <div className="item">FRAME <b>04</b> / <b>06</b></div>
-        </div>
-        <div className="group">
-          <div className="item">SCROLL <b>READY</b></div>
-          <div className="rule" />
-          <div className="item">BUILD <b>V1.0</b> · 2026</div>
-        </div>
-      </div>
-
       <style>{`
         .contact-section {
           position: relative;
           min-height: 100vh;
-          background: #14141A;
+          background: transparent;
           overflow: hidden;
           width: 100%;
         }
 
-        /* Micro-grid overlay — matches all sections exactly */
-        .contact-section::before {
-          content: '';
-          position: absolute;
-          inset: 0;
-          z-index: 1;
-          pointer-events: none;
-          background-image:
-            linear-gradient(rgba(245,246,252,0.14) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(245,246,252,0.14) 1px, transparent 1px);
-          background-size: 48px 48px;
-          opacity: 0.55;
-        }
-        .contact-section::after {
-          content: '';
-          position: absolute;
-          inset: 0;
-          z-index: 1;
-          pointer-events: none;
-          background-image:
-            linear-gradient(rgba(245,246,252,0.12) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(245,246,252,0.12) 1px, transparent 1px);
-          background-size: 192px 192px;
-          opacity: 0.7;
-        }
-
-        /* Registration marks — identical style */
-        .reg-mark {
-          position: absolute;
-          z-index: 2;
-          pointer-events: none;
-          width: 28px;
-          height: 28px;
-          border: 1px solid rgba(245,246,252,0.25);
-        }
-        .reg-mark.tl { top: 28px; left: 28px; border-right: none; border-bottom: none; }
-        .reg-mark.tr { top: 28px; right: 28px; border-left: none; border-bottom: none; }
-        .reg-mark.bl { bottom: 28px; left: 28px; border-right: none; border-top: none; }
-        .reg-mark.br { bottom: 28px; right: 28px; border-left: none; border-top: none; }
-        .reg-mark::before, .reg-mark::after {
-          content: '';
-          position: absolute;
-          background: rgba(245,246,252,0.45);
-        }
-        .reg-mark::before { width: 1px; height: 8px; }
-        .reg-mark::after  { width: 8px; height: 1px; }
-        .reg-mark.tl::before { top: -1px; left: 50%; transform: translateX(-50%); }
-        .reg-mark.tl::after  { top: 50%; left: -1px; transform: translateY(-50%); }
-        .reg-mark.tr::before { top: -1px; right: 50%; transform: translateX(50%); }
-        .reg-mark.tr::after  { top: 50%; right: -1px; transform: translateY(-50%); }
-        .reg-mark.bl::before { bottom: -1px; left: 50%; transform: translateX(-50%); }
-        .reg-mark.bl::after  { bottom: 50%; left: -1px; transform: translateY(-50%); }
-        .reg-mark.br::before { bottom: -1px; right: 50%; transform: translateX(50%); }
-        .reg-mark.br::after  { bottom: 50%; right: -1px; transform: translateY(-50%); }
-
-        /* Coordinate labels — same typography */
         .coord-label {
           position: absolute;
           z-index: 2;
@@ -391,57 +300,7 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
         }
         .coord-label.tl { top: 24px; left: 72px; }
         .coord-label.tr { top: 24px; right: 72px; }
-        .coord-label.bl { bottom: 24px; left: 72px; }
-        .coord-label.br { bottom: 24px; right: 72px; }
         .coord-label .val { color: rgba(245,246,252,0.75); font-weight: 500; }
-
-        /* Left vertical rule — identical */
-        .edge-rule-left {
-          position: absolute;
-          left: 0;
-          top: 50%;
-          transform: translateY(-50%);
-          z-index: 2;
-          pointer-events: none;
-          display: flex;
-          align-items: center;
-        }
-        .edge-rule-left .line { width: 40px; height: 1px; background: rgba(245,246,252,0.25); }
-        .edge-rule-left .label {
-          font-family: ui-monospace, "SF Mono", "IBM Plex Mono", "JetBrains Mono", monospace;
-          font-size: 8px;
-          letter-spacing: 0.28em;
-          text-transform: uppercase;
-          color: rgba(245,246,252,0.45);
-          padding-left: 10px;
-          writing-mode: vertical-rl;
-          transform: rotate(180deg);
-        }
-
-        /* Bottom spec bar — same component */
-        .spec-bar {
-          position: absolute;
-          bottom: 0;
-          left: 0;
-          right: 0;
-          z-index: 2;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 14px clamp(24px, 4vw, 64px);
-          border-top: 1px solid rgba(245,246,252,0.08);
-          font-family: ui-monospace, "SF Mono", "IBM Plex Mono", "JetBrains Mono", monospace;
-          font-size: 9px;
-          letter-spacing: 0.2em;
-          text-transform: uppercase;
-          color: rgba(245,246,252,0.45);
-          pointer-events: none;
-        }
-        .spec-bar .group { display: flex; gap: 28px; align-items: center; }
-        .spec-bar .item { display: flex; align-items: center; gap: 8px; }
-        .spec-bar .dot { width: 5px; height: 5px; border-radius: 50%; background: #e63946; }
-        .spec-bar b { color: rgba(245,246,252,0.75); font-weight: 500; }
-        .spec-bar .rule { width: 24px; height: 1px; background: rgba(245,246,252,0.25); }
 
         .contact-grid {
           display: grid;
@@ -457,18 +316,12 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
         .contact-link:hover p:last-child { color: ${DARK_GRAY}; }
 
         @media (max-width: 900px) {
-          .reg-mark, .coord-label, .edge-rule-left { display: none; }
+          .coord-label { display: none; }
           .contact-grid {
             grid-template-columns: 1fr;
             row-gap: 48px;
           }
           .col-main, .col-details { grid-column: 1; }
-          .spec-bar {
-            flex-direction: column;
-            gap: 10px;
-            padding: 12px 24px;
-          }
-          .spec-bar .group { gap: 16px; }
         }
       `}</style>
 

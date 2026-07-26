@@ -5,7 +5,6 @@ import { mono, zalando } from "../fonts";
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 const ICE_WHITE = "#F5F6FC";
-const BG = "#14141A";
 const DARK_GRAY = "rgba(245,246,252,0.75)";
 const MUTED_GRAY = "rgba(245,246,252,0.65)";
 
@@ -186,28 +185,9 @@ export default function About() {
   const inView = useInView(ref, { once: true, margin: "-60px 0px" });
 
   return (
-    <section
-      id="about"
-      ref={ref}
-      className="about-section"
-    >
-      {/* ── Corner registration marks ── */}
-      <div className="reg-mark tl" aria-hidden="true" />
-      <div className="reg-mark tr" aria-hidden="true" />
-      <div className="reg-mark bl" aria-hidden="true" />
-      <div className="reg-mark br" aria-hidden="true" />
-
-      {/* ── Coordinate labels ── */}
+    <section id="about" ref={ref} className="about-section">
       <div className="coord-label tl" aria-hidden="true">X <span className="val">00</span> · Y <span className="val">01</span></div>
       <div className="coord-label tr" aria-hidden="true">PLATE <span className="val">02</span> / ABOUT</div>
-      <div className="coord-label bl" aria-hidden="true">GRID <span className="val">48</span> · MAJOR <span className="val">192</span></div>
-      <div className="coord-label br" aria-hidden="true">SECTION <span className="val">02</span></div>
-
-      {/* ── Left vertical rule ── */}
-      <div className="edge-rule-left" aria-hidden="true">
-        <div className="line" />
-        <div className="label">Registration · Vertical Datum</div>
-      </div>
 
       <div className="container" style={{ position: "relative", zIndex: 3, width: "100%", margin: "0 auto", padding: "clamp(60px, 8vw, 100px) clamp(24px, 4vw, 64px)", maxWidth: "1020px", boxSizing: "border-box" }}>
         <motion.div
@@ -379,85 +359,15 @@ export default function About() {
         </div>
       </div>
 
-      {/* ── Bottom spec bar ── */}
-      <div className="spec-bar" aria-hidden="true">
-        <div className="group">
-          <div className="item"><span className="dot" /> SYSTEM <b>ACTIVE</b></div>
-          <div className="rule" />
-          <div className="item">FRAME <b>02</b> / <b>06</b></div>
-        </div>
-        <div className="group">
-          <div className="item">SCROLL <b>READY</b></div>
-          <div className="rule" />
-          <div className="item">BUILD <b>V1.0</b> · 2026</div>
-        </div>
-      </div>
-
       <style>{`
         .about-section {
           position: relative;
           min-height: 100vh;
-          background: #14141A;
+          background: transparent;
           overflow: hidden;
           width: 100%;
         }
 
-        /* Micro-grid overlay — matches Hero exactly */
-        .about-section::before {
-          content: '';
-          position: absolute;
-          inset: 0;
-          z-index: 1;
-          pointer-events: none;
-          background-image:
-            linear-gradient(rgba(245,246,252,0.14) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(245,246,252,0.14) 1px, transparent 1px);
-          background-size: 48px 48px;
-          opacity: 0.55;
-        }
-        .about-section::after {
-          content: '';
-          position: absolute;
-          inset: 0;
-          z-index: 1;
-          pointer-events: none;
-          background-image:
-            linear-gradient(rgba(245,246,252,0.12) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(245,246,252,0.12) 1px, transparent 1px);
-          background-size: 192px 192px;
-          opacity: 0.7;
-        }
-
-        /* Registration marks — same as Hero */
-        .reg-mark {
-          position: absolute;
-          z-index: 2;
-          pointer-events: none;
-          width: 28px;
-          height: 28px;
-          border: 1px solid rgba(245,246,252,0.25);
-        }
-        .reg-mark.tl { top: 28px; left: 28px; border-right: none; border-bottom: none; }
-        .reg-mark.tr { top: 28px; right: 28px; border-left: none; border-bottom: none; }
-        .reg-mark.bl { bottom: 28px; left: 28px; border-right: none; border-top: none; }
-        .reg-mark.br { bottom: 28px; right: 28px; border-left: none; border-top: none; }
-        .reg-mark::before, .reg-mark::after {
-          content: '';
-          position: absolute;
-          background: rgba(245,246,252,0.45);
-        }
-        .reg-mark::before { width: 1px; height: 8px; }
-        .reg-mark::after  { width: 8px; height: 1px; }
-        .reg-mark.tl::before { top: -1px; left: 50%; transform: translateX(-50%); }
-        .reg-mark.tl::after  { top: 50%; left: -1px; transform: translateY(-50%); }
-        .reg-mark.tr::before { top: -1px; right: 50%; transform: translateX(50%); }
-        .reg-mark.tr::after  { top: 50%; right: -1px; transform: translateY(-50%); }
-        .reg-mark.bl::before { bottom: -1px; left: 50%; transform: translateX(-50%); }
-        .reg-mark.bl::after  { bottom: 50%; left: -1px; transform: translateY(-50%); }
-        .reg-mark.br::before { bottom: -1px; right: 50%; transform: translateX(50%); }
-        .reg-mark.br::after  { bottom: 50%; right: -1px; transform: translateY(-50%); }
-
-        /* Coordinate labels — same style */
         .coord-label {
           position: absolute;
           z-index: 2;
@@ -470,57 +380,7 @@ export default function About() {
         }
         .coord-label.tl { top: 24px; left: 72px; }
         .coord-label.tr { top: 24px; right: 72px; }
-        .coord-label.bl { bottom: 24px; left: 72px; }
-        .coord-label.br { bottom: 24px; right: 72px; }
         .coord-label .val { color: rgba(245,246,252,0.75); font-weight: 500; }
-
-        /* Left vertical rule — identical */
-        .edge-rule-left {
-          position: absolute;
-          left: 0;
-          top: 50%;
-          transform: translateY(-50%);
-          z-index: 2;
-          pointer-events: none;
-          display: flex;
-          align-items: center;
-        }
-        .edge-rule-left .line { width: 40px; height: 1px; background: rgba(245,246,252,0.25); }
-        .edge-rule-left .label {
-          font-family: ui-monospace, "SF Mono", "IBM Plex Mono", "JetBrains Mono", monospace;
-          font-size: 8px;
-          letter-spacing: 0.28em;
-          text-transform: uppercase;
-          color: rgba(245,246,252,0.45);
-          padding-left: 10px;
-          writing-mode: vertical-rl;
-          transform: rotate(180deg);
-        }
-
-        /* Bottom spec bar — same component */
-        .spec-bar {
-          position: absolute;
-          bottom: 0;
-          left: 0;
-          right: 0;
-          z-index: 2;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 14px clamp(24px, 4vw, 64px);
-          border-top: 1px solid rgba(245,246,252,0.08);
-          font-family: ui-monospace, "SF Mono", "IBM Plex Mono", "JetBrains Mono", monospace;
-          font-size: 9px;
-          letter-spacing: 0.2em;
-          text-transform: uppercase;
-          color: rgba(245,246,252,0.45);
-          pointer-events: none;
-        }
-        .spec-bar .group { display: flex; gap: 28px; align-items: center; }
-        .spec-bar .item { display: flex; align-items: center; gap: 8px; }
-        .spec-bar .dot { width: 5px; height: 5px; border-radius: 50%; background: #e63946; }
-        .spec-bar b { color: rgba(245,246,252,0.75); font-weight: 500; }
-        .spec-bar .rule { width: 24px; height: 1px; background: rgba(245,246,252,0.25); }
 
         .about-grid {
           display: grid;
@@ -535,17 +395,11 @@ export default function About() {
         .about-grid .cell-details     { grid-column: 1 / -1; align-self: stretch; justify-self: stretch; }
 
         @media (max-width: 900px) {
-          .reg-mark, .coord-label, .edge-rule-left { display: none; }
+          .coord-label { display: none; }
           .about-grid { grid-template-columns: 1fr; row-gap: 36px; }
           .about-grid .cell-text        { grid-column: 1; }
           .about-grid .cell-plain-info  { grid-column: 1; justify-self: start; max-width: 100% !important; }
           .about-grid .cell-details     { grid-column: 1; align-self: auto; }
-          .spec-bar {
-            flex-direction: column;
-            gap: 10px;
-            padding: 12px 24px;
-          }
-          .spec-bar .group { gap: 16px; }
         }
 
         .no-scrollbar::-webkit-scrollbar { display: none; }
