@@ -29,58 +29,116 @@ const submitTimestamps: number[] = [];
 
 const VALIDATION_DATA = {
   profanity: {
-    en: ["fuck","fucking","fucked","fucker","shit","shitting","bullshit","ass","asshole","bitch","bitches","bastard","dick","dickhead","cock","cunt","pussy","whore","slut","motherfucker","nigga","nigger","retard","retarded","damn","goddamn","hell","crap","douche","wanker","prick","twat","bollocks","arse","arsehole","bugger","tosser","nonce","paedo","pedo","rape","rapist","kill","murder","suicide","terrorist","nazi","hitler","fag","faggot","dyke","tranny","hoe","skank","scumbag","degenerate","pervert","creep","idiot","moron","imbecile","stupid","dumb","dumbass","loser","pathetic","worthless","trash","garbage","dipshit","jackass","smartass","wiseass","halfass","pieceofshit","sonofabitch","stfu","gtfo","fml","ffs","wtf","holyshit"],
-    fil: ["putangina","putanginamo","puta","tangina","tanginamo","tanga","gago","gagi","bobo","ulol","olol","yawa","buang","ungas","engot","tarantado","lintik","lintek","pucha","bwisit","bwiset","leche","hinayupak","hayop","salot","walanghiya","walangmodo","basura","kadiri","kupal","siraulo","baliw","punyeta","mamataykana","patayinkita","peste","demonyo","walangkwenta","walangsilbi","manloloko","mandaraya","magnanakaw","kurakot","korap","duwag","walangbayag","supot","bakla","bayot","pokpok","prosti","kabit","manyakis","bastos","malandi","inutil","palpak","mangmang","hangal","ampon","pulubi","abnoy","abnormal","lukaluka"]
+    en: ["fuck","fucking","fucked","fucker","fuckers","fucks","fuk","fukk","fck","fcking","shit","shitting","shitted","shitter","bullshit","horseshit","sht","sh1t","shyt","ass","asses","asshole","assholes","bitch","bitches","bitching","b1tch","bich","bastard","bastards","dick","dicks","dickhead","dickheads","dik","cock","cocks","cunt","cunts","pussy","pussies","whore","whores","slut","sluts","motherfucker","motherfuckers","mofo","mf","nigga","nigger","niggers","n1gga","chink","chinks","spic","spics","kike","kikes","retard","retards","retarded","r3tard","damn","damned","dammit","goddamn","goddamned","hell","crap","craps","crappy","douche","douchebag","douchebags","wanker","wankers","prick","pricks","twat","twats","bollocks","arse","arses","arsehole","arseholes","bugger","buggers","sod","sods","tosser","tossers","git","gits","minger","mingers","nonce","nonces","paedo","paedophile","pedo","pedophile","rape","rapist","rapists","kill","killer","killers","murder","murderer","suicide","bomb","terrorist","terrorism","nazi","hitler","kkk","fag","faggot","faggots","fagot","dyke","dykes","tranny","shemale","hoe","hoes","skank","skanks","scumbag","scumbags","scum","lowlife","lowlifes","degenerate","degenerates","pervert","perverts","perv","pervs","creep","creeps","creepy","idiot","idiots","moron","morons","imbecile","imbeciles","stupid","dumb","dumbass","dumbasses","loser","losers","pathetic","worthless","disgusting","vile","filthy","trash","garbage","waste","dipshit","dipshits","dumbshit","dumbshits","jackass","jackasses","smartass","smartasses","wiseass","wiseasses","kissass","kissasses","halfass","halfassed","pieceofshit","sonofabitch","stfu","gtfo","fml","ffs","wtf","holyshit","free money","click here","win now","crypto giveaway","investment scam","easy cash","fast money","urgent action","verify your account","limited time offer"],
+    fil: ["putangina","putanginamo","putang ina mo","puta","putaka","putang","tangina","tanginamo","tang ina mo","tngina","tnga","tanga","tangang","tangaka","gago","gagong","gagoka","gagi","gag0","bobo","bobong","boboka","ulol","ulolka","olol","ololka","yawa","yawaka","yawaa","buang","buangka","buanga","ungas","ungaska","engot","engotka","tarantado","tarantadong","tarantadoka","lintik","lintikka","lintek","lintekka","pucha","puchang","puchaka","puchamo","bwisit","bwiset","bwusit","leche","lecheka","lecheng","hinayupak","hinayupakka","hayop","hayopka","salot","salotka","walanghiya","walang hiya","walanghiyaka","walangmodo","walang modo","modoka","basura","basuraka","kadiri","kadirika","kadiring","kupal","kupalka","kupalna","siraulo","sira ulo","sirauloka","baliw","baliwka","punyeta","punyetaka","mamataykana","mamatay ka na","patayinkita","patayin kita","peste","demonyo","demonyoka","walangkwenta","walang kwenta","walangsilbi","walang silbi","manloloko","mandaraya","magnanakaw","kurakot","korap","duwag","walangbayag","walang bayag","bayagmo","supot","bakla","bayot","pokpok","prosti","kabit","manyakis","bastos","malandi","landi","inutil","palpak","mangmang","hangal","ampon","pulubi","abnoy","abnormal","lukaluka","luka luka","gago ka","bobo ka","tanga ka","ulol ka","sira ka","buang ka","yawa ka","pucha ka","puta ka","hayop ka","salot ka","basura ka","walang hiya ka","walang modo ka","bastos ka","manyak ka","inutil ka","palpak ka","mangmang ka","abnoy ka","baliw ka"]
   },
-  fakeNames: ["test","asdf","abc","none","na","idk","xxx","qwerty","unknown","anonymous","johndoe","janedoe","fake","placeholder","sample","trial","demo","hello"],
-  keyboardRuns: ["qwert","asdfg","zxcvb","qazwsx","poiuy","lkjhg"],
-  patterns: [
-    /^(.)\1{2,}$/i,
-    /(.)\1{5,}/,
-    /^[bcdfghjklmnpqrstvwxyz]{4,}$/i,
-    /^[aeiou]{6,}$/i
-  ]
+  fakeNames: ["test","testing","tester","testuser","test name","abc","abcd","abcde","none","na","idk","xxx","qwerty","unknown","anonymous","anon","johndoe","john doe","janedoe","jane doe","fake","fake name","placeholder","sample","sample name","trial","demo","hello","user","username","user name","admin","administrator","guest","visitor","temp","temporary","delete","deleteme","spam","spammer","bot","robot","auto","automatic","random","random name","junk","trash","garbage","nobody","no name","noname","someone","anyone","person","human","name","full name","first last","firstname lastname"],
+  keyboardRuns: ["qwert","qwerty","asdfg","asdfgh","zxcvb","zxcvbn","qazwsx","qazwsxe","poiuy","poiuyt","lkjhg","lkjhgf","mnbvc","mnbvcx","12345","123456","654321","09876"],
+  spamTriggers: ["free money","click here","win now","crypto giveaway","investment","easy cash","fast money","urgent","verify account","limited offer","act now","exclusive deal","make money","get rich","lottery","prize","won","winner","claim your","risk free","guaranteed","no obligation","double your","investment opportunity","earn daily","passive income","work from home","get paid","instant cash","wire transfer","western union","money gram","gift card","itunes card","amazon card","paypal","cash app","gcash","maya","bank details","account info","password","credit card","ssn","otp","verification code","confirm your","security alert","suspicious activity","unauthorized login","reset password","update your info","account suspended","locked account","reactivate","immediately","asap","right now","don't miss","only today","last chance","hurry up","act fast","limited time","expires soon","final notice","official notification","important message","dear customer","dear user","dear friend","hello friend","my dear","beloved","i have a proposal","business proposal","inheritance","lottery win","fund transfer","overseas job","job offer","work visa","immigration","loan offer","low interest","no credit check","guaranteed loan","debt relief","credit repair","weight loss","lose weight fast","diet pill","enhancement","male enhancement","miracle cure","healing","psychic","spell caster","love spell","lottery spell","bring back ex","revenge spell","black magic","voodoo","illuminati","join illuminati","rich and famous","power and wealth","secret society","brotherhood","freemason","get famous","become celebrity","mastercard","visa card","debit card","bank account","routing number","pin code","cvv","expiry date","send money","send load","mobile load","gcash number","maya number","smart padala","pera padala","cebuana lhuillier","palawan express","mlhuillier","western union","moneygram","coinbase","binance","crypto wallet","bitcoin","ethereum","usdt","giveaway","raffle","contest winner","you have won","claim prize","free gift","free sample","free trial","subscribe now","unsubscribe","click link","open attachment","download file","install app","update software","security update","system update","your computer is infected","virus detected","clean your pc","optimize your device","speed up your internet","boost performance","call this number","text this number","whatsapp","telegram","viber","signal","wechat","line","kakaotalk","facebook friend request","instagram dm","twitter dm","tiktok message","private message","pm me","dm me","contact me on","reach me at","alternative email","secondary number","my agent","my lawyer","my accountant","my secretary","my partner","my cousin","my uncle","my father","my mother","late husband","late wife","next of kin","beneficiary","next to kin","fund release","clearance fee","processing fee","delivery fee","customs fee","tax fee","insurance fee","security fee","keep this secret","confidential","don't tell anyone","this is private","top secret","for your eyes only","trust me","i promise you","guaranteed 100%","risk free","no scam","legitimate","official","licensed","registered","authorized","accredited"]
 } as const;
 
 function normalize(s: string): string {
   return s.toLowerCase().replace(/[^a-z0-9]/g, "");
 }
 
+function normalizeSoft(s: string): string {
+  return s.toLowerCase().replace(/[^a-z0-9\s]/g, "").replace(/\s+/g, " ").trim();
+}
+
 function hasProfanity(text: string): boolean {
   const compact = normalize(text);
-  return VALIDATION_DATA.profanity.en.some(w => compact.includes(w))
-      || VALIDATION_DATA.profanity.fil.some(w => compact.includes(normalize(w)));
+  const soft = normalizeSoft(text);
+  const words = soft.split(/\s+/);
+  if (VALIDATION_DATA.profanity.en.some(w => compact.includes(normalize(w)))) return true;
+  if (VALIDATION_DATA.profanity.en.some(w => words.includes(normalize(w)))) return true;
+  if (VALIDATION_DATA.profanity.fil.some(w => compact.includes(normalize(w)))) return true;
+  if (VALIDATION_DATA.profanity.fil.some(w => words.includes(normalizeSoft(w)))) return true;
+  return false;
+}
+
+function hasSpamTriggers(text: string): boolean {
+  const lower = text.toLowerCase();
+  let matches = 0;
+  for (const trigger of VALIDATION_DATA.spamTriggers) {
+    if (lower.includes(trigger)) matches++;
+    if (matches >= 2) return true;
+  }
+  return false;
 }
 
 function isLikelyFakeName(name: string): boolean {
   const trimmed = name.trim();
-  if (trimmed.length < 2) return false;
+  if (trimmed.length < 2 || trimmed.length > 60) return true;
   const lower = trimmed.toLowerCase();
   const clean = normalize(trimmed);
-  if (VALIDATION_DATA.patterns[0].test(clean)) return true;
-  if (clean && (VALIDATION_DATA.fakeNames as readonly string[]).includes(clean)) return true;
+  const soft = normalizeSoft(trimmed);
+  const words = soft.split(/\s+/).filter(Boolean);
+
+  if (/^(.)\1{2,}$/i.test(clean)) return true;
+  if (clean.length < 2) return true;
+  if ((VALIDATION_DATA.fakeNames as readonly string[]).some(f => lower.includes(f))) return true;
+  if ((VALIDATION_DATA.fakeNames as readonly string[]).includes(clean)) return true;
   if (/\d/.test(trimmed)) return true;
+  if (/[@#$%^&*()_+=\[\]{};:"\\|,<>\?\/~`]/.test(trimmed)) return true;
   if (VALIDATION_DATA.keyboardRuns.some(run => lower.includes(run))) return true;
   if (clean.length >= 4 && !/[aeiou]/.test(clean)) return true;
-  return hasProfanity(trimmed);
+  if (words.some(w => w.length === 1 && !/[aeiouAEIOU]/.test(w))) return true;
+  if (words.length >= 2 && words.every(w => w.length <= 1)) return true;
+  const uniqueChars = new Set(clean.split(""));
+  if (clean.length >= 6 && uniqueChars.size <= 2) return true;
+  if (/^(.)\1+(.)\2+$/.test(clean)) return true;
+  if (lower.includes("http") || lower.includes("www") || lower.includes(".com") || lower.includes("@")) return true;
+  if (hasProfanity(trimmed)) return true;
+  return false;
 }
 
 function isLikelySpamMessage(message: string): boolean {
   const trimmed = message.trim();
-  if (trimmed.length < 10) return false;
-  if (VALIDATION_DATA.patterns[1].test(trimmed)) return true;
+  if (trimmed.length < 10) return true;
+  if (trimmed.length > 500) return true;
+
+  if (/(.)\1{5,}/.test(trimmed)) return true;
   const words = trimmed.toLowerCase().split(/\s+/).filter(Boolean);
   const uniqueWords = new Set(words);
   if (words.length >= 4 && uniqueWords.size / words.length < 0.4) return true;
+
   const letters = trimmed.replace(/[^a-zA-Z]/g, "");
-  if (letters.length > 15 && letters === letters.toUpperCase()) return true;
+  if (letters.length > 20 && letters === letters.toUpperCase()) return true;
+
   const links = trimmed.match(/https?:\/\/|www\./gi);
-  if (links && links.length >= 2) return true;
+  if (links && links.length >= 1) return true;
+
   if (letters.length >= 15) {
     const vowels = (letters.match(/[aeiou]/gi) || []).length;
     if (vowels / letters.length < 0.15) return true;
   }
-  return hasProfanity(trimmed);
+
+  const specialChars = (trimmed.match(/[^a-zA-Z0-9\s.,!?'"-]/g) || []).length;
+  if (trimmed.length > 20 && specialChars / trimmed.length > 0.25) return true;
+
+  const emojiOrSymbol = (trimmed.match(/[^\x00-\x7F]/g) || []).length;
+  if (trimmed.length > 20 && emojiOrSymbol / trimmed.length > 0.3) return true;
+
+  const lines = trimmed.split(/\n+/).filter(Boolean);
+  const uniqueLines = new Set(lines.map(l => l.trim()));
+  if (lines.length >= 3 && uniqueLines.size / lines.length < 0.5) return true;
+
+  const wordCounts: Record<string, number> = {};
+  for (const w of words) {
+    if (w.length <= 2) continue;
+    wordCounts[w] = (wordCounts[w] || 0) + 1;
+    if (wordCounts[w] >= 4) return true;
+  }
+
+  if (VALIDATION_DATA.keyboardRuns.some(run => trimmed.toLowerCase().includes(run))) return true;
+
+  if (hasProfanity(trimmed)) return true;
+  if (hasSpamTriggers(trimmed)) return true;
+
+  const meaningfulWords = words.filter(w => w.length >= 3);
+  if (meaningfulWords.length < 2) return true;
+
+  return false;
 }
 
 function isRateLimited(): boolean {
@@ -119,8 +177,7 @@ export default function ContactFormPopup({ isOpen, onClose }: ContactFormPopupPr
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState("");
-  const [warnings, setWarnings] = useState({ fullName: "", vision: "" });
-  const [warningAck, setWarningAck] = useState({ fullName: false, vision: false });
+  const [blocks, setBlocks] = useState({ fullName: "", vision: "" });
 
   const totalSteps = 4;
   const progress = (step / totalSteps) * 100;
@@ -128,8 +185,7 @@ export default function ContactFormPopup({ isOpen, onClose }: ContactFormPopupPr
   useEffect(() => {
     const t = setTimeout(() => {
       const flagged = formData.fullName.trim() && isLikelyFakeName(formData.fullName);
-      setWarnings(w => ({ ...w, fullName: flagged ? "This doesn't look like a real name — double check it's correct." : "" }));
-      setWarningAck(a => ({ ...a, fullName: false }));
+      setBlocks(b => ({ ...b, fullName: flagged ? "This name looks invalid, fake, or inappropriate. Please enter your real full name." : "" }));
     }, 500);
     return () => clearTimeout(t);
   }, [formData.fullName]);
@@ -137,8 +193,7 @@ export default function ContactFormPopup({ isOpen, onClose }: ContactFormPopupPr
   useEffect(() => {
     const t = setTimeout(() => {
       const flagged = formData.vision.trim() && isLikelySpamMessage(formData.vision);
-      setWarnings(w => ({ ...w, vision: flagged ? "This message looks like spam or inappropriate — please make sure it's a genuine inquiry." : "" }));
-      setWarningAck(a => ({ ...a, vision: false }));
+      setBlocks(b => ({ ...b, vision: flagged ? "This message looks like spam, gibberish, or inappropriate content. Please write a genuine, clear message." : "" }));
     }, 600);
     return () => clearTimeout(t);
   }, [formData.vision]);
@@ -166,19 +221,25 @@ export default function ContactFormPopup({ isOpen, onClose }: ContactFormPopupPr
     let valid = true;
     if (step === 1) {
       if (!formData.fullName.trim()) { newErrors.fullName = "Please enter your full name"; valid = false; }
+      else if (blocks.fullName) { newErrors.fullName = blocks.fullName; valid = false; }
     }
     if (step === 2) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!formData.email.trim()) { newErrors.email = "Please enter your email address"; valid = false; }
       else if (!emailRegex.test(formData.email)) { newErrors.email = "Please enter a valid email address"; valid = false; }
+      else if (hasProfanity(formData.email)) { newErrors.email = "Email contains inappropriate content"; valid = false; }
     }
     if (step === 3) {
       if (!formData.projectType) { newErrors.projectType = "Please select a project type"; valid = false; }
       else if (formData.projectType === "OTHER" && !formData.customProject.trim()) { newErrors.customProject = "Please describe your project type"; valid = false; }
+      else if (formData.projectType === "OTHER" && (isLikelyFakeName(formData.customProject) || hasProfanity(formData.customProject))) {
+        newErrors.customProject = "Please enter a valid project description"; valid = false;
+      }
     }
     if (step === 4) {
       if (!formData.vision.trim()) { newErrors.vision = "Please tell me about your project"; valid = false; }
       else if (formData.vision.trim().length < 10) { newErrors.vision = "Please provide a little more detail (at least 10 characters)"; valid = false; }
+      else if (blocks.vision) { newErrors.vision = blocks.vision; valid = false; }
     }
     setErrors(newErrors);
     return valid;
@@ -186,20 +247,12 @@ export default function ContactFormPopup({ isOpen, onClose }: ContactFormPopupPr
 
   const nextStep = () => {
     if (!validateStep()) return;
-    if (step === 1 && warnings.fullName && !warningAck.fullName) {
-      setWarningAck(a => ({ ...a, fullName: true })); return;
-    }
-    if (step === 4 && warnings.vision && !warningAck.vision) {
-      setWarningAck(a => ({ ...a, vision: true })); return;
-    }
     if (step < totalSteps) setStep(prev => prev + 1);
     else handleSubmit();
   };
 
   const getButtonLabel = () => {
     if (loading) return "SENDING...";
-    if (step === 1 && warnings.fullName && warningAck.fullName) return "CONTINUE ANYWAY";
-    if (step === 4 && warnings.vision && warningAck.vision) return "SEND ANYWAY";
     return step === 4 ? "SEND IT" : "CONTINUE";
   };
 
@@ -215,6 +268,7 @@ export default function ContactFormPopup({ isOpen, onClose }: ContactFormPopupPr
   const handleSubmit = async (e?: FormEvent) => {
     e?.preventDefault();
     if (!validateStep()) return;
+    if (isLikelyFakeName(formData.fullName) || isLikelySpamMessage(formData.vision)) return;
     if (isRateLimited()) {
       setSubmitError("Too many submissions. Please wait a few minutes before trying again.");
       return;
@@ -242,8 +296,7 @@ export default function ContactFormPopup({ isOpen, onClose }: ContactFormPopupPr
     setStep(1);
     setFormData({ fullName: "", email: "", projectType: "", customProject: "", vision: "" });
     setErrors({ fullName: "", email: "", projectType: "", customProject: "", vision: "" });
-    setWarnings({ fullName: "", vision: "" });
-    setWarningAck({ fullName: false, vision: false });
+    setBlocks({ fullName: "", vision: "" });
     setSubmitted(false); setLoading(false); setSubmitError("");
     onClose();
   };
@@ -252,8 +305,7 @@ export default function ContactFormPopup({ isOpen, onClose }: ContactFormPopupPr
     setStep(1);
     setFormData({ fullName: "", email: "", projectType: "", customProject: "", vision: "" });
     setErrors({ fullName: "", email: "", projectType: "", customProject: "", vision: "" });
-    setWarnings({ fullName: "", vision: "" });
-    setWarningAck({ fullName: false, vision: false });
+    setBlocks({ fullName: "", vision: "" });
     setSubmitted(false); setLoading(false); setSubmitError("");
   };
 
@@ -461,14 +513,13 @@ export default function ContactFormPopup({ isOpen, onClose }: ContactFormPopupPr
                               )}
                             </AnimatePresence>
                             <AnimatePresence>
-                              {!errors.fullName && warnings.fullName && (
+                              {!errors.fullName && blocks.fullName && (
                                 <motion.p
                                   initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }}
                                   transition={{ duration: 0.2 }}
                                   style={{ color: TOKENS.warning, fontSize: "12px", marginTop: "6px", marginBottom: "0", fontFamily: mono.style.fontFamily, display: "flex", alignItems: "center", gap: "6px" }}
                                 >
-                                  <MdWarningAmber size={13} />
-                                  {warnings.fullName}{warningAck.fullName ? " Click Continue again to proceed anyway." : ""}
+                                  <MdWarningAmber size={13} />{blocks.fullName}
                                 </motion.p>
                               )}
                             </AnimatePresence>
@@ -612,19 +663,18 @@ export default function ContactFormPopup({ isOpen, onClose }: ContactFormPopupPr
                                   </motion.p>
                                 )}
                               </AnimatePresence>
-                              <p className={mono.className} style={{ textAlign: "right", color: TOKENS.textMuted, fontSize: "10px", margin: 0, letterSpacing: "0.1em" }}>
+                              <p className={mono.className} style={{ textAlign: "right", color: TOKENS.textMuted, fontSize: "10px", margin: "0", letterSpacing: "0.1em" }}>
                                 {formData.vision.length}/500
                               </p>
                             </div>
                             <AnimatePresence>
-                              {!errors.vision && warnings.vision && (
+                              {!errors.vision && blocks.vision && (
                                 <motion.p
                                   initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }}
                                   transition={{ duration: 0.2 }}
                                   style={{ color: TOKENS.warning, fontSize: "12px", marginTop: "6px", marginBottom: "0", fontFamily: mono.style.fontFamily, display: "flex", alignItems: "center", gap: "6px" }}
                                 >
-                                  <MdWarningAmber size={13} />
-                                  {warnings.vision}{warningAck.vision ? " Click Send again to proceed anyway." : ""}
+                                  <MdWarningAmber size={13} />{blocks.vision}
                                 </motion.p>
                               )}
                             </AnimatePresence>

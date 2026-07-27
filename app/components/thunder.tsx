@@ -17,13 +17,17 @@ const STOCK = "#f4f5fb";
 const INK = "#0a0b10";
 const GRAPHITE = "#5a5c68";
 const HAIRLINE = "#c8cad6";
-const SIGNAL = "#ff1f30";
-const SIGNAL_SOFT = "rgba(255, 31, 48, 0.18)";
+const SIGNAL = "#e63946";
 
 const SIZE = 64;
 const RING_R = 24;
 const RING_C = 2 * Math.PI * RING_R;
 const EASE = [0.16, 1, 0.3, 1] as [number, number, number, number];
+
+// Smooth ease-out curve — starts fast, decelerates gracefully
+function easeOutCustom(t: number): number {
+  return t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
+}
 
 const HALF = 36;
 const VIEW_BOX = `${-HALF} ${-HALF} ${HALF * 2} ${HALF * 2}`;
@@ -71,6 +75,7 @@ export default function ScrollToTopButton() {
 
   const panelHideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const fireTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scrollRafId = useRef<number | null>(null);
 
   const { scrollY, scrollYProgress } = useScroll();
   const smoothProgress = useSpring(scrollYProgress, {
@@ -80,6 +85,8 @@ export default function ScrollToTopButton() {
   });
   const dashOffset = useTransform(smoothProgress, (p) => RING_C * (1 - p));
 
+  // ✅ FIX: scroll handler ONLY updates UI — never cancels the animation
+  // Cancellation now happens ONLY on real user-input events (see below)
   useMotionValueEvent(scrollY, "change", (v) => {
     setVisible(v > 260);
     setScrollYpx(Math.round(v));
@@ -93,10 +100,38 @@ export default function ScrollToTopButton() {
     setPct(Math.round(v * 100));
   });
 
+  // ✅ Cancel animation ONLY when the user physically interacts
+  // (wheel scroll, finger touch, or keyboard navigation)
+  useEffect(() => {
+    const cancelScroll = () => {
+      if (scrollRafId.current !== null) {
+        cancelAnimationFrame(scrollRafId.current);
+        scrollRafId.current = null;
+      }
+    };
+
+    const opts: AddEventListenerOptions = { passive: true };
+    window.addEventListener("wheel", cancelScroll, opts);
+    window.addEventListener("touchstart", cancelScroll, opts);
+    window.addEventListener("touchmove", cancelScroll, opts);
+    window.addEventListener("keydown", (e) => {
+      if (["ArrowUp", "ArrowDown", "PageUp", "PageDown", " ", "Home", "End"].includes(e.key)) {
+        cancelScroll();
+      }
+    });
+
+    return () => {
+      window.removeEventListener("wheel", cancelScroll);
+      window.removeEventListener("touchstart", cancelScroll);
+      window.removeEventListener("touchmove", cancelScroll);
+    };
+  }, []);
+
   useEffect(() => {
     return () => {
       if (fireTimeout.current) clearTimeout(fireTimeout.current);
       if (panelHideTimer.current) clearTimeout(panelHideTimer.current);
+      if (scrollRafId.current !== null) cancelAnimationFrame(scrollRafId.current);
     };
   }, []);
 
@@ -109,16 +144,64 @@ export default function ScrollToTopButton() {
     panelHideTimer.current = setTimeout(() => setShowPanel(false), 400);
   }, []);
 
+  // ─── Buttery-smooth scroll-to-top via requestAnimationFrame ───
+  const smoothScrollToTop = useCallback(() => {
+    const startY = window.scrollY || window.pageYOffset;
+    if (startY <= 0) return;
+
+    // Always cancel any in-progress animation first (restart cleanly)
+    if (scrollRafId.current !== null) {
+      cancelAnimationFrame(scrollRafId.current);
+      scrollRafId.current = null;
+    }
+
+    // Distance-aware duration: short = snappy, long = luxurious but capped
+    const baseDuration = 420;
+    const per1000px = 180;
+    const maxDuration = 1100;
+    const distanceFactor = Math.min(1, startY / 3000);
+    const duration = Math.min(
+      maxDuration,
+      baseDuration + (startY / 1000) * per1000px * (0.5 + distanceFactor * 0.5)
+    );
+
+    const startTime = performance.now();
+
+    const tick = (now: number) => {
+      const elapsed = now - startTime;
+      const rawProgress = Math.min(1, elapsed / duration);
+      const eased = easeOutCustom(rawProgress);
+      const currentY = startY * (1 - eased);
+
+      window.scrollTo(0, currentY);
+
+      if (rawProgress < 1) {
+        scrollRafId.current = requestAnimationFrame(tick);
+      } else {
+        scrollRafId.current = null;
+        window.scrollTo(0, 0); // hard snap to exact top
+      }
+    };
+
+    scrollRafId.current = requestAnimationFrame(tick);
+  }, []);
+
   const handleClick = useCallback(() => {
     setFireId((id) => id + 1);
     setFiring(true);
-    window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
+
+    if (reduceMotion) {
+      window.scrollTo({ top: 0, behavior: "auto" });
+    } else {
+      smoothScrollToTop();
+    }
+
     if (fireTimeout.current) clearTimeout(fireTimeout.current);
     fireTimeout.current = setTimeout(
       () => setFiring(false),
       reduceMotion ? 180 : 820
     );
-  }, [reduceMotion]);
+  }, [reduceMotion, smoothScrollToTop]);
 
   return (
     <MotionConfig reducedMotion="user" transition={{ ease: EASE }}>
@@ -138,6 +221,8 @@ export default function ScrollToTopButton() {
           cursor: pointer;
           z-index: 45;
           -webkit-tap-highlight-color: transparent;
+          will-change: transform, opacity;
+          transform: translateZ(0);
         }
         .stt-btn:focus-visible {
           outline: none;
@@ -148,19 +233,19 @@ export default function ScrollToTopButton() {
           border-radius: 0;
         }
         .stt-face {
+          will-change: transform, filter;
+          transform: translateZ(0);
           filter:
             drop-shadow(0 1px 2px rgba(10, 11, 16, 0.10))
             drop-shadow(0 10px 24px rgba(10, 11, 16, 0.08));
-        }
-        .stt-progress-glow {
-          filter: drop-shadow(0 0 1.2px ${SIGNAL}) drop-shadow(0 0 3px ${SIGNAL_SOFT});
         }
 
         .stt-plate {
           position: absolute;
           right: calc(100% + 18px);
           top: 50%;
-          transform: translateY(-50%);
+          transform: translateY(-50%) translateZ(0);
+          will-change: transform, opacity;
           pointer-events: none;
           white-space: nowrap;
           background: ${PAPER};
@@ -315,11 +400,6 @@ export default function ScrollToTopButton() {
                     opacity="0.6"
                   />
                 </pattern>
-                <radialGradient id="clickBurst" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" stopColor={SIGNAL} stopOpacity="0.45" />
-                  <stop offset="60%" stopColor={SIGNAL} stopOpacity="0.12" />
-                  <stop offset="100%" stopColor={SIGNAL} stopOpacity="0" />
-                </radialGradient>
               </defs>
 
               <g stroke={INK} strokeWidth="0.9" fill="none" opacity="0.55">
@@ -350,85 +430,38 @@ export default function ScrollToTopButton() {
                 </text>
               ))}
 
-              <g className="stt-progress-glow">
-                <motion.circle
-                  cx="0" cy="0" r={RING_R}
-                  fill="none" stroke={SIGNAL} strokeWidth="2.6" strokeLinecap="round"
-                  transform="rotate(-90)"
-                  strokeDasharray={RING_C}
-                  style={{ strokeDashoffset: dashOffset, opacity: 0.25 }}
-                />
-                <motion.circle
-                  cx="0" cy="0" r={RING_R}
-                  fill="none" stroke={SIGNAL} strokeWidth="2" strokeLinecap="round"
-                  transform="rotate(-90)"
-                  strokeDasharray={RING_C}
-                  style={{ strokeDashoffset: dashOffset }}
-                />
-              </g>
+              <motion.circle
+                cx="0" cy="0" r={RING_R}
+                fill="none" stroke={SIGNAL} strokeWidth="1.6" strokeLinecap="round"
+                transform="rotate(-90)"
+                strokeDasharray={RING_C}
+                style={{ strokeDashoffset: dashOffset }}
+              />
 
               <AnimatePresence>
                 {firing && !reduceMotion && (
-                  <>
-                    <motion.circle
-                      key={`burst-${fireId}`} cx="0" cy="0" r={RING_R + 2}
-                      fill="url(#clickBurst)"
-                      initial={{ opacity: 1, scale: 0.4 }}
-                      animate={{ opacity: 0, scale: 1.8 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.7, ease: EASE }}
-                    />
-                    <motion.circle
-                      key={`pulse1-${fireId}`} cx="0" cy="0" r={RING_R}
-                      fill="none" stroke={SIGNAL} strokeWidth="1.4"
-                      initial={{ opacity: 0.9, scale: 1 }}
-                      animate={{ opacity: 0, scale: 1.9 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.7, ease: EASE }}
-                    />
-                    <motion.circle
-                      key={`pulse2-${fireId}`} cx="0" cy="0" r={RING_R}
-                      fill="none" stroke={SIGNAL} strokeWidth="1"
-                      initial={{ opacity: 0.6, scale: 1 }}
-                      animate={{ opacity: 0, scale: 2.3 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.85, ease: EASE, delay: 0.06 }}
-                    />
-                  </>
+                  <motion.circle
+                    key={`pulse-${fireId}`} cx="0" cy="0" r={RING_R}
+                    fill="none" stroke={SIGNAL} strokeWidth="1"
+                    initial={{ opacity: 0.7, scale: 1 }}
+                    animate={{ opacity: 0, scale: 1.5 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.65, ease: EASE }}
+                  />
                 )}
               </AnimatePresence>
 
               <AnimatePresence>
                 {firing && !reduceMotion && (
-                  <>
-                    <motion.line
-                      key={`beam-${fireId}`}
-                      x1="0" y1={-RING_R - 2} x2="0" y2={-RING_R - 22}
-                      stroke={SIGNAL} strokeWidth="1.4" strokeLinecap="round"
-                      initial={{ pathLength: 0, opacity: 1 }}
-                      animate={{ pathLength: 1, opacity: 0 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.6, ease: EASE }}
-                    />
-                    <motion.line
-                      key={`beamL-${fireId}`}
-                      x1="-3" y1={-RING_R - 4} x2="-10" y2={-RING_R - 16}
-                      stroke={SIGNAL} strokeWidth="0.9" strokeLinecap="round"
-                      initial={{ pathLength: 0, opacity: 0.9 }}
-                      animate={{ pathLength: 1, opacity: 0 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.5, ease: EASE, delay: 0.04 }}
-                    />
-                    <motion.line
-                      key={`beamR-${fireId}`}
-                      x1="3" y1={-RING_R - 4} x2="10" y2={-RING_R - 16}
-                      stroke={SIGNAL} strokeWidth="0.9" strokeLinecap="round"
-                      initial={{ pathLength: 0, opacity: 0.9 }}
-                      animate={{ pathLength: 1, opacity: 0 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.5, ease: EASE, delay: 0.04 }}
-                    />
-                  </>
+                  <motion.line
+                    key={`beam-${fireId}`}
+                    x1="0" y1={-RING_R - 2} x2="0" y2={-RING_R - 14}
+                    stroke={SIGNAL} strokeWidth="1" strokeLinecap="round"
+                    initial={{ pathLength: 0, opacity: 0.9 }}
+                    animate={{ pathLength: 1, opacity: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.55, ease: EASE }}
+                  />
                 )}
               </AnimatePresence>
 
@@ -436,14 +469,14 @@ export default function ScrollToTopButton() {
                 {firing ? (
                   <motion.g
                     key="arrow"
-                    initial={{ opacity: 0, scale: 0.4, rotate: -35 }}
-                    animate={{ opacity: 1, scale: 1.15, rotate: 0 }}
+                    initial={{ opacity: 0, scale: 0.5, rotate: -25 }}
+                    animate={{ opacity: 1, scale: 1, rotate: 0 }}
                     exit={{ opacity: 0, scale: 0.5, rotate: 20 }}
-                    transition={{ type: "spring", stiffness: 420, damping: 20 }}
+                    transition={{ type: "spring", stiffness: 380, damping: 22 }}
                   >
-                    <line x1="0" y1="-10" x2="0" y2="10" stroke={INK} strokeWidth="1.6" strokeLinecap="round" />
-                    <path d="M -8,-4 L 0,-12 L 8,-4" fill="none" stroke={INK} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-                    <path d="M -4,3 L 0,-1 L 4,3" fill="none" stroke={SIGNAL} strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+                    <line x1="0" y1="-9" x2="0" y2="9" stroke={INK} strokeWidth="1.4" strokeLinecap="round" />
+                    <path d="M -7,-3 L 0,-10 L 7,-3" fill="none" stroke={INK} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M -3,2 L 0,-1 L 3,2" fill="none" stroke={SIGNAL} strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
                   </motion.g>
                 ) : (
                   <motion.g
