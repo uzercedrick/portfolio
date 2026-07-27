@@ -24,11 +24,6 @@ const RING_R = 24;
 const RING_C = 2 * Math.PI * RING_R;
 const EASE = [0.16, 1, 0.3, 1] as [number, number, number, number];
 
-// Smooth ease-out curve — starts fast, decelerates gracefully
-function easeOutCustom(t: number): number {
-  return t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
-}
-
 const HALF = 36;
 const VIEW_BOX = `${-HALF} ${-HALF} ${HALF * 2} ${HALF * 2}`;
 
@@ -75,7 +70,6 @@ export default function ScrollToTopButton() {
 
   const panelHideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const fireTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const scrollRafId = useRef<number | null>(null);
 
   const { scrollY, scrollYProgress } = useScroll();
   const smoothProgress = useSpring(scrollYProgress, {
@@ -85,8 +79,6 @@ export default function ScrollToTopButton() {
   });
   const dashOffset = useTransform(smoothProgress, (p) => RING_C * (1 - p));
 
-  // ✅ FIX: scroll handler ONLY updates UI — never cancels the animation
-  // Cancellation now happens ONLY on real user-input events (see below)
   useMotionValueEvent(scrollY, "change", (v) => {
     setVisible(v > 260);
     setScrollYpx(Math.round(v));
@@ -100,38 +92,10 @@ export default function ScrollToTopButton() {
     setPct(Math.round(v * 100));
   });
 
-  // ✅ Cancel animation ONLY when the user physically interacts
-  // (wheel scroll, finger touch, or keyboard navigation)
-  useEffect(() => {
-    const cancelScroll = () => {
-      if (scrollRafId.current !== null) {
-        cancelAnimationFrame(scrollRafId.current);
-        scrollRafId.current = null;
-      }
-    };
-
-    const opts: AddEventListenerOptions = { passive: true };
-    window.addEventListener("wheel", cancelScroll, opts);
-    window.addEventListener("touchstart", cancelScroll, opts);
-    window.addEventListener("touchmove", cancelScroll, opts);
-    window.addEventListener("keydown", (e) => {
-      if (["ArrowUp", "ArrowDown", "PageUp", "PageDown", " ", "Home", "End"].includes(e.key)) {
-        cancelScroll();
-      }
-    });
-
-    return () => {
-      window.removeEventListener("wheel", cancelScroll);
-      window.removeEventListener("touchstart", cancelScroll);
-      window.removeEventListener("touchmove", cancelScroll);
-    };
-  }, []);
-
   useEffect(() => {
     return () => {
       if (fireTimeout.current) clearTimeout(fireTimeout.current);
       if (panelHideTimer.current) clearTimeout(panelHideTimer.current);
-      if (scrollRafId.current !== null) cancelAnimationFrame(scrollRafId.current);
     };
   }, []);
 
@@ -144,64 +108,16 @@ export default function ScrollToTopButton() {
     panelHideTimer.current = setTimeout(() => setShowPanel(false), 400);
   }, []);
 
-  // ─── Buttery-smooth scroll-to-top via requestAnimationFrame ───
-  const smoothScrollToTop = useCallback(() => {
-    const startY = window.scrollY || window.pageYOffset;
-    if (startY <= 0) return;
-
-    // Always cancel any in-progress animation first (restart cleanly)
-    if (scrollRafId.current !== null) {
-      cancelAnimationFrame(scrollRafId.current);
-      scrollRafId.current = null;
-    }
-
-    // Distance-aware duration: short = snappy, long = luxurious but capped
-    const baseDuration = 420;
-    const per1000px = 180;
-    const maxDuration = 1100;
-    const distanceFactor = Math.min(1, startY / 3000);
-    const duration = Math.min(
-      maxDuration,
-      baseDuration + (startY / 1000) * per1000px * (0.5 + distanceFactor * 0.5)
-    );
-
-    const startTime = performance.now();
-
-    const tick = (now: number) => {
-      const elapsed = now - startTime;
-      const rawProgress = Math.min(1, elapsed / duration);
-      const eased = easeOutCustom(rawProgress);
-      const currentY = startY * (1 - eased);
-
-      window.scrollTo(0, currentY);
-
-      if (rawProgress < 1) {
-        scrollRafId.current = requestAnimationFrame(tick);
-      } else {
-        scrollRafId.current = null;
-        window.scrollTo(0, 0); // hard snap to exact top
-      }
-    };
-
-    scrollRafId.current = requestAnimationFrame(tick);
-  }, []);
-
   const handleClick = useCallback(() => {
     setFireId((id) => id + 1);
     setFiring(true);
-
-    if (reduceMotion) {
-      window.scrollTo({ top: 0, behavior: "auto" });
-    } else {
-      smoothScrollToTop();
-    }
-
+    window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
     if (fireTimeout.current) clearTimeout(fireTimeout.current);
     fireTimeout.current = setTimeout(
       () => setFiring(false),
       reduceMotion ? 180 : 820
     );
-  }, [reduceMotion, smoothScrollToTop]);
+  }, [reduceMotion]);
 
   return (
     <MotionConfig reducedMotion="user" transition={{ ease: EASE }}>
@@ -221,8 +137,6 @@ export default function ScrollToTopButton() {
           cursor: pointer;
           z-index: 45;
           -webkit-tap-highlight-color: transparent;
-          will-change: transform, opacity;
-          transform: translateZ(0);
         }
         .stt-btn:focus-visible {
           outline: none;
@@ -233,8 +147,6 @@ export default function ScrollToTopButton() {
           border-radius: 0;
         }
         .stt-face {
-          will-change: transform, filter;
-          transform: translateZ(0);
           filter:
             drop-shadow(0 1px 2px rgba(10, 11, 16, 0.10))
             drop-shadow(0 10px 24px rgba(10, 11, 16, 0.08));
@@ -244,8 +156,7 @@ export default function ScrollToTopButton() {
           position: absolute;
           right: calc(100% + 18px);
           top: 50%;
-          transform: translateY(-50%) translateZ(0);
-          will-change: transform, opacity;
+          transform: translateY(-50%);
           pointer-events: none;
           white-space: nowrap;
           background: ${PAPER};
@@ -313,7 +224,7 @@ export default function ScrollToTopButton() {
           font-weight: 500;
         }
         .stt-coord-label {
-          font-family: ui-monospace, "SF Mono", "IBM Plex Mono", "JetBrains Mono", monospace;
+          font-family: ui-monospace, "SF Mono", "IBM Plex Mono", monospace;
           font-size: 5px;
           fill: ${GRAPHITE};
         }
