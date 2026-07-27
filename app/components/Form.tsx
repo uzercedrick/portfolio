@@ -7,6 +7,7 @@ import emailjs from "@emailjs/browser";
 import { zalando, mono } from "../fonts";
 
 const E = [0.22, 1, 0.36, 1] as [number, number, number, number];
+const E_MOBILE = [0.2, 0.8, 0.2, 1] as [number, number, number, number];
 
 const TOKENS = {
   bg: "#14141A",
@@ -26,6 +27,25 @@ const RECIPIENT_EMAIL = "jhoncedrick.fuentes@gmail.com";
 const RATE_LIMIT_MAX = 3;
 const RATE_LIMIT_MS = 10 * 60 * 1000;
 const submitTimestamps: number[] = [];
+
+interface NavigatorExtended {
+  deviceMemory?: number;
+  hardwareConcurrency?: number;
+  userAgent: string;
+}
+
+const nav = typeof navigator !== "undefined" ? (navigator as unknown as NavigatorExtended) : null;
+const IS_MOBILE = typeof window !== "undefined" && (
+  window.innerWidth < 768 ||
+  /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(nav?.userAgent ?? "")
+);
+const IS_LOW_END = IS_MOBILE && (
+  (nav?.deviceMemory !== undefined && nav.deviceMemory <= 4) ||
+  (nav?.hardwareConcurrency !== undefined && nav.hardwareConcurrency <= 4)
+);
+
+const MODAL_DURATION = IS_LOW_END ? 0.18 : IS_MOBILE ? 0.22 : 0.28;
+const MODAL_EASE = IS_MOBILE ? E_MOBILE : E;
 
 const VALIDATION_DATA = {
   profanity: {
@@ -198,6 +218,44 @@ export default function ContactFormPopup({ isOpen, onClose }: ContactFormPopupPr
     return () => clearTimeout(t);
   }, [formData.vision]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const htmlEl = document.documentElement;
+    const bodyEl = document.body;
+    const scrollY = window.scrollY;
+    const scrollbarWidth = window.innerWidth - htmlEl.clientWidth;
+
+    const originalOverflow = bodyEl.style.overflow;
+    const originalPaddingRight = bodyEl.style.paddingRight;
+    const originalScrollBehavior = htmlEl.style.scrollBehavior;
+    const originalPosition = bodyEl.style.position;
+    const originalTop = bodyEl.style.top;
+    const originalWidth = bodyEl.style.width;
+
+    bodyEl.style.overflow = "hidden";
+    bodyEl.style.position = "fixed";
+    bodyEl.style.top = `-${scrollY}px`;
+    bodyEl.style.width = "100%";
+    if (scrollbarWidth > 0) {
+      bodyEl.style.paddingRight = `${scrollbarWidth}px`;
+    }
+
+    return () => {
+      bodyEl.style.overflow = originalOverflow;
+      bodyEl.style.position = originalPosition;
+      bodyEl.style.top = originalTop;
+      bodyEl.style.width = originalWidth;
+      bodyEl.style.paddingRight = originalPaddingRight;
+
+      htmlEl.style.scrollBehavior = "auto";
+      window.scrollTo(0, scrollY);
+      requestAnimationFrame(() => {
+        htmlEl.style.scrollBehavior = originalScrollBehavior;
+      });
+    };
+  }, [isOpen]);
+
   const getCurrentDateTime = () => new Intl.DateTimeFormat("en-PH", {
     timeZone: "Asia/Manila", year: "numeric", month: "long", day: "numeric",
     hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true,
@@ -314,26 +372,59 @@ export default function ContactFormPopup({ isOpen, onClose }: ContactFormPopupPr
   };
   const activeMeta = STEP_META[Math.min(step, 4) - 1];
 
+  const backdropVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1 },
+    exit: { opacity: 0 },
+  };
+
+  const panelVariants = IS_MOBILE ? {
+    hidden: { opacity: 0, y: "100%" },
+    visible: { opacity: 1, y: 0, transition: { duration: MODAL_DURATION, ease: MODAL_EASE } },
+    exit: { opacity: 0, y: "100%", transition: { duration: MODAL_DURATION * 0.85, ease: MODAL_EASE } },
+  } : {
+    hidden: { opacity: 0, y: 14 },
+    visible: { opacity: 1, y: 0, transition: { duration: MODAL_DURATION, ease: MODAL_EASE } },
+    exit: { opacity: 0, y: 10, transition: { duration: MODAL_DURATION * 0.85, ease: MODAL_EASE } },
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
         <motion.div
           key="contact-overlay"
-          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-          transition={{ duration: 0.28, ease: E }} onClick={closeAndReset}
+          variants={backdropVariants}
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+          transition={{ duration: MODAL_DURATION * 0.75, ease: MODAL_EASE }}
+          onClick={closeAndReset}
           style={{
             position: "fixed", inset: 0, background: "rgba(0, 0, 0, 0.7)",
-            backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)",
-            zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: "16px",
+            zIndex: 9999, display: "flex", alignItems: "flex-end", justifyContent: "center", padding: IS_MOBILE ? "0" : "16px",
           }}
+          className="sm:items-center"
         >
+          {!IS_MOBILE && (
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{ backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)" }}
+              aria-hidden="true"
+            />
+          )}
           <motion.div
-            initial={{ scale: 0.95, opacity: 0, y: 14 }} animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.96, opacity: 0, y: 14 }} transition={{ duration: 0.28, ease: E }}
+            variants={panelVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
             onClick={(e) => e.stopPropagation()}
             style={{
               background: TOKENS.bg, width: "100%", maxWidth: "850px", maxHeight: "90vh",
-              overflowY: "auto", position: "relative", borderRadius: "2px", border: `1px solid ${TOKENS.line}`,
+              overflowY: "auto", position: "relative", borderRadius: IS_MOBILE ? "16px 16px 0 0" : "2px",
+              border: `1px solid ${TOKENS.line}`,
+              willChange: "transform, opacity",
+              transform: "translateZ(0)",
+              backfaceVisibility: "hidden",
             }}
             onKeyDown={handleKeyDown} tabIndex={-1}
           >
@@ -383,6 +474,9 @@ export default function ContactFormPopup({ isOpen, onClose }: ContactFormPopupPr
               .form-content { position: relative; z-index: 2; }
               ::selection { background: ${TOKENS.accent}; color: ${TOKENS.bg}; }
               button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid ${TOKENS.accent}; outline-offset: 2px; }
+              @media (prefers-reduced-motion: reduce) {
+                .view-enter, .view-exit, .reveal { animation-duration: 0.01ms !important; }
+              }
             `}</style>
             <div className="form-inner w-full h-full p-6 sm:p-8">
               <div className="reg-mark tl" aria-hidden="true" />

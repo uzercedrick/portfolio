@@ -32,17 +32,44 @@ export default function AboutPortfolioModal({ open, onClose }: AboutPortfolioMod
 
   useEffect(() => {
     if (!mounted) return;
-    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
-    document.body.style.overflow = "hidden";
+
+    const htmlEl = document.documentElement;
+    const bodyEl = document.body;
+    const scrollY = window.scrollY;
+    const scrollbarWidth = window.innerWidth - htmlEl.clientWidth;
+
+    const originalOverflow = bodyEl.style.overflow;
+    const originalPaddingRight = bodyEl.style.paddingRight;
+    const originalScrollBehavior = htmlEl.style.scrollBehavior;
+    const originalPosition = bodyEl.style.position;
+    const originalTop = bodyEl.style.top;
+    const originalWidth = bodyEl.style.width;
+
+    bodyEl.style.overflow = "hidden";
+    bodyEl.style.position = "fixed";
+    bodyEl.style.top = `-${scrollY}px`;
+    bodyEl.style.width = "100%";
     if (scrollbarWidth > 0) {
-      document.body.style.paddingRight = `${scrollbarWidth}px`;
+      bodyEl.style.paddingRight = `${scrollbarWidth}px`;
     }
+
     closeBtnRef.current?.focus();
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
+
     return () => {
-      document.body.style.overflow = "";
-      document.body.style.paddingRight = "";
+      bodyEl.style.overflow = originalOverflow;
+      bodyEl.style.position = originalPosition;
+      bodyEl.style.top = originalTop;
+      bodyEl.style.width = originalWidth;
+      bodyEl.style.paddingRight = originalPaddingRight;
+
+      htmlEl.style.scrollBehavior = "auto";
+      window.scrollTo(0, scrollY);
+      requestAnimationFrame(() => {
+        htmlEl.style.scrollBehavior = originalScrollBehavior;
+      });
+
       window.removeEventListener("keydown", onKey);
     };
   }, [mounted, onClose]);
@@ -64,9 +91,14 @@ export default function AboutPortfolioModal({ open, onClose }: AboutPortfolioMod
       aria-labelledby="about-portfolio-heading"
     >
       <div
-        className={`absolute inset-0 backdrop-blur-sm ${closing ? "backdrop-exit" : "animate-[fadeIn_.2s_ease]"}`}
+        className={`absolute inset-0 ${closing ? "backdrop-exit" : "animate-[fadeIn_.18s_ease]"}`}
         style={{ background: "rgba(0,0,0,0.65)" }}
         onClick={onClose}
+        aria-hidden="true"
+      />
+      <div
+        className="absolute inset-0 hidden sm:block pointer-events-none"
+        style={{ backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)" }}
         aria-hidden="true"
       />
 
@@ -76,21 +108,30 @@ export default function AboutPortfolioModal({ open, onClose }: AboutPortfolioMod
           background: BG,
           borderColor: "rgba(245,246,252,0.08)",
           color: ICE_WHITE,
+          willChange: "transform, opacity",
+          transform: "translateZ(0)",
+          backfaceVisibility: "hidden",
         }}
         onClick={(e) => e.stopPropagation()}
         onAnimationEnd={handleExitAnimationEnd}
       >
         <style>{`
           @keyframes fadeUp { to { opacity:1; transform:translateY(0); } }
-          @keyframes fadeIn { to { opacity:1; } }
-          @keyframes fadeSlide { from { opacity:0; transform:translateY(16px);} to { opacity:1; transform:none; } }
-          @keyframes fadeSlideOut { from { opacity:1; transform:none; } to { opacity:0; transform:translateY(16px); } }
+          @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+          @keyframes fadeSlide { from { opacity:0; transform:translateY(100%);} to { opacity:1; transform:translateY(0); } }
+          @keyframes fadeSlideDesktop { from { opacity:0; transform:translateY(12px);} to { opacity:1; transform:translateY(0); } }
+          @keyframes fadeSlideOut { from { opacity:1; transform:translateY(0); } to { opacity:0; transform:translateY(100%); } }
+          @keyframes fadeSlideOutDesktop { from { opacity:1; transform:translateY(0); } to { opacity:0; transform:translateY(8px); } }
           @keyframes fadeOut { from { opacity:1; } to { opacity:0; } }
-          .view-enter { animation: fadeSlide .35s cubic-bezier(0.22,1,0.36,1) both; }
-          .view-exit { animation: fadeSlideOut .28s cubic-bezier(0.22,1,0.36,1) both; }
-          .backdrop-exit { animation: fadeOut .28s ease both; }
-          .reveal { opacity: 0; transform: translateY(10px); animation: fadeUp .55s ease forwards; }
-          .reveal:nth-of-type(2){animation-delay:.1s}.reveal:nth-of-type(3){animation-delay:.2s}
+          .view-enter { animation: fadeSlide .22s cubic-bezier(0.2,0.8,0.2,1) both; }
+          .view-exit { animation: fadeSlideOut .18s cubic-bezier(0.2,0.8,0.2,1) both; }
+          .backdrop-exit { animation: fadeOut .18s ease both; }
+          @media (min-width: 640px) {
+            .view-enter { animation: fadeSlideDesktop .28s cubic-bezier(0.22,1,0.36,1) both; }
+            .view-exit { animation: fadeSlideOutDesktop .22s cubic-bezier(0.22,1,0.36,1) both; }
+          }
+          .reveal { opacity: 0; transform: translateY(10px); animation: fadeUp .45s ease forwards; transform: translateZ(0); }
+          .reveal:nth-of-type(2){animation-delay:.08s}.reveal:nth-of-type(3){animation-delay:.16s}
 
           .modal-inner::before {
             content: '';
@@ -153,7 +194,7 @@ export default function AboutPortfolioModal({ open, onClose }: AboutPortfolioMod
           .coord-label.tr { top: 10px; right: 40px; }
           .coord-label .val { color: rgba(245,246,252,0.75); font-weight: 500; }
 
-          .close-btn { transition: all 0.2s ease; }
+          .close-btn { transition: background 0.15s ease, color 0.15s ease; }
           .close-btn:hover, .close-btn:focus-visible { 
             background: rgba(245,246,252,0.08); 
             color: ${ICE_WHITE};
@@ -163,6 +204,12 @@ export default function AboutPortfolioModal({ open, onClose }: AboutPortfolioMod
           button:focus-visible { outline: 2px solid ${DARK_GRAY}; outline-offset: 2px; }
 
           .modal-content { position: relative; z-index: 2; }
+
+          @media (prefers-reduced-motion: reduce) {
+            .view-enter, .view-exit, .backdrop-exit, .reveal {
+              animation-duration: 0.01ms !important;
+            }
+          }
         `}</style>
 
         <div className="modal-inner w-full h-full">

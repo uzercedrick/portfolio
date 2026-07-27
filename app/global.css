@@ -31,8 +31,18 @@ html {
   scroll-behavior: smooth;
 }
 
+@supports (scroll-behavior: smooth) {
+  @media (max-width: 768px) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+}
+
 body {
   overflow-x: hidden;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 img,
@@ -40,6 +50,7 @@ picture,
 video {
   max-width: 100%;
   display: block;
+  content-visibility: auto;
 }
 
 a {
@@ -49,6 +60,7 @@ a {
 button {
   font: inherit;
   color: inherit;
+  -webkit-tap-highlight-color: transparent;
 }
 
 ::selection {
@@ -86,4 +98,37 @@ button {
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+.reveal,
+.group,
+button,
+a,
+[class*="transition-"] {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .reveal,
+  [class*="hover:"] {
+    transition-duration: 150ms !important;
+  }
+  
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
 }
