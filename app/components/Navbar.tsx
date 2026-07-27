@@ -114,7 +114,6 @@ export default function Navbar() {
           pointerEvents: "none",
         }}
       >
-        {/* Desktop row — Zalando Sans Expanded, bold, ICE_WHITE hover */}
         <div
           className="nav-desktop-row"
           style={{ alignItems: "center", gap: "36px", pointerEvents: "auto", whiteSpace: "nowrap" }}
@@ -163,7 +162,6 @@ export default function Navbar() {
           })}
         </div>
 
-        {/* Mobile trigger — tech chip, fixed top-right */}
         <div
           className="nav-mobile-trigger"
           style={{

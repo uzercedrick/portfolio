@@ -376,7 +376,6 @@ export default function About() {
         .about-grid .cell-plain-info  { grid-column: 2; justify-self: end; width: 100%; max-width: 360px; }
         .about-grid .cell-details     { grid-column: 1 / -1; align-self: stretch; justify-self: stretch; }
 
-        /* ---------- Info items (Projects / Award / Year graduated) ---------- */
         .cell-plain-info {
           display: flex;
           flex-direction: column;
@@ -389,7 +388,6 @@ export default function About() {
           border-bottom: 1px solid rgba(245,246,252,0.12);
         }
 
-        /* ---------- Details grid (Education / Location / etc.) ---------- */
         .details-grid {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));

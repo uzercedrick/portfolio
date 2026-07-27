@@ -13,7 +13,6 @@ import {
 } from "framer-motion";
 
 const PAPER = "#fafbff";
-const STOCK = "#f4f5fb";
 const INK = "#0a0b10";
 const GRAPHITE = "#5a5c68";
 const HAIRLINE = "#c8cad6";

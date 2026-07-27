@@ -35,7 +35,7 @@ const PROJECTS: Project[] = [
     meta: [
       { label: "ROLE", value: "UX/UI + Front-end Developer" },
       { label: "TEAM", value: "5-Person Capstone" },
-      { label: "STATUS", value: "Research Congress Finalist" },
+      { label: "STATUS", value: "International Research Conference on Building Sustainable Ecosystem 2025" },
     ],
     caseStudyHref: "/studies?project=classguard",
     windowLabel: "classguard.app",

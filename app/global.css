@@ -61,7 +61,6 @@ button {
   outline-offset: 2px;
 }
 
-/* Dark scrollbar to match the theme */
 * {
   scrollbar-width: thin;
   scrollbar-color: rgba(245, 246, 252, 0.25) transparent;
@@ -81,7 +80,6 @@ button {
   background: rgba(245, 246, 252, 0.35);
 }
 
-/* Utility for horizontally-scrolling tracks (used in About's skill carousel) */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }

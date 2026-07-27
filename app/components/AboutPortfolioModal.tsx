@@ -63,7 +63,6 @@ export default function AboutPortfolioModal({ open, onClose }: AboutPortfolioMod
       aria-modal="true"
       aria-labelledby="about-portfolio-heading"
     >
-      {/* Backdrop */}
       <div
         className={`absolute inset-0 backdrop-blur-sm ${closing ? "backdrop-exit" : "animate-[fadeIn_.2s_ease]"}`}
         style={{ background: "rgba(0,0,0,0.65)" }}
@@ -71,7 +70,6 @@ export default function AboutPortfolioModal({ open, onClose }: AboutPortfolioMod
         aria-hidden="true"
       />
 
-      {/* Modal — Tech+Editorial Blueprint */}
       <div
         className={`relative w-full max-w-2xl max-h-[92vh] overflow-y-auto rounded-t-2xl sm:rounded-xl border ${closing ? "view-exit" : "view-enter"}`}
         style={{
@@ -94,7 +92,6 @@ export default function AboutPortfolioModal({ open, onClose }: AboutPortfolioMod
           .reveal { opacity: 0; transform: translateY(10px); animation: fadeUp .55s ease forwards; }
           .reveal:nth-of-type(2){animation-delay:.1s}.reveal:nth-of-type(3){animation-delay:.2s}
 
-          /* ── MODAL: Tech + Editorial instrument layer ── */
           .modal-inner::before {
             content: '';
             position: absolute;
@@ -120,7 +117,6 @@ export default function AboutPortfolioModal({ open, onClose }: AboutPortfolioMod
             opacity: 0.7;
           }
 
-          /* Corner registration marks — match hero */
           .reg-mark {
             position: absolute;
             z-index: 1;
@@ -143,7 +139,6 @@ export default function AboutPortfolioModal({ open, onClose }: AboutPortfolioMod
           .reg-mark.tr::before { top: -1px; right: 50%; transform: translateX(50%); }
           .reg-mark.tr::after  { top: 50%; right: -1px; transform: translateY(-50%); }
 
-          /* Edge coordinate labels — match hero */
           .coord-label {
             position: absolute;
             z-index: 1;
@@ -171,15 +166,12 @@ export default function AboutPortfolioModal({ open, onClose }: AboutPortfolioMod
         `}</style>
 
         <div className="modal-inner w-full h-full">
-          {/* Registration Marks */}
           <div className="reg-mark tl" aria-hidden="true" />
           <div className="reg-mark tr" aria-hidden="true" />
 
-          {/* Coordinate Labels */}
           <div className="coord-label tl" aria-hidden="true">X <span className="val">00</span> · Y <span className="val">01</span></div>
           <div className="coord-label tr" aria-hidden="true">SHEET <span className="val">02</span> / ABOUT</div>
 
-          {/* Header */}
           <div className="modal-content sticky top-0 z-10 flex items-start justify-between gap-4 px-6 sm:px-10 pt-6 sm:pt-8 pb-5" style={{ background: BG }}>
             <div>
               <div className={`${mono.className} text-[11px] tracking-[0.22em] uppercase mb-3`} style={{ color: DARK_GRAY }}>
@@ -203,7 +195,6 @@ export default function AboutPortfolioModal({ open, onClose }: AboutPortfolioMod
             </button>
           </div>
 
-          {/* Content */}
           <div className="modal-content px-6 sm:px-10 pb-10 sm:pb-12 space-y-6">
             <p className={`reveal ${zalando.className} text-[15px] sm:text-base leading-relaxed`} style={{ color: ICE_WHITE }}>
               Designed and built by{" "}

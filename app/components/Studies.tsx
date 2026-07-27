@@ -1,26 +1,29 @@
 "use client";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import React, { useEffect, useRef, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import ThunderScrollButton from "./thunder";
-import { ArrowUpRight, ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowUpRight, ArrowLeft, ArrowRight, X } from "lucide-react";
 import { zalando, mono } from "../fonts";
 
 const E = [0.22, 1, 0.36, 1] as [number, number, number, number];
-const up = {
-  hidden: { opacity: 0, y: 24 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: E } },
-};
 
 const DARK_GRAY = "rgba(245,246,252,0.75)";
 const ICE_WHITE = "#F5F6FC";
 const MUTED_GRAY = "rgba(245,246,252,0.65)";
 const BG = "#14141A";
-const HIGHLIGHT_BG = "#CEFF1A"; // Marker background
-const HIGHLIGHT_TEXT = "#14141A"; // Dark text for contrast
+const HIGHLIGHT_BG = "#CEFF1A";
+const HIGHLIGHT_TEXT = "#14141A";
+const ACCENT_RED = "#E63946";
+
+const CONGRESS_NAME = "International Research Conference on Building Sustainable Ecosystem 2025";
 
 interface MetaItem { label: string; value: string; }
-interface NarrativeItem { n: string; h: string; p: string; highlight?: string[]; }
+interface NarrativeItem {
+  n: string; h: string; p: string;
+  highlight?: string[];
+  keywords: string[];
+}
 interface MockImage { src: string; alt: string; caption?: string; }
 interface Brand { a: string; b: string; c: string; }
 interface Project {
@@ -35,36 +38,33 @@ const CASES: Project[] = [
     index: "01", id: "classguard", tag: "IoT Dashboard · Real-Time Monitoring",
     title: "ClassGuard Monitoring System",
     highlightWord: "System",
-    subtitle: "A real-time IoT dashboard tracking classroom temperature, humidity, and availability — built from scratch for City of Malabon University and recognized as a Research Congress finalist.",
+    subtitle: "A real-time IoT dashboard tracking classroom temperature, humidity, and availability — built from scratch for City of Malabon University and recognized as a finalist at the " + CONGRESS_NAME + ".",
     subtitleHighlight: "A real-time IoT dashboard",
-    summary: "Led UX/UI design, front-end, and backend setup by a 5-person capstone team — designing a live monitoring dashboard for classroom conditions and availability, and building the Node.js backend and account system behind it. Selected as a Research Congress finalist.",
+    summary: "Led UX/UI design, front-end, and backend setup by a 5-person capstone team — designing a live monitoring dashboard for classroom conditions and availability, and building the Node.js backend and account system behind it. Selected as a finalist at the " + CONGRESS_NAME + ".",
     meta: [
       { label: "ROLE", value: "UX/UI + Front-end Developer" },
       { label: "TEAM", value: "5-Person Capstone Team" },
-      { label: "RECOGNITION", value: "Research Congress Finalist" },
+      { label: "RECOGNITION", value: CONGRESS_NAME + " · Finalist" },
       { label: "STACK", value: "HTML · CSS · JAVASCRIPT · Node.js" },
     ],
     narrative: [
       {
         n: "01", h: "PROBLEM",
-        p: "Teachers at City of Malabon University had no way to check a classroom's temperature, humidity, or availability without walking over — a problem no existing system solved. Our 5-person capstone team built ClassGuard from scratch to fix it.",
-        highlight: [
-          "no way to check a classroom's temperature, humidity, or availability without walking over",
-        ],
+        p: "Faculty run on back-to-back schedules with no way to check if a room was free without walking over — and more often than not, that walk ended in a closed door and 5 to 10 minutes lost hunting for another space. I identified this as a fixable problem and led a 5-person team to build ClassGuard from scratch: a real-time classroom monitoring system that puts live room status in faculty's hands before they leave their office, with temperature and humidity sensing added as a bonus feature once the core system was working.",
+        highlight: ["5 to 10 minutes lost hunting for another space"],
+        keywords: ["Back-to-back schedules", "No room visibility", "Walking over", "Closed doors", "Lost class time"],
       },
       {
         n: "02", h: "APPROACH",
-        p: "I led UX/UI and front-end design, building color-coded status cards (ClassGuard Blue and Gold) for at-a-glance room availability, plus the Node.js backend with real-time socket updates and an account system verified through Google SMTP. Room readings came from Arduino Uno boards with DHT11 sensors, transmitted live via ESP32 microcontrollers.",
-        highlight: [
-          "color-coded status cards (ClassGuard Blue and Gold) for at-a-glance room availability",
-        ],
+        p: "As the only designer and front-end developer on the team, I owned the wireframes, visual system, and full front-end build. The key decision was color: instead of the usual red/green traffic-light pattern, I used the university's own blue and gold, so status reads at a glance and still feels like it belongs on campus. I also owned the account creation and email verification flow end-to-end, restricting access to verified faculty and staff. My teammates built the Node.js backend, the socket layer pushing real-time updates, and the Arduino Uno/DHT11 sensors feeding data through ESP32. As team lead, my job was keeping the UI honest about what the hardware and backend could actually deliver in real time.",
+        highlight: ["university's own blue and gold, so status reads at a glance"],
+        keywords: ["Wireframes", "Visual system", "Blue & gold palette", "Email verification", "Real-time sockets", "Arduino + ESP32"],
       },
       {
         n: "03", h: "RESULT",
-        p: "ClassGuard was live-demoed across 2 classrooms for our thesis defense and selected as a Research Congress finalist. The working prototype proved the concept — real-time room conditions readable at a glance — with full multi-room deployment as the clear next step.",
-        highlight: [
-          "selected as a Research Congress finalist",
-        ],
+        p: "ClassGuard was a fully working system, not a simulation — we ran it live across two real classrooms for our thesis defense, proving the pipeline worked end-to-end under real conditions. It was selected as a finalist at the " + CONGRESS_NAME + ", our university's research showcase, and more importantly, it worked: faculty could check a room's status in seconds instead of losing 5 to 10 minutes walking over. Full multi-room rollout is the next step toward campus-wide deployment.",
+        highlight: ["selected as a finalist at the " + CONGRESS_NAME],
+        keywords: ["Live in 2 classrooms", "Thesis defense", CONGRESS_NAME + " Finalist", "Seconds vs. minutes", "Multi-room rollout next"],
       },
     ],
     brand: { a: ICE_WHITE, b: DARK_GRAY, c: "#2B1F4D" },
@@ -85,42 +85,36 @@ const CASES: Project[] = [
     meta: [
       { label: "ROLE", value: "UX/UI + Landing Page Dev" },
       { label: "TEAM", value: "4-Person Team" },
-      { label: "TIMELINE", value: "6 WKS · 400-HR ONSITE OJT" },
-      { label: "STACK", value: "Figma · Laravel · Tailwind CSS · PHP" },
-      { label: "STATUS", value: "Deployed Live Website" },
+      { label: "TIMELINE", value: "10-WEEK ONSITE INTERNSHIP" },
+      { label: "STACK", value: "React · Next.js · Laravel · Tailwind CSS · PHP" },
+      { label: "STATUS", value: "Deployed Live at ultrafoodinc.com" },
     ],
     narrative: [
       {
         n: "01", h: "PROBLEM",
-        p: "Ultrafood Distributors needed its own dedicated B2B website to represent its brands, Menu Food Solutions and Nordic Foods Philippines — while a sister company's site was already up and running, Ultrafood had no web presence of its own. Leadership brought in a 4-person intern team to design and build one from scratch.",
-        highlight: [
-          "Ultrafood had no web presence of its own",
-        ],
+        p: "Ultrafood Distributors runs two B2B brands — Menu Food Solutions and Nordic Foods Philippines — but neither had a website, while their sister company already did. That left Ultrafood invisible online, with no page for a prospective distributor, retailer, or HORECA buyer to land on and learn what either brand offered before reaching out. Leadership brought in a 4-person intern team, myself included, to design and build a dedicated site for both brands from scratch.",
+        highlight: ["left Ultrafood invisible online"],
+        keywords: ["Two B2B brands", "No website", "Sister company had one", "Invisible online", "No landing page for buyers"],
       },
       {
         n: "02", h: "APPROACH",
-        p: "I owned the landing page front-end and a Google SMTP-powered contact form solo, validating the design in a React, Next.js, and Tailwind CSS prototype before rebuilding it in Laravel and PHP to match the client's production stack — all during a 400-hour onsite internship.",
-        highlight: [
-          "validating the design in a React, Next.js, and Tailwind CSS prototype before rebuilding it in Laravel and PHP to match the client's production stack",
-        ],
+        p: "I owned the UX/UI for the entire site, and the hardest part was the brand section: Menu leans playful and flavor-forward, while Nordic reads cleaner and more premium — so the section needed enough personality to represent each brand honestly, with a clear enough split to send visitors to the right one in one click. Before touching production code, I built the design as a working prototype in React, Next.js, and Tailwind CSS and walked the client's marketing team through it directly — fast to change, cheap to throw away, and a way to get UX sign-off before committing engineering time. I built the landing page and contact form myself; teammates covered the rest of the site and the backend. I then spent a 10-week onsite internship helping rebuild the validated prototype in Laravel and PHP to match the client's production stack.",
+        highlight: ["Menu leans playful and flavor-forward, while Nordic reads cleaner and more premium"],
+        keywords: ["Dual-brand UX", "Playful vs. premium", "React prototype", "Client walkthroughs", "Laravel rebuild", "10-week onsite"],
       },
       {
         n: "03", h: "RESULT",
-        p: "The site shipped and is live today at ultrafoodinc.com, giving Ultrafood its first dedicated brand presence. The internship supervisor overseeing the project gave positive feedback on the final result.",
-        highlight: [
-          "live today at ultrafoodinc.com",
-        ],
+        p: "The site shipped and is live at ultrafoodinc.com — Ultrafood's first dedicated brand presence. The marketing supervisor praised the UX/UI directly, and leadership signed off with no major revision cycles. Next step: extend the same brand-section pattern as Ultrafood onboards more brands.",
+        highlight: ["live at ultrafoodinc.com"],
+        keywords: ["Shipped & live", "First brand presence", "UX praised by client", "No major revisions", "Extendable pattern"],
       },
     ],
     brand: { a: ICE_WHITE, b: DARK_GRAY, c: "#1F3A16" },
     accentName: "Ultrafood Green", live: "https://ultrafoodinc.com/",
-    images: [
-      { src: "/ultrafood.png", alt: "Ultrafood Distributors Inc. live website" },
-    ],
+    images: [{ src: "/ultrafood.png", alt: "Ultrafood Distributors Inc. live website" }],
   },
 ];
 
-// Restore original style for title highlights
 function renderTitle(title: string, highlight?: string) {
   if (!highlight) return title;
   const idx = title.indexOf(highlight);
@@ -134,7 +128,6 @@ function renderTitle(title: string, highlight?: string) {
   );
 }
 
-// Marker-style highlight ONLY for PROBLEM/APPROACH/RESULT: background, no bold
 function renderHighlighted(text: string, highlight?: string | string[]) {
   if (!highlight) return text;
   const highlights = Array.isArray(highlight) ? highlight : [highlight];
@@ -145,15 +138,15 @@ function renderHighlighted(text: string, highlight?: string | string[]) {
     if (idx === -1) return;
     if (idx > cursor) parts.push(text.slice(cursor, idx));
     parts.push(
-      <span 
-        key={i} 
-        style={{ 
+      <span
+        key={i}
+        style={{
           backgroundColor: HIGHLIGHT_BG,
           color: HIGHLIGHT_TEXT,
           padding: "0.1em 0.3em",
           borderRadius: "0.15em",
-          lineHeight: "1.4",
-          fontWeight: "normal"
+          lineHeight: "1.6",
+          fontWeight: "normal",
         }}
       >
         {h}
@@ -165,7 +158,6 @@ function renderHighlighted(text: string, highlight?: string | string[]) {
   return <>{parts}</>;
 }
 
-// Restore original bold/white for subtitle highlights
 function renderSubtitleHighlight(text: string, highlight?: string) {
   if (!highlight) return text;
   const idx = text.indexOf(highlight);
@@ -210,20 +202,14 @@ function MetaChip({ label, value }: MetaItem) {
 
 function MockImageFill({ src, alt, fill = true }: { src: string; alt: string; fill?: boolean }) {
   const [errored, setErrored] = useState(false);
-
   if (errored) {
     return (
       <div className="w-full flex flex-col items-center justify-center gap-2 p-8 text-center border border-dashed rounded-lg" style={{ borderColor: MUTED_GRAY }}>
-        <span className={`${mono.className} text-[11px] tracking-[0.18em] uppercase`} style={{ color: DARK_GRAY, opacity: 0.6 }}>
-          Image Unavailable
-        </span>
-        <span className={`${mono.className} text-[10px] break-all`} style={{ color: MUTED_GRAY }}>
-          {src}
-        </span>
+        <span className={`${mono.className} text-[11px] tracking-[0.18em] uppercase`} style={{ color: DARK_GRAY, opacity: 0.6 }}>Image Unavailable</span>
+        <span className={`${mono.className} text-[10px] break-all`} style={{ color: MUTED_GRAY }}>{src}</span>
       </div>
     );
   }
-
   return (
     <img
       src={src}
@@ -235,9 +221,7 @@ function MockImageFill({ src, alt, fill = true }: { src: string; alt: string; fi
   );
 }
 
-function BrowserFrame({
-  label, showLive, height, href, children,
-}: {
+function BrowserFrame({ label, showLive, height, href, children }: {
   label: string; showLive?: boolean; height: string; href?: string; children: React.ReactNode;
 }) {
   const inner = (
@@ -257,21 +241,13 @@ function BrowserFrame({
           </span>
         )}
       </div>
-      <div className="relative w-full" style={{ height }}>
-        {children}
-      </div>
+      <div className="relative w-full" style={{ height }}>{children}</div>
     </>
   );
-
   const frameClass = "rounded-xl overflow-hidden border";
   const frameStyle = { borderColor: MUTED_GRAY, background: "rgba(245,246,252,0.02)" };
-
   if (href) {
-    return (
-      <a href={href} target="_blank" rel="noopener noreferrer" className="group relative block" style={frameStyle}>
-        {inner}
-      </a>
-    );
+    return <a href={href} target="_blank" rel="noopener noreferrer" className="group relative block" style={frameStyle}>{inner}</a>;
   }
   return <div className={frameClass} style={frameStyle}>{inner}</div>;
 }
@@ -279,17 +255,13 @@ function BrowserFrame({
 function MockPanel({ project }: { project: Project }) {
   const hasLiveUrl = Boolean(project.live) && project.live !== "#";
   const images = project.images ?? [];
-
   if (images.length > 1) {
     return (
       <div className="flex flex-col sm:flex-row items-stretch gap-4">
         {images.map((img, i) => (
           <React.Fragment key={img.src}>
             <div className="flex-1 min-w-0">
-              <BrowserFrame
-                label={img.caption ?? `${project.id}-0${i + 1}`}
-                height="auto"
-              >
+              <BrowserFrame label={img.caption ?? `${project.id}-0${i + 1}`} height="auto">
                 <MockImageFill src={img.src} alt={img.alt} fill={false} />
               </BrowserFrame>
             </div>
@@ -303,7 +275,6 @@ function MockPanel({ project }: { project: Project }) {
       </div>
     );
   }
-
   if (images.length === 1) {
     const img = images[0];
     return (
@@ -319,13 +290,8 @@ function MockPanel({ project }: { project: Project }) {
       </div>
     );
   }
-
   return (
-    <BrowserFrame
-      label={hasLiveUrl ? project.live.replace(/^https?:\/\//, "") : `${project.id}.app`}
-      showLive={hasLiveUrl}
-      height="320px"
-    >
+    <BrowserFrame label={hasLiveUrl ? project.live.replace(/^https?:\/\//, "") : `${project.id}.app`} showLive={hasLiveUrl} height="320px">
       <div className="p-8 flex flex-col justify-center gap-6">
         <div>
           <div className={`${mono.className} text-[11px] tracking-[0.2em] uppercase mb-3`} style={{ color: DARK_GRAY, opacity: 0.7 }}>{project.accentName}</div>
@@ -339,17 +305,301 @@ function MockPanel({ project }: { project: Project }) {
   );
 }
 
-function CaseStudyDetail({ project, onSwitch, nextId }: { project: Project; onSwitch: (id: string) => void; nextId: string }) {
+function useScrollLock(locked: boolean) {
+  useEffect(() => {
+    if (!locked) return;
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+    const prevOverflow = document.body.style.overflow;
+    const prevPaddingRight = document.body.style.paddingRight;
+    document.body.style.overflow = "hidden";
+    if (scrollbarWidth > 0) {
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+    }
+    document.body.classList.add("modal-open");
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      document.body.style.paddingRight = prevPaddingRight;
+      document.body.classList.remove("modal-open");
+    };
+  }, [locked]);
+}
+
+function NarrativeModal({
+  item, onClose, projectTitle, projectIndex,
+}: {
+  item: NarrativeItem;
+  onClose: () => void;
+  projectTitle: string;
+  projectIndex: string;
+}) {
+  useScrollLock(true);
+  const closeBtnRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", onKey);
+    closeBtnRef.current?.focus();
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  const backdropVariants = {
+    hidden: { backgroundColor: "rgba(20,20,26,0)" },
+    visible: { backgroundColor: "rgba(20,20,26,0.82)" },
+    exit: { backgroundColor: "rgba(20,20,26,0)" },
+  };
+
+  const panelVariants = {
+    hidden: { opacity: 0, y: 28, scale: 0.96 },
+    visible: { 
+      opacity: 1, 
+      y: 0, 
+      scale: 1,
+      transition: { duration: 0.4, ease: E }
+    },
+    exit: { 
+      opacity: 0, 
+      y: 18, 
+      scale: 0.97,
+      transition: { duration: 0.3, ease: E }
+    },
+  };
+
+  return (
+    <AnimatePresence mode="wait">
+      <motion.div
+        key="backdrop"
+        className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-6"
+        style={{ backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}
+        variants={backdropVariants}
+        initial="hidden"
+        animate="visible"
+        exit="exit"
+        transition={{ duration: 0.35, ease: E }}
+        onClick={onClose}
+      >
+        <motion.div
+          key="panel"
+          className="relative w-full max-w-2xl max-h-[92vh] overflow-y-auto rounded-t-2xl sm:rounded-2xl"
+          style={{
+            background: "#1A1A20",
+            border: "1px solid rgba(245,246,252,0.14)",
+            boxShadow: "0 30px 80px rgba(0,0,0,0.55), 0 0 0 1px rgba(245,246,252,0.04) inset",
+          }}
+          variants={panelVariants}
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+          onClick={(e) => e.stopPropagation()}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modal-heading"
+        >
+          {/* Tech grid */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              backgroundImage: `
+                linear-gradient(rgba(245,246,252,0.08) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(245,246,252,0.08) 1px, transparent 1px)
+              `,
+              backgroundSize: "32px 32px",
+              opacity: 0.6,
+            }}
+          />
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              backgroundImage: `
+                linear-gradient(rgba(245,246,252,0.06) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(245,246,252,0.06) 1px, transparent 1px)
+              `,
+              backgroundSize: "128px 128px",
+              opacity: 0.8,
+            }}
+          />
+
+          {/* Corner registration marks */}
+          <div className="absolute top-4 left-4 w-5 h-5 pointer-events-none" style={{ borderTop: "1px solid rgba(245,246,252,0.35)", borderLeft: "1px solid rgba(245,246,252,0.35)" }} />
+          <div className="absolute top-4 right-4 w-5 h-5 pointer-events-none" style={{ borderTop: "1px solid rgba(245,246,252,0.35)", borderRight: "1px solid rgba(245,246,252,0.35)" }} />
+          <div className="absolute bottom-4 left-4 w-5 h-5 pointer-events-none sm:block hidden" style={{ borderBottom: "1px solid rgba(245,246,252,0.35)", borderLeft: "1px solid rgba(245,246,252,0.35)" }} />
+          <div className="absolute bottom-4 right-4 w-5 h-5 pointer-events-none sm:block hidden" style={{ borderBottom: "1px solid rgba(245,246,252,0.35)", borderRight: "1px solid rgba(245,246,252,0.35)" }} />
+
+          {/* Coordinate labels */}
+          <div className={`${mono.className} absolute top-3 left-12 text-[8px] tracking-[0.22em] uppercase pointer-events-none`} style={{ color: "rgba(245,246,252,0.35)" }}>
+            X <span style={{ color: ACCENT_RED }}>00</span> · Y <span style={{ color: ACCENT_RED }}>01</span>
+          </div>
+          <div className={`${mono.className} absolute top-3 right-12 text-[8px] tracking-[0.22em] uppercase pointer-events-none`} style={{ color: "rgba(245,246,252,0.35)" }}>
+            PLATE <span style={{ color: ACCENT_RED }}>{projectIndex}</span> · NARRATIVE <span style={{ color: ACCENT_RED }}>{item.n}</span>
+          </div>
+
+          {/* Content */}
+          <div className="relative z-10">
+            <div className="sticky top-0 z-10 flex items-start justify-between gap-4 px-6 sm:px-12 pt-6 sm:pt-8 pb-5" style={{ background: "#1A1A20" }}>
+              <div>
+                <div className={`${mono.className} text-[10px] tracking-[0.22em] uppercase mb-3`} style={{ color: DARK_GRAY }}>
+                  {projectTitle}
+                </div>
+                <div className="flex items-baseline gap-4">
+                  <span className={`${mono.className} text-[11px] tracking-[0.2em] font-bold`} style={{ color: ACCENT_RED }}>{item.n}</span>
+                  <h2
+                    id="modal-heading"
+                    className={`${zalando.className} font-black uppercase leading-[1] text-[clamp(1.5rem,5vw,2.5rem)]`}
+                    style={{ color: ICE_WHITE }}
+                  >
+                    {item.h}
+                  </h2>
+                </div>
+              </div>
+              <button
+                ref={closeBtnRef}
+                type="button"
+                onClick={onClose}
+                aria-label="Close"
+                className="shrink-0 w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 z-20"
+                style={{ color: MUTED_GRAY, background: "rgba(245,246,252,0.04)", border: "1px solid rgba(245,246,252,0.08)" }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = ICE_WHITE; e.currentTarget.style.background = "rgba(245,246,252,0.1)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = MUTED_GRAY; e.currentTarget.style.background = "rgba(245,246,252,0.04)"; }}
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Divider rule */}
+            <div className="w-full h-px mx-6 sm:mx-12" style={{ width: "calc(100% - 3rem)", background: "rgba(245,246,252,0.1)" }} />
+
+            {/* Body */}
+            <div className="px-6 sm:px-12 pt-6 pb-6 sm:pb-8">
+              <p
+                className={`${mono.className} text-[15px] leading-[1.85]`}
+                style={{ color: DARK_GRAY }}
+              >
+                {renderHighlighted(item.p, item.highlight)}
+              </p>
+
+              {/* Key takeaways */}
+              <div className="mt-8 pt-6" style={{ borderTop: "1px solid rgba(245,246,252,0.08)" }}>
+                <div className={`${mono.className} text-[9px] tracking-[0.22em] uppercase mb-2`} style={{ color: MUTED_GRAY, opacity: 0.7 }}>
+                  KEY TAKEAWAYS
+                </div>
+                <p className={`${mono.className} text-[13px] leading-[1.7]`} style={{ color: MUTED_GRAY }}>
+                  {item.keywords.join(" · ")}
+                </p>
+              </div>
+            </div>
+
+            {/* Bottom spec bar */}
+            <div
+              className="flex justify-between items-center px-6 sm:px-12 py-3"
+              style={{
+                borderTop: "1px solid rgba(245,246,252,0.08)",
+                background: "rgba(245,246,252,0.015)",
+              }}
+            >
+              <div className="flex items-center gap-5">
+                <span className={`${mono.className} text-[8px] tracking-[0.2em] uppercase flex items-center gap-2`} style={{ color: "rgba(245,246,252,0.4)" }}>
+                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: ACCENT_RED }} />
+                  PANEL <b style={{ color: "rgba(245,246,252,0.6)", fontWeight: 500 }}>ACTIVE</b>
+                </span>
+                <span className="hidden sm:inline w-6 h-px" style={{ background: "rgba(245,246,252,0.2)" }} />
+                <span className={`${mono.className} text-[8px] tracking-[0.2em] uppercase hidden sm:inline`} style={{ color: "rgba(245,246,252,0.4)" }}>
+                  GRID <b style={{ color: ACCENT_RED, fontWeight: 500 }}>32</b> · MAJOR <b style={{ color: ACCENT_RED, fontWeight: 500 }}>128</b>
+                </span>
+              </div>
+              <span className={`${mono.className} text-[8px] tracking-[0.2em] uppercase`} style={{ color: "rgba(245,246,252,0.4)" }}>
+                ESC · CLICK OUTSIDE TO CLOSE
+              </span>
+            </div>
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
+function NarrativeCard({
+  item, onOpen, projectTitle,
+}: {
+  item: NarrativeItem;
+  onOpen: () => void;
+  projectTitle: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      className="group w-full text-left rounded-xl p-6 transition-all duration-300 ease-out hover:-translate-y-1"
+      style={{
+        background: "rgba(245,246,252,0.02)",
+        border: "1px solid rgba(245,246,252,0.1)",
+        cursor: "pointer",
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.background = "rgba(245,246,252,0.05)";
+        e.currentTarget.style.borderColor = "rgba(206,255,26,0.35)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.background = "rgba(245,246,252,0.02)";
+        e.currentTarget.style.borderColor = "rgba(245,246,252,0.1)";
+      }}
+      aria-haspopup="dialog"
+      aria-label={`Open ${item.h} details for ${projectTitle}`}
+    >
+      <div className="mb-4">
+        <div className={`${mono.className} text-[11px] tracking-[0.2em] uppercase mb-2`} style={{ color: DARK_GRAY }}>{item.n}</div>
+        <div className={`${zalando.className} font-bold uppercase text-sm mb-1 flex items-center gap-2`} style={{ color: ICE_WHITE }}>
+          {item.h}
+          <ArrowUpRight
+            size={14}
+            style={{
+              color: HIGHLIGHT_BG,
+              opacity: 0,
+              transform: "translate(-4px, 4px)",
+              transition: "all 0.25s ease-out",
+            }}
+            className="group-hover:opacity-100 group-hover:translate-x-0 group-hover:translate-y-0"
+          />
+        </div>
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        {item.keywords.map((kw) => (
+          <span
+            key={kw}
+            className={`${mono.className} text-[11px] px-2.5 py-1 rounded-md transition-colors duration-200`}
+            style={{
+              background: "rgba(245,246,252,0.05)",
+              color: DARK_GRAY,
+              border: "1px solid rgba(245,246,252,0.08)",
+            }}
+          >
+            {kw}
+          </span>
+        ))}
+      </div>
+
+      <div className={`${mono.className} text-[10px] tracking-[0.18em] uppercase mt-4 flex items-center gap-1.5`} style={{ color: HIGHLIGHT_BG, opacity: 0.7 }}>
+        Click to open
+        <span className="inline-block transition-transform duration-200 group-hover:translate-x-0.5">→</span>
+      </div>
+    </button>
+  );
+}
+
+function CaseStudyDetail({
+  project, onSwitch, nextId,
+}: {
+  project: Project;
+  onSwitch: (id: string) => void;
+  nextId: string;
+}) {
   const router = useRouter();
+  const [activeNarrative, setActiveNarrative] = useState<NarrativeItem | null>(null);
 
   const goToProjectSection = () => {
     if (typeof window === "undefined") return;
-
     if (window.location.pathname === "/") {
-      // Already on the landing page — just scroll straight to the section
       document.getElementById("project")?.scrollIntoView({ behavior: "smooth", block: "start" });
     } else {
-      // On a different route — navigate home, then scroll once the page mounts
       router.push("/#project");
       setTimeout(() => {
         document.getElementById("project")?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -360,16 +610,24 @@ function CaseStudyDetail({ project, onSwitch, nextId }: { project: Project; onSw
   return (
     <div>
       <div className="flex items-center justify-between flex-wrap gap-4 mb-12">
-        <button 
+        <button
           onClick={goToProjectSection}
-          className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.18em] transition-colors" 
-          style={{ color: MUTED_GRAY }} 
-          onMouseEnter={e => e.currentTarget.style.color = ICE_WHITE} 
-          onMouseLeave={e => e.currentTarget.style.color = MUTED_GRAY}
+          className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.18em] transition-colors"
+          style={{ color: MUTED_GRAY }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = ICE_WHITE)}
+          onMouseLeave={(e) => (e.currentTarget.style.color = MUTED_GRAY)}
         >
           <ArrowLeft size={14} /> BACK TO PROJECT
         </button>
-        <button type="button" onClick={() => onSwitch(nextId)} aria-label="Next case study" className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.18em] transition-colors" style={{ color: MUTED_GRAY }} onMouseEnter={e => e.currentTarget.style.color = ICE_WHITE} onMouseLeave={e => e.currentTarget.style.color = MUTED_GRAY}>
+        <button
+          type="button"
+          onClick={() => onSwitch(nextId)}
+          aria-label="Next case study"
+          className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.18em] transition-colors"
+          style={{ color: MUTED_GRAY }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = ICE_WHITE)}
+          onMouseLeave={(e) => (e.currentTarget.style.color = MUTED_GRAY)}
+        >
           <span className="hidden sm:inline">NEXT CASE STUDY</span>
           <ArrowUpRight size={18} className="sm:hidden" />
           <ArrowUpRight size={14} className="hidden sm:block" />
@@ -383,15 +641,28 @@ function CaseStudyDetail({ project, onSwitch, nextId }: { project: Project; onSw
       <Reveal className="mb-16"><MockPanel project={project} /></Reveal>
       <Reveal><p className={`${mono.className} max-w-2xl mb-16 leading-relaxed`} style={{ color: MUTED_GRAY }}>{project.summary}</p></Reveal>
 
-      <div className="grid sm:grid-cols-3 gap-10">
+      <div className="grid sm:grid-cols-3 gap-6">
         {project.narrative.map((n) => (
           <Reveal key={n.n}>
-            <div className={`${mono.className} text-[11px] tracking-[0.2em] uppercase mb-3`} style={{ color: DARK_GRAY }}>{n.n}</div>
-            <div className={`${zalando.className} font-bold uppercase mb-2 text-sm`} style={{ color: ICE_WHITE }}>{n.h}</div>
-            <p className={`${mono.className} text-sm leading-relaxed`} style={{ color: MUTED_GRAY }}>{renderHighlighted(n.p, n.highlight)}</p>
+            <NarrativeCard
+              item={n}
+              projectTitle={project.title}
+              onOpen={() => setActiveNarrative(n)}
+            />
           </Reveal>
         ))}
       </div>
+
+      <AnimatePresence mode="wait">
+        {activeNarrative && (
+          <NarrativeModal
+            item={activeNarrative}
+            projectTitle={project.title}
+            projectIndex={project.index}
+            onClose={() => setActiveNarrative(null)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -432,24 +703,25 @@ export default function CaseStudyLanding() {
           background-size: 192px 192px;
           opacity: 0.7;
         }
-
+        /* FIX: Hide study-section background grid on mobile when modal is open — prevents highlight glitch */
+        @media (max-width: 639px) {
+          body.modal-open .study-section::before,
+          body.modal-open .study-section::after {
+            display: none;
+          }
+          body.modal-open .study-section {
+            background: #0e0e13 !important;
+          }
+        }
         .reg-mark {
-          position: absolute;
-          z-index: 2;
-          pointer-events: none;
-          width: 28px;
-          height: 28px;
-          border: 1px solid rgba(245,246,252,0.25);
+          position: absolute; z-index: 2; pointer-events: none;
+          width: 28px; height: 28px; border: 1px solid rgba(245,246,252,0.25);
         }
         .reg-mark.tl { top: 28px; left: 28px; border-right: none; border-bottom: none; }
         .reg-mark.tr { top: 28px; right: 28px; border-left: none; border-bottom: none; }
         .reg-mark.bl { bottom: 28px; left: 28px; border-right: none; border-top: none; }
         .reg-mark.br { bottom: 28px; right: 28px; border-left: none; border-top: none; }
-        .reg-mark::before, .reg-mark::after {
-          content: '';
-          position: absolute;
-          background: rgba(245,246,252,0.45);
-        }
+        .reg-mark::before, .reg-mark::after { content: ''; position: absolute; background: rgba(245,246,252,0.45); }
         .reg-mark::before { width: 1px; height: 8px; }
         .reg-mark::after  { width: 8px; height: 1px; }
         .reg-mark.tl::before { top: -1px; left: 50%; transform: translateX(-50%); }
@@ -460,69 +732,41 @@ export default function CaseStudyLanding() {
         .reg-mark.bl::after  { bottom: 50%; left: -1px; transform: translateY(-50%); }
         .reg-mark.br::before { bottom: -1px; right: 50%; transform: translateX(50%); }
         .reg-mark.br::after  { bottom: 50%; right: -1px; transform: translateY(-50%); }
-
         .coord-label {
-          position: absolute;
-          z-index: 2;
-          pointer-events: none;
+          position: absolute; z-index: 2; pointer-events: none;
           font-family: ui-monospace, "SF Mono", "IBM Plex Mono", "JetBrains Mono", monospace;
-          font-size: 9px;
-          letter-spacing: 0.22em;
-          text-transform: uppercase;
-          color: rgba(245,246,252,0.45);
+          font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(245,246,252,0.45);
         }
         .coord-label.tl { top: 24px; left: 72px; }
         .coord-label.tr { top: 24px; right: 72px; }
         .coord-label.bl { bottom: 24px; left: 72px; }
         .coord-label.br { bottom: 24px; right: 72px; }
         .coord-label .val { color: rgba(245,246,252,0.75); font-weight: 500; }
-
         .edge-rule-left {
-          position: absolute;
-          left: 0;
-          top: 50%;
-          transform: translateY(-50%);
-          z-index: 2;
-          pointer-events: none;
-          display: flex;
-          align-items: center;
+          position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+          z-index: 2; pointer-events: none; display: flex; align-items: center;
         }
         .edge-rule-left .line { width: 40px; height: 1px; background: rgba(245,246,252,0.25); }
         .edge-rule-left .label {
           font-family: ui-monospace, "SF Mono", "IBM Plex Mono", "JetBrains Mono", monospace;
-          font-size: 8px;
-          letter-spacing: 0.28em;
-          text-transform: uppercase;
-          color: rgba(245,246,252,0.45);
-          padding-left: 10px;
-          writing-mode: vertical-rl;
-          transform: rotate(180deg);
+          font-size: 8px; letter-spacing: 0.28em; text-transform: uppercase;
+          color: rgba(245,246,252,0.45); padding-left: 10px;
+          writing-mode: vertical-rl; transform: rotate(180deg);
         }
-
         .spec-bar {
-          position: absolute;
-          bottom: 0;
-          left: 0;
-          right: 0;
-          z-index: 2;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
+          position: absolute; bottom: 0; left: 0; right: 0; z-index: 2;
+          display: flex; justify-content: space-between; align-items: center;
           padding: 14px clamp(24px, 4vw, 64px);
           border-top: 1px solid rgba(245,246,252,0.08);
           font-family: ui-monospace, "SF Mono", "IBM Plex Mono", "JetBrains Mono", monospace;
-          font-size: 9px;
-          letter-spacing: 0.2em;
-          text-transform: uppercase;
-          color: rgba(245,246,252,0.45);
-          pointer-events: none;
+          font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
+          color: rgba(245,246,252,0.45); pointer-events: none;
         }
         .spec-bar .group { display: flex; gap: 28px; align-items: center; }
         .spec-bar .item { display: flex; align-items: center; gap: 8px; }
         .spec-bar .dot { width: 5px; height: 5px; border-radius: 50%; background: #e63946; }
         .spec-bar b { color: rgba(245,246,252,0.75); font-weight: 500; }
         .spec-bar .rule { width: 24px; height: 1px; background: rgba(245,246,252,0.25); }
-
         .reveal { opacity: 0; transform: translateY(12px); transition: opacity 0.6s cubic-bezier(0.22,1,0.36,1), transform 0.6s cubic-bezier(0.22,1,0.36,1); }
         @media (prefers-reduced-motion: reduce) {
           .reveal { transition: none; opacity: 1; transform: none; }
@@ -530,31 +774,23 @@ export default function CaseStudyLanding() {
         }
         ::selection { background: ${DARK_GRAY}; color: ${BG}; }
         a:focus-visible, button:focus-visible { outline: 2px solid ${DARK_GRAY}; outline-offset: 2px; }
-
         @media (max-width: 900px) {
           .reg-mark, .coord-label, .edge-rule-left { display: none; }
-          .spec-bar {
-            flex-direction: column;
-            gap: 10px;
-            padding: 12px 24px;
-          }
+          .spec-bar { flex-direction: column; gap: 10px; padding: 12px 24px; }
           .spec-bar .group { gap: 16px; }
         }
       `}</style>
 
-      {/* Corner registration marks */}
       <div className="reg-mark tl" aria-hidden="true" />
       <div className="reg-mark tr" aria-hidden="true" />
       <div className="reg-mark bl" aria-hidden="true" />
       <div className="reg-mark br" aria-hidden="true" />
 
-      {/* Coordinate labels */}
       <div className="coord-label tl" aria-hidden="true">X <span className="val">00</span> · Y <span className="val">03</span></div>
       <div className="coord-label tr" aria-hidden="true">PLATE <span className="val">04</span> / CASE STUDY</div>
       <div className="coord-label bl" aria-hidden="true">GRID <span className="val">48</span> · MAJOR <span className="val">192</span></div>
       <div className="coord-label br" aria-hidden="true">SECTION <span className="val">04</span></div>
 
-      {/* Left vertical rule */}
       <div className="edge-rule-left" aria-hidden="true">
         <div className="line" />
         <div className="label">Registration · Vertical Datum</div>
@@ -566,7 +802,6 @@ export default function CaseStudyLanding() {
         </div>
       </div>
 
-      {/* Bottom spec bar */}
       <div className="spec-bar" aria-hidden="true">
         <div className="group">
           <div className="item"><span className="dot" /> SYSTEM <b>ACTIVE</b></div>

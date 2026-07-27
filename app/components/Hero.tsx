@@ -59,7 +59,6 @@ export default function Hero({ openContactForm }: HeroProps) {
           .v1-dot-ping { animation: none; opacity: 0; }
         }
 
-        /* ---------- Tech + editorial logo mark (top-left) ---------- */
         .site-logo {
           position: fixed;
           top: 44px;

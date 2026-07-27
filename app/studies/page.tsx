@@ -8,7 +8,6 @@ import { NavbarSkeleton, SkillsSkeleton, FooterSkeleton } from "../components/Sk
 export default function StudiesPage() {
   const [ready, setReady] = useState(false);
 
-  // More reliable load trigger + cleanup
   useEffect(() => {
     let mounted = true;
     requestAnimationFrame(() => {
@@ -22,7 +21,6 @@ export default function StudiesPage() {
     console.log("Studies page ready:", ready);
   }, [ready]);
 
-  // Show skeleton until ready
   if (!ready) {
     return (
       <>
@@ -35,7 +33,6 @@ export default function StudiesPage() {
 
   return (
     <div className="page-ready min-h-screen flex flex-col">
-      {/* Navbar will render here once ready */}
       <Navbar />
       <main className="flex-1 flex flex-col">
         <Studies />
