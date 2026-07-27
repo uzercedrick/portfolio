@@ -41,10 +41,10 @@ interface NavigatorExtended {
   userAgent: string;
 }
 
-const nav = typeof navigator !== "undefined" ? (navigator as NavigatorExtended) : null;
+const nav = typeof navigator !== "undefined" ? (navigator as unknown as NavigatorExtended) : null;
 const IS_MOBILE = typeof window !== "undefined" && (
   window.innerWidth < 768 ||
-  /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator?.userAgent ?? "")
+  /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(nav?.userAgent ?? "")
 );
 const IS_LOW_END = IS_MOBILE && (
   (nav?.deviceMemory !== undefined && nav.deviceMemory <= 4) ||
@@ -342,23 +342,41 @@ function MockPanel({ project }: { project: Project }) {
 function useScrollLock(locked: boolean) {
   useEffect(() => {
     if (!locked) return;
-    const prevOverflow = document.body.style.overflow;
-    const prevTop = document.body.style.top;
+
+    const htmlEl = document.documentElement;
+    const bodyEl = document.body;
     const scrollY = window.scrollY;
-    
-    document.body.style.overflow = "hidden";
-    document.body.style.position = "fixed";
-    document.body.style.top = `-${scrollY}px`;
-    document.body.style.width = "100%";
-    document.body.classList.add("modal-open");
-    
+    const scrollbarWidth = window.innerWidth - htmlEl.clientWidth;
+
+    const originalOverflow = bodyEl.style.overflow;
+    const originalPaddingRight = bodyEl.style.paddingRight;
+    const originalScrollBehavior = htmlEl.style.scrollBehavior;
+    const originalPosition = bodyEl.style.position;
+    const originalTop = bodyEl.style.top;
+    const originalWidth = bodyEl.style.width;
+
+    bodyEl.style.overflow = "hidden";
+    bodyEl.style.position = "fixed";
+    bodyEl.style.top = `-${scrollY}px`;
+    bodyEl.style.width = "100%";
+    if (scrollbarWidth > 0) {
+      bodyEl.style.paddingRight = `${scrollbarWidth}px`;
+    }
+    bodyEl.classList.add("modal-open");
+
     return () => {
-      document.body.style.overflow = prevOverflow;
-      document.body.style.position = "";
-      document.body.style.top = prevTop;
-      document.body.style.width = "";
-      document.body.classList.remove("modal-open");
+      bodyEl.style.overflow = originalOverflow;
+      bodyEl.style.position = originalPosition;
+      bodyEl.style.top = originalTop;
+      bodyEl.style.width = originalWidth;
+      bodyEl.style.paddingRight = originalPaddingRight;
+      bodyEl.classList.remove("modal-open");
+
+      htmlEl.style.scrollBehavior = "auto";
       window.scrollTo(0, scrollY);
+      requestAnimationFrame(() => {
+        htmlEl.style.scrollBehavior = originalScrollBehavior;
+      });
     };
   }, [locked]);
 }
@@ -760,12 +778,12 @@ export default function CaseStudyLanding() {
           opacity: 0.7;
         }
         @media (max-width: 639px) {
-          body.modal-open .study-section::before,
-          body.modal-open .study-section::after {
-            display: none;
-          }
           body.modal-open .study-section {
             background: #0e0e13 !important;
+          }
+          body.modal-open .study-section::before,
+          body.modal-open .study-section::after {
+            opacity: 0.35 !important;
           }
         }
         .reg-mark {
