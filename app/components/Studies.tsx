@@ -1,12 +1,14 @@
 "use client";
 import { motion, AnimatePresence } from "framer-motion";
 import React, { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { useSearchParams, useRouter } from "next/navigation";
 import ThunderScrollButton from "./thunder";
 import { ArrowUpRight, ArrowLeft, ArrowRight, X } from "lucide-react";
 import { zalando, mono } from "../fonts";
 
 const E = [0.22, 1, 0.36, 1] as [number, number, number, number];
+const E_MOBILE = [0.2, 0.8, 0.2, 1] as [number, number, number, number];
 
 const DARK_GRAY = "rgba(245,246,252,0.75)";
 const ICE_WHITE = "#F5F6FC";
@@ -32,6 +34,22 @@ interface Project {
   brand: Brand; accentName: string; live: string; images?: MockImage[];
   highlightWord?: string; subtitleHighlight?: string;
 }
+
+interface NavigatorExtended {
+  deviceMemory?: number;
+  hardwareConcurrency?: number;
+  userAgent: string;
+}
+
+const nav = typeof navigator !== "undefined" ? (navigator as NavigatorExtended) : null;
+const IS_MOBILE = typeof window !== "undefined" && (
+  window.innerWidth < 768 ||
+  /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator?.userAgent ?? "")
+);
+const IS_LOW_END = IS_MOBILE && (
+  (nav?.deviceMemory !== undefined && nav.deviceMemory <= 4) ||
+  (nav?.hardwareConcurrency !== undefined && nav.hardwareConcurrency <= 4)
+);
 
 const CASES: Project[] = [
   {
@@ -210,11 +228,27 @@ function MockImageFill({ src, alt, fill = true }: { src: string; alt: string; fi
       </div>
     );
   }
+  if (fill) {
+    return (
+      <div className="relative w-full h-full">
+        <Image
+          src={src}
+          alt={alt}
+          fill
+          className="object-contain object-center transition-transform duration-700 ease-out"
+          loading="eager"
+          onError={() => setErrored(true)}
+        />
+      </div>
+    );
+  }
   return (
-    <img
+    <Image
       src={src}
       alt={alt}
-      className={fill ? "w-full h-full object-contain object-center transition-transform duration-700 ease-out" : "w-full h-auto block transition-transform duration-700 ease-out"}
+      width={1200}
+      height={800}
+      className="w-full h-auto block transition-transform duration-700 ease-out"
       loading="eager"
       onError={() => setErrored(true)}
     />
@@ -308,18 +342,23 @@ function MockPanel({ project }: { project: Project }) {
 function useScrollLock(locked: boolean) {
   useEffect(() => {
     if (!locked) return;
-    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
     const prevOverflow = document.body.style.overflow;
-    const prevPaddingRight = document.body.style.paddingRight;
+    const prevTop = document.body.style.top;
+    const scrollY = window.scrollY;
+    
     document.body.style.overflow = "hidden";
-    if (scrollbarWidth > 0) {
-      document.body.style.paddingRight = `${scrollbarWidth}px`;
-    }
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = "100%";
     document.body.classList.add("modal-open");
+    
     return () => {
       document.body.style.overflow = prevOverflow;
-      document.body.style.paddingRight = prevPaddingRight;
+      document.body.style.position = "";
+      document.body.style.top = prevTop;
+      document.body.style.width = "";
       document.body.classList.remove("modal-open");
+      window.scrollTo(0, scrollY);
     };
   }, [locked]);
 }
@@ -342,39 +381,54 @@ function NarrativeModal({
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
+  const animDuration = IS_LOW_END ? 0.18 : IS_MOBILE ? 0.22 : 0.4;
+  const animEase = IS_MOBILE ? E_MOBILE : E;
+
   const backdropVariants = {
-    hidden: { backgroundColor: "rgba(20,20,26,0)" },
-    visible: { backgroundColor: "rgba(20,20,26,0.82)" },
-    exit: { backgroundColor: "rgba(20,20,26,0)" },
+    hidden: { opacity: 0 },
+    visible: { opacity: 1 },
+    exit: { opacity: 0 },
   };
 
-  const panelVariants = {
-    hidden: { opacity: 0, y: 28, scale: 0.96 },
+  const panelVariants = IS_MOBILE ? {
+    hidden: { opacity: 0, y: "100%" },
     visible: { 
       opacity: 1, 
-      y: 0, 
-      scale: 1,
-      transition: { duration: 0.4, ease: E }
+      y: 0,
+      transition: { duration: animDuration, ease: animEase }
     },
     exit: { 
       opacity: 0, 
-      y: 18, 
-      scale: 0.97,
-      transition: { duration: 0.3, ease: E }
+      y: "100%",
+      transition: { duration: animDuration * 0.85, ease: animEase }
+    },
+  } : {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { duration: animDuration, ease: animEase }
+    },
+    exit: { 
+      opacity: 0, 
+      y: 12,
+      transition: { duration: animDuration * 0.85, ease: animEase }
     },
   };
+
+  const showDecor = !IS_LOW_END;
 
   return (
     <AnimatePresence mode="wait">
       <motion.div
         key="backdrop"
-        className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-6"
-        style={{ backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}
+        className="fixed inset-0 z-100 flex items-end sm:items-center justify-center p-0 sm:p-6"
+        style={IS_MOBILE ? {} : { backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}
         variants={backdropVariants}
         initial="hidden"
         animate="visible"
         exit="exit"
-        transition={{ duration: 0.35, ease: E }}
+        transition={{ duration: animDuration * 0.75, ease: animEase }}
         onClick={onClose}
       >
         <motion.div
@@ -383,7 +437,10 @@ function NarrativeModal({
           style={{
             background: "#1A1A20",
             border: "1px solid rgba(245,246,252,0.14)",
-            boxShadow: "0 30px 80px rgba(0,0,0,0.55), 0 0 0 1px rgba(245,246,252,0.04) inset",
+            boxShadow: IS_MOBILE 
+              ? "0 -8px 30px rgba(0,0,0,0.5)" 
+              : "0 30px 80px rgba(0,0,0,0.55), 0 0 0 1px rgba(245,246,252,0.04) inset",
+            willChange: "transform, opacity",
           }}
           variants={panelVariants}
           initial="hidden"
@@ -394,45 +451,43 @@ function NarrativeModal({
           aria-modal="true"
           aria-labelledby="modal-heading"
         >
-          {/* Tech grid */}
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              backgroundImage: `
-                linear-gradient(rgba(245,246,252,0.08) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(245,246,252,0.08) 1px, transparent 1px)
-              `,
-              backgroundSize: "32px 32px",
-              opacity: 0.6,
-            }}
-          />
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              backgroundImage: `
-                linear-gradient(rgba(245,246,252,0.06) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(245,246,252,0.06) 1px, transparent 1px)
-              `,
-              backgroundSize: "128px 128px",
-              opacity: 0.8,
-            }}
-          />
+          {showDecor && (
+            <>
+              <div
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  backgroundImage: `
+                    linear-gradient(rgba(245,246,252,0.08) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(245,246,252,0.08) 1px, transparent 1px)
+                  `,
+                  backgroundSize: "32px 32px",
+                  opacity: 0.6,
+                }}
+              />
+              <div
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  backgroundImage: `
+                    linear-gradient(rgba(245,246,252,0.06) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(245,246,252,0.06) 1px, transparent 1px)
+                  `,
+                  backgroundSize: "128px 128px",
+                  opacity: 0.8,
+                }}
+              />
+              <div className="absolute top-4 left-4 w-5 h-5 pointer-events-none" style={{ borderTop: "1px solid rgba(245,246,252,0.35)", borderLeft: "1px solid rgba(245,246,252,0.35)" }} />
+              <div className="absolute top-4 right-4 w-5 h-5 pointer-events-none" style={{ borderTop: "1px solid rgba(245,246,252,0.35)", borderRight: "1px solid rgba(245,246,252,0.35)" }} />
+              <div className="absolute bottom-4 left-4 w-5 h-5 pointer-events-none sm:block hidden" style={{ borderBottom: "1px solid rgba(245,246,252,0.35)", borderLeft: "1px solid rgba(245,246,252,0.35)" }} />
+              <div className="absolute bottom-4 right-4 w-5 h-5 pointer-events-none sm:block hidden" style={{ borderBottom: "1px solid rgba(245,246,252,0.35)", borderRight: "1px solid rgba(245,246,252,0.35)" }} />
+              <div className={`${mono.className} absolute top-3 left-12 text-[8px] tracking-[0.22em] uppercase pointer-events-none`} style={{ color: "rgba(245,246,252,0.35)" }}>
+                X <span style={{ color: ACCENT_RED }}>00</span> · Y <span style={{ color: ACCENT_RED }}>01</span>
+              </div>
+              <div className={`${mono.className} absolute top-3 right-12 text-[8px] tracking-[0.22em] uppercase pointer-events-none`} style={{ color: "rgba(245,246,252,0.35)" }}>
+                PLATE <span style={{ color: ACCENT_RED }}>{projectIndex}</span> · NARRATIVE <span style={{ color: ACCENT_RED }}>{item.n}</span>
+              </div>
+            </>
+          )}
 
-          {/* Corner registration marks */}
-          <div className="absolute top-4 left-4 w-5 h-5 pointer-events-none" style={{ borderTop: "1px solid rgba(245,246,252,0.35)", borderLeft: "1px solid rgba(245,246,252,0.35)" }} />
-          <div className="absolute top-4 right-4 w-5 h-5 pointer-events-none" style={{ borderTop: "1px solid rgba(245,246,252,0.35)", borderRight: "1px solid rgba(245,246,252,0.35)" }} />
-          <div className="absolute bottom-4 left-4 w-5 h-5 pointer-events-none sm:block hidden" style={{ borderBottom: "1px solid rgba(245,246,252,0.35)", borderLeft: "1px solid rgba(245,246,252,0.35)" }} />
-          <div className="absolute bottom-4 right-4 w-5 h-5 pointer-events-none sm:block hidden" style={{ borderBottom: "1px solid rgba(245,246,252,0.35)", borderRight: "1px solid rgba(245,246,252,0.35)" }} />
-
-          {/* Coordinate labels */}
-          <div className={`${mono.className} absolute top-3 left-12 text-[8px] tracking-[0.22em] uppercase pointer-events-none`} style={{ color: "rgba(245,246,252,0.35)" }}>
-            X <span style={{ color: ACCENT_RED }}>00</span> · Y <span style={{ color: ACCENT_RED }}>01</span>
-          </div>
-          <div className={`${mono.className} absolute top-3 right-12 text-[8px] tracking-[0.22em] uppercase pointer-events-none`} style={{ color: "rgba(245,246,252,0.35)" }}>
-            PLATE <span style={{ color: ACCENT_RED }}>{projectIndex}</span> · NARRATIVE <span style={{ color: ACCENT_RED }}>{item.n}</span>
-          </div>
-
-          {/* Content */}
           <div className="relative z-10">
             <div className="sticky top-0 z-10 flex items-start justify-between gap-4 px-6 sm:px-12 pt-6 sm:pt-8 pb-5" style={{ background: "#1A1A20" }}>
               <div>
@@ -443,7 +498,7 @@ function NarrativeModal({
                   <span className={`${mono.className} text-[11px] tracking-[0.2em] font-bold`} style={{ color: ACCENT_RED }}>{item.n}</span>
                   <h2
                     id="modal-heading"
-                    className={`${zalando.className} font-black uppercase leading-[1] text-[clamp(1.5rem,5vw,2.5rem)]`}
+                    className={`${zalando.className} font-black uppercase leading-none text-[clamp(1.5rem,5vw,2.5rem)]`}
                     style={{ color: ICE_WHITE }}
                   >
                     {item.h}
@@ -464,10 +519,8 @@ function NarrativeModal({
               </button>
             </div>
 
-            {/* Divider rule */}
             <div className="w-full h-px mx-6 sm:mx-12" style={{ width: "calc(100% - 3rem)", background: "rgba(245,246,252,0.1)" }} />
 
-            {/* Body */}
             <div className="px-6 sm:px-12 pt-6 pb-6 sm:pb-8">
               <p
                 className={`${mono.className} text-[15px] leading-[1.85]`}
@@ -476,7 +529,6 @@ function NarrativeModal({
                 {renderHighlighted(item.p, item.highlight)}
               </p>
 
-              {/* Key takeaways */}
               <div className="mt-8 pt-6" style={{ borderTop: "1px solid rgba(245,246,252,0.08)" }}>
                 <div className={`${mono.className} text-[9px] tracking-[0.22em] uppercase mb-2`} style={{ color: MUTED_GRAY, opacity: 0.7 }}>
                   KEY TAKEAWAYS
@@ -487,7 +539,6 @@ function NarrativeModal({
               </div>
             </div>
 
-            {/* Bottom spec bar */}
             <div
               className="flex justify-between items-center px-6 sm:px-12 py-3"
               style={{
@@ -500,13 +551,17 @@ function NarrativeModal({
                   <span className="w-1.5 h-1.5 rounded-full" style={{ background: ACCENT_RED }} />
                   PANEL <b style={{ color: "rgba(245,246,252,0.6)", fontWeight: 500 }}>ACTIVE</b>
                 </span>
-                <span className="hidden sm:inline w-6 h-px" style={{ background: "rgba(245,246,252,0.2)" }} />
-                <span className={`${mono.className} text-[8px] tracking-[0.2em] uppercase hidden sm:inline`} style={{ color: "rgba(245,246,252,0.4)" }}>
-                  GRID <b style={{ color: ACCENT_RED, fontWeight: 500 }}>32</b> · MAJOR <b style={{ color: ACCENT_RED, fontWeight: 500 }}>128</b>
-                </span>
+                {!IS_MOBILE && (
+                  <>
+                    <span className="hidden sm:inline w-6 h-px" style={{ background: "rgba(245,246,252,0.2)" }} />
+                    <span className={`${mono.className} text-[8px] tracking-[0.2em] uppercase hidden sm:inline`} style={{ color: "rgba(245,246,252,0.4)" }}>
+                      GRID <b style={{ color: ACCENT_RED, fontWeight: 500 }}>32</b> · MAJOR <b style={{ color: ACCENT_RED, fontWeight: 500 }}>128</b>
+                    </span>
+                  </>
+                )}
               </div>
               <span className={`${mono.className} text-[8px] tracking-[0.2em] uppercase`} style={{ color: "rgba(245,246,252,0.4)" }}>
-                ESC · CLICK OUTSIDE TO CLOSE
+                ESC · CLOSE
               </span>
             </div>
           </div>
@@ -532,6 +587,7 @@ function NarrativeCard({
         background: "rgba(245,246,252,0.02)",
         border: "1px solid rgba(245,246,252,0.1)",
         cursor: "pointer",
+        willChange: "transform",
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.background = "rgba(245,246,252,0.05)";
@@ -703,7 +759,6 @@ export default function CaseStudyLanding() {
           background-size: 192px 192px;
           opacity: 0.7;
         }
-        /* FIX: Hide study-section background grid on mobile when modal is open — prevents highlight glitch */
         @media (max-width: 639px) {
           body.modal-open .study-section::before,
           body.modal-open .study-section::after {
