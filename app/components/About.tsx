@@ -382,10 +382,13 @@ export default function About() {
         }
         .info-item {
           padding: 14px 0;
-          border-top: 1px solid rgba(245,246,252,0.12);
+          border-top: none;
+        }
+        .info-item:not(:first-child) {
+          border-top: 1px solid #F5F6FC;
         }
         .info-item:last-child {
-          border-bottom: 1px solid rgba(245,246,252,0.12);
+          border-bottom: 1px solid #F5F6FC;
         }
 
         .details-grid {
@@ -394,7 +397,6 @@ export default function About() {
           gap: clamp(20px, 2.5vw, 28px) clamp(28px, 3.5vw, 48px);
           width: 100%;
           padding-top: clamp(20px, 2.5vw, 28px);
-          border-top: 1px solid rgba(245,246,252,0.12);
         }
 
         @media (max-width: 900px) {

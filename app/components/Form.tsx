@@ -401,9 +401,11 @@ export default function ContactFormPopup({ isOpen, onClose }: ContactFormPopupPr
           onClick={closeAndReset}
           style={{
             position: "fixed", inset: 0, background: "rgba(0, 0, 0, 0.7)",
-            zIndex: 9999, display: "flex", alignItems: "flex-end", justifyContent: "center", padding: IS_MOBILE ? "0" : "16px",
+            zIndex: 9999, display: "flex",
+            alignItems: IS_MOBILE ? "flex-end" : "center",
+            justifyContent: "center",
+            padding: IS_MOBILE ? "0" : "16px",
           }}
-          className="sm:items-center"
         >
           {!IS_MOBILE && (
             <div
@@ -419,8 +421,10 @@ export default function ContactFormPopup({ isOpen, onClose }: ContactFormPopupPr
             exit="exit"
             onClick={(e) => e.stopPropagation()}
             style={{
-              background: TOKENS.bg, width: "100%", maxWidth: "850px", maxHeight: "90vh",
-              overflowY: "auto", position: "relative", borderRadius: IS_MOBILE ? "16px 16px 0 0" : "2px",
+              background: TOKENS.bg, width: "100%", maxWidth: "850px",
+              maxHeight: IS_MOBILE ? "96vh" : "90vh",
+              overflowY: "auto", position: "relative",
+              borderRadius: IS_MOBILE ? "16px 16px 0 0" : "2px",
               border: `1px solid ${TOKENS.line}`,
               willChange: "transform, opacity",
               transform: "translateZ(0)",
@@ -463,13 +467,56 @@ export default function ContactFormPopup({ isOpen, onClose }: ContactFormPopupPr
               .reg-mark.tl::after  { top: 50%; left: -1px; transform: translateY(-50%); }
               .reg-mark.tr::before { top: -1px; right: 50%; transform: translateX(50%); }
               .reg-mark.tr::after  { top: 50%; right: -1px; transform: translateY(-50%); }
+
+              .form-logo {
+                position: absolute; z-index: 1; pointer-events: none;
+                display: flex; align-items: center; gap: 10px;
+                font-family: ui-monospace, "SF Mono", "IBM Plex Mono", "JetBrains Mono", monospace;
+                user-select: none;
+              }
+              .form-logo-mark {
+                position: relative; width: 26px; height: 26px;
+                border: 1px solid rgba(245,246,252,0.35);
+                border-radius: 2px;
+                display: flex; align-items: center; justify-content: center;
+                background: rgba(20,20,26,0.4);
+                backdrop-filter: blur(4px);
+              }
+              .form-logo-mark::before,
+              .form-logo-mark::after {
+                content: ""; position: absolute; width: 5px; height: 5px;
+                border-color: rgba(245,246,252,0.6);
+              }
+              .form-logo-mark::before {
+                top: -1px; left: -1px;
+                border-top: 1px solid; border-left: 1px solid;
+              }
+              .form-logo-mark::after {
+                bottom: -1px; right: -1px;
+                border-bottom: 1px solid; border-right: 1px solid;
+              }
+              .form-logo-mark span {
+                font-weight: 700; font-size: 11px;
+                letter-spacing: 0.02em; color: #F5F6FC;
+              }
+              .form-logo-text {
+                display: flex; flex-direction: column; line-height: 1.15;
+              }
+              .form-logo-name {
+                font-size: 9px; font-weight: 600;
+                letter-spacing: 0.2em; color: rgba(245,246,252,0.85);
+              }
+              .form-logo-sub {
+                font-size: 7px; font-weight: 500;
+                letter-spacing: 0.24em; color: rgba(245,246,252,0.4);
+              }
+
               .coord-label {
                 position: absolute; z-index: 1; pointer-events: none;
                 font-family: ui-monospace, "SF Mono", "IBM Plex Mono", "JetBrains Mono", monospace;
                 font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(245,246,252,0.45);
               }
-              .coord-label.tl { top: 10px; left: 40px; }
-              .coord-label.tr { top: 10px; right: 40px; }
+              .coord-label.tr { top: 18px; right: 40px; }
               .coord-label .val { color: rgba(245,246,252,0.75); font-weight: 500; }
               .form-content { position: relative; z-index: 2; }
               ::selection { background: ${TOKENS.accent}; color: ${TOKENS.bg}; }
@@ -477,26 +524,32 @@ export default function ContactFormPopup({ isOpen, onClose }: ContactFormPopupPr
               @media (prefers-reduced-motion: reduce) {
                 .view-enter, .view-exit, .reveal { animation-duration: 0.01ms !important; }
               }
+              @media (max-width: 900px) {
+                .coord-label { display: none; }
+                .form-logo { display: none; }
+              }
             `}</style>
-            <div className="form-inner w-full h-full p-6 sm:p-8">
+            <div className="form-inner w-full h-full" style={{ padding: IS_MOBILE ? "24px 20px 40px" : "32px" }}>
               <div className="reg-mark tl" aria-hidden="true" />
               <div className="reg-mark tr" aria-hidden="true" />
-              <div className="coord-label tl" aria-hidden="true">X <span className="val">00</span> · Y <span className="val">02</span></div>
+
+              <div className="form-logo" aria-hidden="true" style={{ top: "22px", left: "40px" }}>
+                <div className="form-logo-mark">
+                  <span>JN</span>
+                </div>
+                <div className="form-logo-text">
+                  <span className="form-logo-name">JCN</span>
+                  <span className="form-logo-sub">DESIGN LOG · 01</span>
+                </div>
+              </div>
+
               <div className="coord-label tr" aria-hidden="true">SHEET <span className="val">03</span> / CONTACT</div>
+
               <div className="form-content">
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "36px" }}>
-                  <div>
-                    {!submitted ? (
-                      <>
-                        <p className={mono.className} style={{ fontSize: "10px", letterSpacing: "0.3em", color: TOKENS.textMuted, textTransform: "uppercase", marginBottom: "6px" }}>
-                          GET IN TOUCH
-                        </p>
-                        <h2 style={{ fontFamily: zalando.style.fontFamily, fontWeight: 800, color: TOKENS.text, fontSize: "20px", letterSpacing: "0.12em", textTransform: "uppercase" }}>JCN</h2>
-                      </>
-                    ) : (
-                      <p className={mono.className} style={{ fontSize: "10px", letterSpacing: "0.3em", color: TOKENS.textMuted, textTransform: "uppercase" }}>STATUS · SENT</p>
-                    )}
-                  </div>
+                <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "flex-start", marginBottom: submitted ? "24px" : "28px" }}>
+                  {submitted && (
+                    <p className={mono.className} style={{ fontSize: "10px", letterSpacing: "0.3em", color: TOKENS.textMuted, textTransform: "uppercase", marginRight: "auto" }}>STATUS · SENT</p>
+                  )}
                   <button
                     onClick={closeAndReset} aria-label="Close contact form"
                     style={{

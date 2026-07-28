@@ -62,7 +62,7 @@ function ProjectItem({ project }: { project: Project }) {
       href={project.caseStudyHref}
       aria-label={`View case study: ${project.title}`}
       className="project-item group block w-full max-w-[520px]"
-      style={{ borderBottom: `1px solid ${TOKENS.line}`, paddingBottom: "clamp(28px, 4vw, 40px)" }}
+      style={{ borderBottom: `1px solid #F5F6FC`, paddingBottom: "clamp(28px, 4vw, 40px)" }}
     >
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">

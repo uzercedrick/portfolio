@@ -4,6 +4,7 @@ import Navbar  from "./components/Navbar";
 import Hero    from "./components/Hero";
 import About   from "./components/About";
 import ProjectsSection from "./components/Project";
+import Blogs from "./components/Blogs";
 import Contact from "./components/Contact";
 import Footer  from "./components/Footer";
 import TechnicalOverlay from "./components/TechnicalOverlay";
@@ -55,6 +56,7 @@ export default function Home() {
         <section id="project">
           <ProjectsSection />
         </section>
+        <Blogs />
         <Contact
           isFormOpen={isContactFormOpen}
           onOpenForm={openContactForm}

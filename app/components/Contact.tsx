@@ -1,12 +1,13 @@
 "use client";
 import { useState, useRef } from "react";
-import { motion, useInView } from "framer-motion";
+import { motion, useInView, useReducedMotion } from "framer-motion";
 import { MdEmail } from "react-icons/md";
 import { FaLinkedinIn, FaGithub } from "react-icons/fa";
 import { mono, zalando } from "../fonts";
 import FormPopup from "./Form";
 
 const E = [0.22, 1, 0.36, 1] as [number, number, number, number];
+const EASE_IN = [0.42, 0, 1, 1] as [number, number, number, number];
 const DARK_GRAY = "rgba(245,246,252,0.75)";
 const ICE_WHITE = "#F5F6FC";
 const MUTED_GRAY = "rgba(245,246,252,0.65)";
@@ -29,13 +30,15 @@ function RevealLine({
   style,
   inView,
   delay = 0,
-  duration = 0.65,
+  duration = 0.95,
+  reduceMotion = false,
 }: {
   text: string;
   style?: React.CSSProperties;
   inView: boolean;
   delay?: number;
   duration?: number;
+  reduceMotion?: boolean;
 }) {
   return (
     <motion.h3
@@ -46,11 +49,12 @@ function RevealLine({
         color: ICE_WHITE,
         lineHeight: 1.15,
         margin: 0,
+        willChange: "transform, opacity",
         ...style,
       }}
-      initial={{ clipPath: "inset(0 100% 0 0)", opacity: 0.3 }}
-      animate={inView ? { clipPath: "inset(0 0% 0 0)", opacity: 1 } : {}}
-      transition={{ duration, ease: E, delay }}
+      initial={reduceMotion ? { opacity: 0 } : { opacity: 0, x: -22 }}
+      animate={inView ? { opacity: 1, x: 0 } : {}}
+      transition={{ duration: reduceMotion ? 0.4 : duration, ease: E, delay: reduceMotion ? 0 : delay }}
     >
       {text}
     </motion.h3>
@@ -63,15 +67,39 @@ function CharReveal({
   segments,
   style,
   inView,
-  charDelay = 0.04,
+  charDelay = 0.05,
   startDelay = 0,
+  reduceMotion = false,
 }: {
   segments: CharSegment[];
   style?: React.CSSProperties;
   inView: boolean;
   charDelay?: number;
   startDelay?: number;
+  reduceMotion?: boolean;
 }) {
+  if (reduceMotion) {
+    return (
+      <motion.h3
+        style={{
+          fontFamily: zalando.style.fontFamily,
+          fontWeight: 800,
+          textTransform: "uppercase",
+          lineHeight: 1.15,
+          margin: 0,
+          ...style,
+        }}
+        initial={{ opacity: 0 }}
+        animate={inView ? { opacity: 1 } : {}}
+        transition={{ duration: 0.3, ease: E }}
+      >
+        {segments.map((seg, si) =>
+          "break" in seg ? <br key={`br-${si}`} /> : <span key={si} style={{ color: seg.color }}>{seg.text}</span>
+        )}
+      </motion.h3>
+    );
+  }
+
   let count = 0;
   return (
     <motion.h3
@@ -91,10 +119,10 @@ function CharReveal({
           return (
             <motion.span
               key={`${si}-${ci}`}
-              initial={{ opacity: 0, y: 8, filter: "blur(2px)" }}
-              animate={inView ? { opacity: 1, y: 0, filter: "blur(0)" } : {}}
-              transition={{ duration: 0.35, ease: E, delay: startDelay + idx * charDelay }}
-              style={{ display: "inline-block", whiteSpace: "pre", color: seg.color }}
+              initial={{ opacity: 0, y: 8 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.5, ease: E, delay: startDelay + idx * charDelay }}
+              style={{ display: "inline-block", whiteSpace: "pre", color: seg.color, willChange: "transform, opacity" }}
             >
               {char}
             </motion.span>
@@ -109,6 +137,7 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
   const ref = useRef<HTMLElement>(null);
   const inView = useInView(ref, { once: true, margin: "-80px 0px -80px 0px" });
   const [internalOpen, setInternalOpen] = useState(false);
+  const reduceMotion = !!useReducedMotion();
 
   const openForm = () => onOpenForm ? onOpenForm() : setInternalOpen(true);
   const closeForm = () => onCloseForm ? onCloseForm() : setInternalOpen(false);
@@ -140,8 +169,8 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.5, ease: E }}
-          style={{ marginBottom: "clamp(50px, 7vw, 70px)" }}
+          transition={{ duration: 0.7, ease: E }}
+          style={{ marginBottom: "clamp(50px, 7vw, 70px)", willChange: "transform, opacity" }}
         >
           <p style={{ fontFamily: mono.style.fontFamily, fontSize: "11px", letterSpacing: "0.3em", textTransform: "uppercase", color: MUTED_GRAY, margin: 0 }}>
             CONTACT
@@ -150,11 +179,11 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
 
         <div className="contact-grid">
           <div className="col-main">
-            <RevealLine inView={inView} delay={0.1} text="GOT A VISION?"
+            <RevealLine inView={inView} delay={0.15} text="GOT A VISION?" reduceMotion={reduceMotion}
               style={{ fontSize: "clamp(34px, 4.2vw, 52px)" }} />
-            <RevealLine inView={inView} delay={0.85} text="I'D LOVE TO"
+            <RevealLine inView={inView} delay={0.8} text="I'D LOVE TO" reduceMotion={reduceMotion}
               style={{ fontSize: "clamp(34px, 4.2vw, 52px)", margin: "0.12em 0" }} />
-            <CharReveal inView={inView} startDelay={1.6}
+            <CharReveal inView={inView} startDelay={1.5} reduceMotion={reduceMotion}
               style={{ fontSize: "clamp(34px, 4.2vw, 52px)", marginBottom: "36px" }}
               segments={[
                 { text: "HEAR ALL", color: ICE_WHITE },
@@ -164,10 +193,10 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
               ]} />
 
             <motion.div
-              initial={{ opacity: 0, y: 24 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: 0.8, ease: E }}
-              style={{ marginTop: "clamp(40px, 5vw, 60px)", display: "flex", alignItems: "flex-end", gap: "clamp(24px, 3vw, 36px)", flexWrap: "wrap" }}
+              transition={{ duration: 0.8, delay: reduceMotion ? 0 : 2.2, ease: E }}
+              style={{ marginTop: "clamp(40px, 5vw, 60px)", display: "flex", alignItems: "flex-end", gap: "clamp(24px, 3vw, 36px)", flexWrap: "wrap", willChange: "transform, opacity" }}
             >
               <div>
                 <h2 style={{ fontFamily: zalando.style.fontFamily, fontWeight: 800, fontSize: "clamp(22px, 3vw, 32px)", color: ICE_WHITE, textTransform: "uppercase", lineHeight: 1.2, margin: 0 }}>
@@ -183,9 +212,9 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
 
               <motion.button
                 onClick={openForm}
-                initial={{ opacity: 0, x: 12 }}
+                initial={{ opacity: 0, x: 14 }}
                 animate={inView ? { opacity: 1, x: 0 } : {}}
-                transition={{ duration: 0.5, delay: 1.0, ease: E }}
+                transition={{ duration: 0.6, delay: reduceMotion ? 0 : 2.4, ease: E }}
                 whileHover={{ x: 4 }}
                 style={{
                   fontFamily: zalando.style.fontFamily,
@@ -199,8 +228,9 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
                   borderBottom: `1px solid ${DARK_GRAY}`,
                   padding: "8px 0",
                   cursor: "pointer",
-                  transition: "all 0.2s ease",
+                  transition: "color 0.2s ease, border-color 0.2s ease",
                   flexShrink: 0,
+                  willChange: "transform, opacity",
                 }}
                 onMouseEnter={e => {
                   e.currentTarget.style.color = DARK_GRAY;
@@ -216,9 +246,9 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
             </motion.div>
 
             <motion.button
-              initial={{ opacity: 0, y: 18 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: 2.3, ease: E }}
+              initial={{ opacity: 0, x: -60 }}
+              animate={inView ? { opacity: 1, x: 0 } : {}}
+              transition={{ duration: 1.1, delay: reduceMotion ? 0 : 2.7, ease: EASE_IN }}
               onClick={downloadResume}
               className={mono.className}
               style={{
@@ -228,8 +258,9 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
                 fontWeight: 500, fontSize: "clamp(13px, 1.5vw, 15px)",
                 letterSpacing: "0.16em", textTransform: "uppercase",
                 padding: "14px 28px", borderRadius: "2px",
-                cursor: "pointer", transition: "all 0.25s ease",
+                cursor: "pointer", transition: "background 0.25s ease, color 0.25s ease, border-color 0.25s ease",
                 marginTop: "clamp(28px, 3.5vw, 40px)",
+                willChange: "transform, opacity",
               }}
               onMouseEnter={e => {
                 e.currentTarget.style.background = ICE_WHITE;
@@ -257,10 +288,10 @@ export default function Contact({ isFormOpen, onOpenForm, onCloseForm }: Contact
                 href={href}
                 target={href.startsWith("http") ? "_blank" : undefined}
                 rel="noopener noreferrer"
-                initial={{ opacity: 0, x: 20 }}
+                initial={{ opacity: 0, x: 22 }}
                 animate={inView ? { opacity: 1, x: 0 } : {}}
-                transition={{ duration: 0.5, delay: 0.2 + i * 0.12, ease: E }}
-                style={{ display: "block", padding: "10px 0", borderBottom: `1px solid ${MUTED_GRAY}`, textDecoration: "none" }}
+                transition={{ duration: 0.65, delay: reduceMotion ? 0 : 0.3 + i * 0.16, ease: E }}
+                style={{ display: "block", padding: "10px 0", borderBottom: `1px solid ${MUTED_GRAY}`, textDecoration: "none", willChange: "transform, opacity" }}
                 className="contact-link"
               >
                 <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>

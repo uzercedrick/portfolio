@@ -194,10 +194,11 @@ export default function AboutPortfolioModal({ open, onClose }: AboutPortfolioMod
           .coord-label.tr { top: 10px; right: 40px; }
           .coord-label .val { color: rgba(245,246,252,0.75); font-weight: 500; }
 
-          .close-btn { transition: background 0.15s ease, color 0.15s ease; }
+          .close-btn { transition: all 0.2s ease; }
           .close-btn:hover, .close-btn:focus-visible { 
-            background: rgba(245,246,252,0.08); 
-            color: ${ICE_WHITE};
+            background: ${ICE_WHITE} !important; 
+            color: ${BG} !important;
+            border-color: ${ICE_WHITE} !important;
           }
 
           ::selection { background: ${DARK_GRAY}; color: ${BG}; }
@@ -235,10 +236,10 @@ export default function AboutPortfolioModal({ open, onClose }: AboutPortfolioMod
               ref={closeBtnRef}
               onClick={onClose}
               aria-label="Close about modal"
-              className="close-btn shrink-0 p-2 rounded-lg"
-              style={{ color: MUTED_GRAY, border: "1px solid rgba(245,246,252,0.08)" }}
+              className="close-btn shrink-0 w-9 h-9 rounded-full flex items-center justify-center"
+              style={{ color: MUTED_GRAY, border: "1px solid rgba(245,246,252,0.08)", background: "rgba(245,246,252,0.04)" }}
             >
-              <X size={18} />
+              <X size={16} />
             </button>
           </div>
 

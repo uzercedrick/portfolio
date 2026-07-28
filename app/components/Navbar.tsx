@@ -15,6 +15,7 @@ const EASE = [0.22, 1, 0.36, 1] as [number, number, number, number];
 const LINKS = [
   { label: "ABOUT", href: "/", anchor: "about" },
   { label: "PROJECT", href: "/", anchor: "projects" },
+  { label: "BLOG", href: "/", anchor: "blog" },
   { label: "CONTACT", href: "/", anchor: "contact" },
 ];
 
@@ -291,7 +292,7 @@ export default function Navbar() {
                 marginBottom: "clamp(28px, 6vw, 44px)",
               }}
             >
-              NAVIGATION · <span style={{ color: ICE_WHITE }}>04</span>
+              NAVIGATION · <span style={{ color: ICE_WHITE }}>{String(LINKS.length).padStart(2, "0")}</span>
             </p>
 
             <div style={{ position: "relative", display: "flex", flexDirection: "column", gap: "clamp(14px, 4vw, 22px)" }}>

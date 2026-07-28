@@ -5,6 +5,7 @@ const SECTIONS = [
   { id: "hero", label: "HERO" },
   { id: "about", label: "ABOUT" },
   { id: "projects", label: "PROJECTS" },
+  { id: "blog", label: "BLOG" },
   { id: "contact", label: "CONTACT" },
 ];
 
@@ -41,7 +42,7 @@ export default function SectionFrameBar() {
       <div className="group">
         <div className="item"><span className="dot" /> SYSTEM <b>ACTIVE</b></div>
         <div className="rule" />
-        <div className="item">FRAME <b>{String(active + 1).padStart(2, "0")}</b> / <b>04</b></div>
+        <div className="item">FRAME <b>{String(active + 1).padStart(2, "0")}</b> / <b>05</b></div>
       </div>
       <div className="group">
         <div className="item">SECTION <b>{current.label}</b></div>

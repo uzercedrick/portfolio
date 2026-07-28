@@ -114,12 +114,12 @@ const CASES: Project[] = [
         highlight: ["left Ultrafood invisible online"],
         keywords: ["Two B2B brands", "No website", "Sister company had one", "Invisible online", "No landing page for buyers"],
       },
-      {
+     {
         n: "02", h: "APPROACH",
-        p: "I owned the UX/UI for the entire site, and the hardest part was the brand section: Menu leans playful and flavor-forward, while Nordic reads cleaner and more premium — so the section needed enough personality to represent each brand honestly, with a clear enough split to send visitors to the right one in one click. Before touching production code, I built the design as a working prototype in React, Next.js, and Tailwind CSS and walked the client's marketing team through it directly — fast to change, cheap to throw away, and a way to get UX sign-off before committing engineering time. I built the landing page and contact form myself; teammates covered the rest of the site and the backend. I then spent a 10-week onsite internship helping rebuild the validated prototype in Laravel and PHP to match the client's production stack.",
-        highlight: ["Menu leans playful and flavor-forward, while Nordic reads cleaner and more premium"],
-        keywords: ["Dual-brand UX", "Playful vs. premium", "React prototype", "Client walkthroughs", "Laravel rebuild", "10-week onsite"],
-      },
+       p: "I owned full UX/UI. The core challenge: Menu leans playful and flavor-forward, while Nordic reads cleaner and more premium. I designed a clear split that gives each brand personality and directs visitors in one click. Before production, I built a React/Next.js/Tailwind prototype to validate UX with the client's marketing team fast. I built the landing page and contact form; teammates handled the rest of the site and backend. Over a 10-week onsite internship, I rebuilt the approved prototype in Laravel and PHP for their production stack.",
+       highlight: ["Menu leans playful and flavor-forward, while Nordic reads cleaner and more premium"],
+       keywords: ["Dual-brand UX", "Playful vs. premium", "React prototype", "Client validation", "Laravel rebuild", "10-week onsite"],
+},
       {
         n: "03", h: "RESULT",
         p: "The site shipped and is live at ultrafoodinc.com — Ultrafood's first dedicated brand presence. The marketing supervisor praised the UX/UI directly, and leadership signed off with no major revision cycles. Next step: extend the same brand-section pattern as Ultrafood onboards more brands.",
@@ -530,8 +530,16 @@ function NarrativeModal({
                 aria-label="Close"
                 className="shrink-0 w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 z-20"
                 style={{ color: MUTED_GRAY, background: "rgba(245,246,252,0.04)", border: "1px solid rgba(245,246,252,0.08)" }}
-                onMouseEnter={(e) => { e.currentTarget.style.color = ICE_WHITE; e.currentTarget.style.background = "rgba(245,246,252,0.1)"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.color = MUTED_GRAY; e.currentTarget.style.background = "rgba(245,246,252,0.04)"; }}
+                onMouseEnter={(e) => { 
+                  e.currentTarget.style.color = BG; 
+                  e.currentTarget.style.background = ICE_WHITE; 
+                  e.currentTarget.style.borderColor = ICE_WHITE; 
+                }}
+                onMouseLeave={(e) => { 
+                  e.currentTarget.style.color = MUTED_GRAY; 
+                  e.currentTarget.style.background = "rgba(245,246,252,0.04)"; 
+                  e.currentTarget.style.borderColor = "rgba(245,246,252,0.08)"; 
+                }}
               >
                 <X size={16} />
               </button>
