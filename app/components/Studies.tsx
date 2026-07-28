@@ -74,10 +74,10 @@ const CASES: Project[] = [
       },
      {
         n: "02", h: "APPROACH",
-        p: "As the only designer and front-end developer on the team, I owned the wireframes, visual system, and full front-end build. The key decision was color: for room status itself, I kept the intuitive red/green pattern everyone already understands — red for occupied, green for available — so faculty could read status at a glance without learning a new convention. But instead of letting those status colors define the whole interface, I wrapped everything in the university's own blue and gold as the core website theme, so the dashboard feels like it belongs on campus rather than looking like a generic traffic-light UI. I also owned the account creation and email verification flow end-to-end, restricting access to verified faculty and staff. My teammates built the Node.js backend, the socket layer pushing real-time updates, and the Arduino Uno/DHT11 sensors feeding data through ESP32. As team lead, my job was keeping the UI honest about what the hardware and backend could actually deliver in real time.",
-        highlight: ["red for occupied, green for available — so faculty could read status at a glance"],
+        p: "I owned all UX/UI and front-end work. For room status, I kept red for occupied and green for available — universally understood at a glance — then used the university’s blue and gold as the main theme so the dashboard feels native to the campus. I also built the account system and email verification flow. My teammates handled the backend, real-time sockets, and sensor hardware; I made sure the UI stayed true to what the system could actually deliver.",
+        highlight: ["red for occupied, green for available", "university’s blue and gold as the main theme"],
         keywords: ["Wireframes", "Visual system", "Red/green status", "Blue & gold theme", "Email verification", "Real-time sockets", "Arduino + ESP32"],
-      },
+},
       {
         n: "03", h: "RESULT",
         p: "ClassGuard was a fully working system, not a simulation — we ran it live across two real classrooms for our thesis defense, proving the pipeline worked end-to-end under real conditions. It was selected as a finalist at the " + CONGRESS_NAME + ", our university's research showcase, and more importantly, it worked: faculty could check a room's status in seconds instead of losing 5 to 10 minutes walking over. Full multi-room rollout is the next step toward campus-wide deployment.",
