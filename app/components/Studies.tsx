@@ -195,18 +195,35 @@ function useReveal(): [React.RefObject<HTMLDivElement | null>, boolean] {
   useEffect(() => {
     const el = ref.current; if (!el) return;
     const obs = new IntersectionObserver(
-      (entries) => entries.forEach((e) => { if (e.isIntersecting) { setVisible(true); obs.unobserve(el); } }),
-      { threshold: 0.1 }
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting && !visible) { 
+            setVisible(true);
+            obs.unobserve(el);
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: "0px 0px 150px 0px" } 
     );
     obs.observe(el);
     return () => obs.disconnect();
-  }, []);
+  }, [visible]);
   return [ref, visible];
 }
 
 function Reveal({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   const [ref, visible] = useReveal();
-  return <motion.div ref={ref} className={`reveal ${className}`} initial={{ opacity: 0, y: 24 }} animate={visible ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, ease: E }}>{children}</motion.div>;
+  return (
+    <motion.div
+      ref={ref}
+      className={`reveal ${className}`}
+      initial={{ opacity: 0, y: 24, willChange: "opacity, transform" }}
+      animate={visible ? { opacity: 1, y: 0, willChange: "auto" } : {}}
+      transition={{ duration: 0.6, ease: E }}
+    >
+      {children}
+    </motion.div>
+  );
 }
 
 function MetaChip({ label, value }: MetaItem) {
@@ -230,14 +247,15 @@ function MockImageFill({ src, alt, fill = true }: { src: string; alt: string; fi
   }
   if (fill) {
     return (
-      <div className="relative w-full h-full">
+      <div className="relative w-full aspect-video overflow-hidden"> {/* fixed aspect ratio = NO layout shift */}
         <Image
           src={src}
           alt={alt}
           fill
           className="object-contain object-center transition-transform duration-700 ease-out"
-          loading="eager"
+          loading="lazy" 
           onError={() => setErrored(true)}
+          sizes="(max-width: 768px) 100vw, 1200px" 
         />
       </div>
     );
@@ -247,10 +265,11 @@ function MockImageFill({ src, alt, fill = true }: { src: string; alt: string; fi
       src={src}
       alt={alt}
       width={1200}
-      height={800}
+      height={675} // fixed 16:9 aspect ratio
       className="w-full h-auto block transition-transform duration-700 ease-out"
-      loading="eager"
+      loading="lazy"
       onError={() => setErrored(true)}
+      sizes="(max-width: 768px) 100vw, 1200px"
     />
   );
 }
@@ -291,19 +310,14 @@ function MockPanel({ project }: { project: Project }) {
   const images = project.images ?? [];
   if (images.length > 1) {
     return (
-      <div className="flex flex-col sm:flex-row items-stretch gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4"> {/* grid = stable heights */}
         {images.map((img, i) => (
           <React.Fragment key={img.src}>
-            <div className="flex-1 min-w-0">
+            <div className="w-full">
               <BrowserFrame label={img.caption ?? `${project.id}-0${i + 1}`} height="auto">
                 <MockImageFill src={img.src} alt={img.alt} fill={false} />
               </BrowserFrame>
             </div>
-            {i < images.length - 1 && (
-              <div className="flex items-center justify-center shrink-0 h-6 sm:h-auto">
-                <ArrowRight size={18} style={{ color: MUTED_GRAY }} />
-              </div>
-            )}
           </React.Fragment>
         ))}
       </div>
