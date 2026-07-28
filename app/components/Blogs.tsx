@@ -57,13 +57,13 @@ const POSTS: Post[] = [
   {
     index: "03",
     tag: "UX DECISIONS",
-    title: "Why I Ditched Red/Green for Classroom Status",
+    title: "Why I Kept Red/Green — And Used Blue & Gold For ClassGuard",
     excerpt:
-      "Traffic-light color is the default for status UI. Here's why a university's own blue and gold read faster, and felt more at home on campus.",
+      "Red and green are the universal default for status UI. Here’s how I kept that familiar meaning while wrapping the whole system in the university’s own identity.",
     content: [
-      "Red and green are the universal default for status UI. But 'universal' doesn't always mean 'most readable' — especially inside a specific environment with its own visual language.",
-      "For ClassGuard, I swapped the traffic-light pattern for the university's own blue and gold palette. Status still reads instantly at a glance, but now it also feels like it belongs on campus, not like a generic dashboard dropped into it.",
-      "Small palette decisions like this are where personality and usability meet. When your UI uses the institution's own colors, users trust it faster — and it stops feeling like software."
+      "Red and green are the universal default for status UI — red for occupied, green for available — and I kept them exactly that way because they’re instantly understood by everyone.",
+      "For ClassGuard, I didn’t replace those colors — I layered the university’s own blue and gold as the core visual theme for the interface, headers, and overall design. Status still reads instantly at a glance, but now the whole dashboard feels like it belongs on campus, not like a generic tool dropped into it.",
+      "Small palette decisions like this are where personality and usability meet: keep what users already know, and make the rest feel like home. When your UI uses the institution’s own colors, people trust it faster — and it stops feeling like software."
     ],
     date: "2026",
     readTime: "4 MIN READ",

@@ -72,11 +72,11 @@ const CASES: Project[] = [
         highlight: ["5 to 10 minutes lost hunting for another space"],
         keywords: ["Back-to-back schedules", "No room visibility", "Walking over", "Closed doors", "Lost class time"],
       },
-      {
+     {
         n: "02", h: "APPROACH",
-        p: "As the only designer and front-end developer on the team, I owned the wireframes, visual system, and full front-end build. The key decision was color: instead of the usual red/green traffic-light pattern, I used the university's own blue and gold, so status reads at a glance and still feels like it belongs on campus. I also owned the account creation and email verification flow end-to-end, restricting access to verified faculty and staff. My teammates built the Node.js backend, the socket layer pushing real-time updates, and the Arduino Uno/DHT11 sensors feeding data through ESP32. As team lead, my job was keeping the UI honest about what the hardware and backend could actually deliver in real time.",
-        highlight: ["university's own blue and gold, so status reads at a glance"],
-        keywords: ["Wireframes", "Visual system", "Blue & gold palette", "Email verification", "Real-time sockets", "Arduino + ESP32"],
+        p: "As the only designer and front-end developer on the team, I owned the wireframes, visual system, and full front-end build. The key decision was color: for room status itself, I kept the intuitive red/green pattern everyone already understands — red for occupied, green for available — so faculty could read status at a glance without learning a new convention. But instead of letting those status colors define the whole interface, I wrapped everything in the university's own blue and gold as the core website theme, so the dashboard feels like it belongs on campus rather than looking like a generic traffic-light UI. I also owned the account creation and email verification flow end-to-end, restricting access to verified faculty and staff. My teammates built the Node.js backend, the socket layer pushing real-time updates, and the Arduino Uno/DHT11 sensors feeding data through ESP32. As team lead, my job was keeping the UI honest about what the hardware and backend could actually deliver in real time.",
+        highlight: ["red for occupied, green for available — so faculty could read status at a glance"],
+        keywords: ["Wireframes", "Visual system", "Red/green status", "Blue & gold theme", "Email verification", "Real-time sockets", "Arduino + ESP32"],
       },
       {
         n: "03", h: "RESULT",
